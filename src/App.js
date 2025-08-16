@@ -1,0 +1,125 @@
+import { Route, Routes } from 'react-router-dom';
+
+import PrivateRoute from './components/PrivateRoute';
+
+import Dashboard from './components/Dashboard';
+import Login from './components/Login';
+import Layout from './components/Layout';
+import UmsatzTable from './components/UmsatzTable';
+import Einstellungen from './components/Einstellungen';
+import Kategorien from './components/Kategorien';
+import WiederkehrenderUmsatz from './components/wiederkehrenderUmsatz';
+
+// import Loader from './components/Loader';
+
+import { createTheme, ThemeProvider, useMediaQuery } from '@mui/material';
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import AbschlussTable from './components/AbschlussTable';
+import UmbuchungTable from './components/UmbuchungTable';
+import Faq from './components/Faq';
+
+function App() {
+    const theme = useSelector((state) => state.settings.theme);
+
+    useEffect(() => {
+        document.body.style.setProperty('--main', theme.color.main);
+        document.body.style.setProperty('--light', theme.color.light);
+    }, [theme.color]);
+
+    const systemModeIsDark = useMediaQuery('(prefers-color-scheme: dark)');
+    const mode =
+        theme.mode === 'system'
+            ? systemModeIsDark
+                ? 'dark'
+                : 'light'
+            : theme.mode;
+
+    const themeConfig = {
+        palette: {
+            primary: {
+                main: mode === 'light' ? theme.color.main : theme.color.light,
+                light: mode === 'light' ? theme.color.light : theme.color.main,
+            },
+            secondary: {
+                main: theme.color.start,
+                light: theme.color.end,
+            },
+            mode: mode,
+        },
+        breakpoints: {
+            values: {
+                xxs: 0,
+                xs: 300,
+                sm: 600,
+                md: 900,
+                lg: 1200,
+                xl: 1536,
+            },
+        },
+    };
+    const muiTheme = createTheme(themeConfig);
+
+    return (
+        <ThemeProvider theme={muiTheme} noSsr>
+            <Routes>
+                <Route path="/" element={<Layout />}>
+                    <Route index element={<Login />} />
+                    <Route
+                        path="/dashboard"
+                        element={
+                            <PrivateRoute>
+                                <Dashboard />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/umsatz"
+                        element={
+                            <PrivateRoute>
+                                <UmsatzTable />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/abschluss"
+                        element={
+                            <PrivateRoute>
+                                <AbschlussTable />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/umbuchung"
+                        element={
+                            <PrivateRoute>
+                                <UmbuchungTable />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route path="/einstellungen" element={<Einstellungen />} />
+                    <Route
+                        path="/kategorien"
+                        element={
+                            <PrivateRoute>
+                                <Kategorien />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/umsatz/wiederkehrend"
+                        element={
+                            <PrivateRoute>
+                                <WiederkehrenderUmsatz />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route path="/faq" element={<Faq />} />
+                </Route>
+            </Routes>
+            {/* <Loader /> */}
+        </ThemeProvider>
+    );
+}
+
+export default App;
