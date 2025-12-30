@@ -30,7 +30,16 @@
         }
     ],
     "start_url": "..",
+    "shortcuts": [
+        {
+            "name": "Beta-Version",
+            "short_name": "Beta",
+            "description": "Aktuelle Beta-Version von 'Haushalt Delucse'",
+            "url": "/beta",
+            "icons": [{ "src": "beta192.png", "sizes": "192x192" }]
+        }
+    ],
     "display": "standalone",
     "theme_color": "#000000",
-    "background_color": "#006400"
+    "background_color": "#076428"
 }

@@ -8,7 +8,7 @@ function PrivateRoute(props) {
     if (isAuthenticated) {
         return props.children;
     } else {
-        return <Navigate to="/" />;
+        return <Navigate to="/beta" />;
     }
 }
 

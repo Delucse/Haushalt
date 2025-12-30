@@ -18,6 +18,7 @@ import { useEffect } from 'react';
 import AbschlussTable from './components/AbschlussTable';
 import UmbuchungTable from './components/UmbuchungTable';
 import Faq from './components/Faq';
+import Announcement from './components/Announcement';
 
 function App() {
     const theme = useSelector((state) => state.settings.theme);
@@ -64,7 +65,9 @@ function App() {
         <ThemeProvider theme={muiTheme} noSsr>
             <Routes>
                 <Route path="/" element={<Layout />}>
-                    <Route index element={<Login />} />
+                    {/* Coming soon Page */}
+                    <Route index element={<Announcement />} />
+                    <Route path="/beta" element={<Login />} />
                     <Route
                         path="/dashboard"
                         element={

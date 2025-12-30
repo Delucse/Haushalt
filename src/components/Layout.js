@@ -315,7 +315,7 @@ const Layout = () => {
 
     return (
         <>
-            {pathname === '/' ? (
+            {pathname === '/beta' ? (
                 <Outlet />
             ) : (
                 <>
@@ -342,9 +342,12 @@ const Layout = () => {
                             <Typography
                                 variant="h6"
                                 component="div"
-                                sx={{ flexGrow: 1 }}
+                                sx={{ flexGrow: 1, fontWeight: 400 }}
                             >
-                                Haushalt Delucse
+                                Haushalt{' '}
+                                <span style={{ fontFamily: 'LobsterTwo-Bold' }}>
+                                    Delucse
+                                </span>
                             </Typography>
                             <Nav />
                         </Toolbar>
