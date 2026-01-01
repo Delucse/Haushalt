@@ -36,23 +36,6 @@ export const setFilterTypes =
         update && dispatch(filterDataframe());
     };
 
-const quarters = ['', 'I', 'II', 'III', 'IV'];
-
-const months = [
-    'Jan',
-    'Feb',
-    'Mär',
-    'Apr',
-    'Mai',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Okt',
-    'Nov',
-    'Dez',
-];
-
 export const setFilterTimeLabels = () => (dispatch, getState) => {
     const { range, interval } = getState().filter.time;
     var startTimestamp = range[0];
@@ -62,9 +45,9 @@ export const setFilterTimeLabels = () => (dispatch, getState) => {
         case 'Quartal':
             while (startTimestamp < endTimestamp) {
                 var startDate = moment(startTimestamp);
-                var quarter = quarters[startDate.quarter()];
-                var label = `Q ${quarter}`;
-                if (quarter === 'I' || startTimestamp === range[0]) {
+                var quarter = startDate.quarter();
+                var label = `Q${quarter}`;
+                if (quarter === 1 || startTimestamp === range[0]) {
                     label += ` '${startDate.format('YY')}`;
                 }
                 labels.push({
@@ -89,7 +72,7 @@ export const setFilterTimeLabels = () => (dispatch, getState) => {
             while (startTimestamp < endTimestamp) {
                 // eslint-disable-next-line
                 var startDate = moment(startTimestamp);
-                var monthString = months[startDate.month()];
+                var monthString = startDate.format('MMM');
                 // eslint-disable-next-line
                 var label = monthString;
                 if (monthString === 'Jan' || startTimestamp === range[0]) {
@@ -138,10 +121,13 @@ export const setFilterTimeRange =
     (range, update = true) =>
     (dispatch, getState) => {
         if (range[0] > range[1]) {
+            const interval = getState().filter.time.interval;
             range[1] = moment(range[0])
                 .endOf(
-                    getState().filter.time.interval === 'Monat'
+                    interval === 'Monat'
                         ? 'month'
+                        : interval === 'Quartal'
+                        ? 'quarter'
                         : 'year'
                 )
                 .valueOf();

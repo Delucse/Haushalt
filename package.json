@@ -9,7 +9,7 @@
         "@mdi/js": "^7.4.47",
         "@mdi/react": "^1.6.1",
         "@mui/material": "^6.4.5",
-        "@mui/x-date-pickers": "^7.27.3",
+        "@mui/x-date-pickers": "^8.23.0",
         "@mui/x-tree-view": "^7.28.1",
         "axios": "^1.7.9",
         "chart.js": "^4.4.7",

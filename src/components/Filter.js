@@ -23,6 +23,17 @@ const Zeitangabe = ({ margin }) => {
                 return yearRange[0] === yearRange[1]
                     ? yearRange[0]
                     : `von ${yearRange[0]} bis ${yearRange[1]}`;
+            case 'Quartal':
+                const quarterRange = [
+                    dateRange[0].format('[Q]Q'),
+                    dateRange[1].format('[Q]Q'),
+                ];
+                return `${quarterRange[0]} ${yearRange[0]}` ===
+                    `${quarterRange[1]} ${yearRange[1]}`
+                    ? `${quarterRange[0]} ${yearRange[0]}`
+                    : yearRange[0] === yearRange[1]
+                    ? `von ${quarterRange[0]} bis ${quarterRange[1]} ${yearRange[1]}`
+                    : `von ${quarterRange[0]} ${yearRange[0]} bis ${quarterRange[1]} ${yearRange[1]}`;
             default:
                 // month
                 const monthRange = [

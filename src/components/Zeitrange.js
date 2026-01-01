@@ -7,14 +7,11 @@ import {
 import Datefield from './Datefield';
 import moment from 'moment';
 import Autocomplete from './Autocomplete';
-import { useState } from 'react';
 
 const Zeitrange = () => {
     const dispatch = useDispatch();
     const umsatzDf = useSelector((state) => state.dataframe.original.umsatz);
     const { range, interval } = useSelector((state) => state.filter.time);
-    const [startOpen, setStartOpen] = useState(false);
-    const [endOpen, setEndOpen] = useState(false);
 
     return (
         umsatzDf && (
@@ -23,24 +20,23 @@ const Zeitrange = () => {
                     <Autocomplete
                         value={interval}
                         placeholder={'Interval'}
-                        options={['Monat', /*'Quartal',*/ 'Jahr']}
+                        options={[
+                            { label: 'Monat', value: 'Monat' },
+                            { label: 'Quartal', value: 'Quartal' },
+                            { label: 'Jahr', value: 'Jahr' },
+                        ]}
+                        optionLabel="label"
+                        select={true}
                         fullWidth
-                        onChange={(value) =>
-                            dispatch(setFilterTimeInterval(value))
+                        onChange={(opt) =>
+                            dispatch(setFilterTimeInterval(opt.value))
                         }
                     />
                 </Grid>
                 <Grid item xxs={12} sm={4}>
                     <Datefield
-                        open={startOpen}
-                        onClose={() => {
-                            setStartOpen(false);
-                            setEndOpen(true);
-                        }}
-                        onClick={() => {
-                            setStartOpen(true);
-                        }}
                         value={range[0]}
+                        interval={interval}
                         views={
                             interval === 'Jahr' ? ['year'] : ['month', 'year']
                         }
@@ -60,26 +56,26 @@ const Zeitrange = () => {
                                 ])
                             )
                         }
-                        toolbarFormat={`[von] ${
-                            interval === 'Monat' ? 'MMM YYYY' : 'YYYY'
+                        toolbarFormat={`[von ] ${
+                            interval === 'Monat'
+                                ? 'MMM YYYY'
+                                : interval === 'Quartal'
+                                ? '[Q]Q YYYY'
+                                : 'YYYY'
                         }`}
                         format={`[von] ${
-                            interval === 'Monat' ? 'MMMM YYYY' : 'YYYY'
+                            interval === 'Monat'
+                                ? 'MMMM YYYY'
+                                : interval === 'Quartal'
+                                ? '[Q]Q YYYY'
+                                : 'YYYY'
                         }`}
                     />
                 </Grid>
                 <Grid item xxs={12} sm={4}>
                     <Datefield
-                        open={endOpen}
-                        onClose={() => {
-                            setEndOpen(false);
-                            // setStartOpen(false);
-                        }}
-                        onClick={() => {
-                            setStartOpen(true);
-                            // setEndOpen(true);
-                        }}
                         value={range[1]}
+                        interval={interval}
                         views={
                             interval === 'Jahr' ? ['year'] : ['month', 'year']
                         }
@@ -97,10 +93,18 @@ const Zeitrange = () => {
                             )
                         }
                         toolbarFormat={`[bis] ${
-                            interval === 'Monat' ? 'MMM YYYY' : 'YYYY'
+                            interval === 'Monat'
+                                ? 'MMM YYYY'
+                                : interval === 'Quartal'
+                                ? '[Q]Q YYYY'
+                                : 'YYYY'
                         }`}
                         format={`[bis] ${
-                            interval === 'Monat' ? 'MMMM YYYY' : 'YYYY'
+                            interval === 'Monat'
+                                ? 'MMMM YYYY'
+                                : interval === 'Quartal'
+                                ? '[Q]Q YYYY'
+                                : 'YYYY'
                         }`}
                     />
                 </Grid>

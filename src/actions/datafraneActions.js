@@ -15,33 +15,6 @@ import {
 import DataFrame from 'dataframe-js';
 import { snackbarErrorMessage, snackbarMessage } from './messageActions';
 
-const days = [
-    'Sonntag',
-    'Montag',
-    'Dienstag',
-    'Mittwoch',
-    'Donnerstag',
-    'Freitag',
-    'Samstag',
-];
-
-const months = [
-    'Jan',
-    'Feb',
-    'Mär',
-    'Apr',
-    'Mai',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Okt',
-    'Nov',
-    'Dez',
-];
-
-const quarters = ['', 'I', 'II', 'III', 'IV'];
-
 export const initDataframe = () => async (dispatch, getState) => {
     try {
         const file = getState().file;
@@ -282,17 +255,14 @@ export const initDataframe = () => async (dispatch, getState) => {
         umsatzDf = umsatzDf.withColumn('Tag', (row) =>
             moment(row.get('Zeitstempel')).format('D')
         );
-        umsatzDf = umsatzDf.withColumn(
-            'Wochentag',
-            (row) => days[moment(row.get('Zeitstempel')).day()]
+        umsatzDf = umsatzDf.withColumn('Wochentag', (row) =>
+            moment(row.get('Zeitstempel')).format('DDDD')
         );
-        umsatzDf = umsatzDf.withColumn(
-            'Monat',
-            (row) => months[moment(row.get('Zeitstempel')).month()]
+        umsatzDf = umsatzDf.withColumn('Monat', (row) =>
+            moment(row.get('Zeitstempel')).format('MMM')
         );
-        umsatzDf = umsatzDf.withColumn(
-            'Quartal',
-            (row) => quarters[moment(row.get('Zeitstempel')).quarter()]
+        umsatzDf = umsatzDf.withColumn('Quartal', (row) =>
+            moment(row.get('Zeitstempel')).quarter()
         );
         umsatzDf = umsatzDf.withColumn('Jahr', (row) =>
             moment(row.get('Zeitstempel')).year()
@@ -504,9 +474,9 @@ const updateNichtGelistet =
                 'variabel',
                 'nicht gelistet',
                 letzterMonatsTag.format('D'),
-                days[letzterMonatsTag.day()],
-                months[letzterMonatsTag.month()],
-                quarters[letzterMonatsTag.quarter()],
+                letzterMonatsTag.format('DDDD'),
+                letzterMonatsTag.format('MMM'),
+                letzterMonatsTag.quarter(),
                 letzterMonatsTag.year(),
                 umsatz.count() + 1,
             ]);
@@ -628,9 +598,9 @@ export const changeUmsatz = (id, update, old) => (dispatch, getState) => {
             row = row.set('Datum', newDate.format('DD.MM.YYYY'));
             row = row.set('Zeitstempel', update.timestamp);
             row = row.set('Tag', newDate.format('D'));
-            row = row.set('Wochentag', days[newDate.day()]);
-            row = row.set('Monat', months[newDate.month()]);
-            row = row.set('Quartal', quarters[newDate.quarter()]);
+            row = row.set('Wochentag', newDate.format('DDDD'));
+            row = row.set('Monat', newDate.format('MMM'));
+            row = row.set('Quartal', newDate.quarter());
             row = row.set('Jahr', newDate.year());
         }
         return row;
@@ -670,9 +640,9 @@ export const addUmsatz =
             kategorie.get('Typ'),
             kategorie.get('Kategorie'),
             date.format('D'),
-            days[date.day()],
-            months[date.month()],
-            quarters[date.quarter()],
+            date.format('DDDD'),
+            date.format('MMM'),
+            date.quarter(),
             date.year(),
             umsatz.count() + 1,
         ]);
@@ -1279,9 +1249,9 @@ const addMonatsposten = (jahr, monat) => (dispatch, getState) => {
                 row.get('Typ'),
                 row.get('Kategorie'),
                 datum.format('D'),
-                days[datum.day()],
-                months[datum.month()],
-                quarters[datum.quarter()],
+                datum.format('DDDD'),
+                datum.format('MMM'),
+                datum.quarter(),
                 datum.year(),
                 umsatz.count() + 1,
             ]);
