@@ -21,6 +21,8 @@ import Icon from '@mdi/react';
 import { mdiEye, mdiEyeOff, mdiFolderOpenOutline } from '@mdi/js';
 import moment from 'moment';
 import Loader from './Loader';
+import { ReactComponent as FilenLogo } from '../media/Filen_Logo.svg';
+import { ReactComponent as DropboxLogo } from '../media/Dropbox_Logo.svg';
 
 const Login = () => {
     const [cloud, setCloud] = useState(null);
@@ -172,7 +174,10 @@ const Login = () => {
                     variant="h5"
                     sx={{ color: (theme) => theme.palette.text.primary }}
                 >
-                    Haushalt Delucse
+                    Haushalt{' '}
+                    <span style={{ fontFamily: 'LobsterTwo-Bold' }}>
+                        Delucse
+                    </span>
                 </Typography>
                 <Divider
                     sx={{
@@ -185,46 +190,45 @@ const Login = () => {
                         <Alert
                             severity="info"
                             message={
-                                'Zukünftig sollen noch weitere Cloud-Anbieter verfügbar gemacht werden.'
+                                'Zukünftig werden weitere Cloud-Anbieter zur Auswahl stehen.'
                             }
-                            style={{ marginBottom: '20px' }}
+                            style={{ marginBottom: '10px' }}
                         />
                         <Box
                             sx={{
                                 background: 'black',
                                 height: '80px',
-                                widht: '100%',
-                                borderRadius: '20px',
+                                width: '100%',
+                                // borderRadius: '20px',
                                 color: 'white',
                                 justifyContent: 'center',
                                 alignItems: 'center',
                                 display: 'flex',
-                                marginBottom: '10px',
+                                // marginBottom: '10px',
                                 cursor: 'pointer',
                                 border: (theme) =>
                                     `1px solid ${theme.palette.text.primary}`,
                             }}
                             onClick={() => setCloud('filen')}
                         >
-                            Filen
+                            <FilenLogo style={{ height: '30px' }} />
                         </Box>
-                        {/* <div
-                            style={{
-                                background: 'darkblue',
+                        {/* <Box
+                            sx={{
+                                background: '#0061fe',
                                 height: '80px',
-                                widht: '100%',
-                                borderRadius: '20px',
+                                width: '100%',
                                 color: 'white',
                                 justifyContent: 'center',
                                 alignItems: 'center',
                                 display: 'flex',
-                                marginBottom: '10px',
+                                // marginBottom: '10px',
                                 cursor: 'pointer',
                             }}
                             onClick={() => setCloud('dropbox')}
                         >
-                            Dropbox
-                        </div> */}
+                            <DropboxLogo style={{ height: '30px' }} />
+                        </Box> */}
                     </div>
                 ) : !isAuthenticated || !tree ? (
                     <div
