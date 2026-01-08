@@ -36,7 +36,9 @@ const Nav = () => {
     const dispatch = useDispatch();
 
     const simple = useSelector((state) => state.settings.simple);
-    const isAuthenticated = useSelector((state) => state.auth.token);
+    const isAuthenticated = useSelector(
+        (state) => state.auth.token || state.auth.type === 'locale'
+    );
 
     const [umsatzOpen, setUmsatzOpen] = useState(false);
     const [abschlussOpen, setAbschlussOpen] = useState(false);
@@ -214,7 +216,7 @@ const Nav = () => {
                 display: 'flex',
             }}
         >
-            <IconButton color="inherit" onClick={() => navigate('/')}>
+            <IconButton color="inherit" onClick={() => navigate('/beta')}>
                 <Icon path={mdiHomeImportOutline} size={1.4} />
             </IconButton>
         </Box>
@@ -223,7 +225,9 @@ const Nav = () => {
 
 const Tab = ({ value }) => {
     const navigate = useNavigate();
-    const isAuthenticated = useSelector((state) => state.auth.token);
+    const isAuthenticated = useSelector(
+        (state) => state.auth.token || state.auth.type === 'locale'
+    );
 
     return (
         <Tabs

@@ -20,6 +20,7 @@ const reducer = (state = initialState, action) => {
                 error: null,
                 type: null,
                 art: null,
+                autoClose: true,
             };
         case ERROR_MESSAGE:
             if (action.payload.type) {

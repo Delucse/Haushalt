@@ -3,7 +3,9 @@ import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 
 function PrivateRoute(props) {
-    const isAuthenticated = useSelector((state) => state.auth.token);
+    const isAuthenticated = useSelector(
+        (state) => state.auth.token || state.auth.type === 'locale'
+    );
 
     if (isAuthenticated) {
         return props.children;

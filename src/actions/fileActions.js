@@ -1,23 +1,163 @@
 import { FilenSDK } from '@filen/sdk';
+
 import {
     FILE_CHANGED,
     FILE_ERROR,
     FILE_SUCCESS,
     FILE_PROGRESS,
     DATAFRAME_INIT_PROGRESS,
+    AUTH_TYPE,
 } from './types';
+
 import { initDataframe } from './datafraneActions';
 import {
     alertErrorMessage,
     resetMessage,
+    snackbarErrorMessage,
     snackbarMessage,
 } from './messageActions';
+
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+import moment from 'moment';
 
 const changeFile = (changed) => (dispatch) => {
     dispatch({
         type: FILE_CHANGED,
         payload: changed,
     });
+};
+
+const openZipFolder = async () => {
+    return new Promise((resolve) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/zip';
+        input.addEventListener('change', () => {
+            if (input.files.length > 0) {
+                JSZip.loadAsync(input.files[0]).then(
+                    (zip) => {
+                        const filenames = Object.keys(zip.files).map(
+                            (filename) => filename
+                        );
+                        const promises = Promise.all(
+                            filenames.map((filename) =>
+                                zip.files[filename].async('blob').then(
+                                    (blob) =>
+                                        new File([blob], filename, {
+                                            type: 'text/csv',
+                                        })
+                                )
+                            )
+                        );
+                        promises.then((files) => {
+                            resolve(files);
+                        });
+                    },
+                    (e) => {
+                        console.log(e);
+                        resolve('error');
+                    }
+                );
+            } else {
+                resolve('error');
+            }
+        });
+        input.addEventListener('cancel', () => {
+            resolve(null);
+        });
+        if ('showPicker' in HTMLInputElement.prototype) {
+            input.showPicker();
+        } else {
+            input.click();
+        }
+    });
+};
+
+export const setFilesLocale = () => async (dispatch) => {
+    try {
+        const filesInZipFolder = await openZipFolder();
+        dispatch({
+            type: DATAFRAME_INIT_PROGRESS,
+            payload: true,
+        });
+        dispatch(resetMessage());
+        if (!filesInZipFolder) {
+            dispatch({
+                type: FILE_ERROR,
+                payload: null,
+            });
+            dispatch({
+                type: DATAFRAME_INIT_PROGRESS,
+                payload: null,
+            });
+        } else {
+            const payload = {};
+            Array.from(filesInZipFolder).forEach(async (file) => {
+                switch (file.name) {
+                    case 'Umsatz.csv':
+                        payload.umsatz = file;
+                        break;
+                    case 'wiederkehrenderUmsatz.csv':
+                        payload.wiederkehrenderUmsatz = file;
+                        break;
+                    case 'Kategorien.csv':
+                        payload.kategorien = file;
+                        break;
+                    case 'Umbuchung.csv':
+                        payload.umbuchung = file;
+                        break;
+                    case 'Abschluss.csv':
+                        payload.abschluss = file;
+                        break;
+                    default:
+                        break;
+                }
+            });
+            dispatch({
+                type: AUTH_TYPE,
+                payload: 'locale',
+            });
+            if (Object.keys(payload).length !== 5) {
+                throw new Error('Dataset is incomplete');
+            }
+            dispatch({
+                type: FILE_SUCCESS,
+                payload,
+            });
+            dispatch(initDataframe());
+        }
+    } catch (error) {
+        console.log(error.message);
+        dispatch({
+            type: FILE_ERROR,
+            payload: null,
+        });
+        dispatch({
+            type: DATAFRAME_INIT_PROGRESS,
+            payload: null,
+        });
+        dispatch(
+            snackbarErrorMessage(
+                <div>
+                    Stelle sicher, dass alle benötigten Dateien im gewählten
+                    ZIP-Ordner vorhanden sind. Alternativ kannst du <br />
+                    <span
+                        style={{
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                        }}
+                        onClick={() => dispatch(uploadRaw())}
+                    >
+                        hier
+                    </span>{' '}
+                    die benötigten Dateien erstellen.
+                </div>,
+                'localeImport',
+                false
+            )
+        );
+    }
 };
 
 export const setFilesFilen = (uuid) => async (dispatch, getState) => {
@@ -190,9 +330,11 @@ const uploadRaw = (uuid) => (dispatch) => {
         },
     });
     dispatch(initDataframe());
-    setTimeout(() => {
-        dispatch(uploadFiles());
-    }, 1000);
+    if (uuid) {
+        setTimeout(() => {
+            dispatch(uploadFiles());
+        }, 1000);
+    }
 };
 
 const getFile = (fileName) => (dispatch, getState) => {
@@ -311,5 +453,30 @@ export const uploadFiles = () => (dispatch) => {
     dispatch(changeFile(false));
     dispatch(
         snackbarMessage('Der aktuelle Stand wurde erfolgreich gespeichert')
+    );
+};
+
+export const downloadFiles = () => (dispatch) => {
+    dispatch({ type: FILE_PROGRESS });
+    const zip = new JSZip();
+    // create files
+    zip.file('Umsatz.csv', dispatch(getFile('Umsatz')));
+    zip.file(
+        'wiederkehrenderUmsatz.csv',
+        dispatch(getFile('wiederkehrenderUmsatz'))
+    );
+    zip.file('Umbuchung.csv', dispatch(getFile('Umbuchung')));
+    zip.file('Abschluss.csv', dispatch(getFile('Abschluss')));
+    zip.file('Kategorien.csv', dispatch(getFile('Kategorien')));
+    // generate ZIP
+    zip.generateAsync({ type: 'blob' }).then((content) => {
+        saveAs(
+            content,
+            `haushalt_delucse__${moment().format('YYYY_MM_DD__HH_mm_ss')}.zip`
+        );
+    });
+    dispatch(changeFile(false));
+    dispatch(
+        snackbarMessage('Der aktuelle Stand wurde erfolgreich heruntergeladen')
     );
 };

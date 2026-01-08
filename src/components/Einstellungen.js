@@ -385,6 +385,10 @@ const Einstellungen = () => {
     const dispatch = useDispatch();
     const saveSetting = useSelector((state) => state.settings.autoSave);
     const simpleSetting = useSelector((state) => state.settings.simple);
+    const authType = useSelector((state) => state.auth.type);
+    const isAuthenticated = useSelector(
+        (state) => state.auth.token || authType === 'locale'
+    );
 
     return (
         <Box>
@@ -393,57 +397,73 @@ const Einstellungen = () => {
                     severity="info"
                     message="Die nachfolgenden Einstellungen werden lediglich lokal im Browser gespeichert."
                 />
-                <Dashboard />
-                <Box>
-                    <Typography
-                        component="div"
-                        variant="body1"
-                        sx={{
-                            display: 'flex',
-                            marginBottom: '10px',
-                            fontWeight: 'bold',
-                            color: (theme) => theme.palette.text.primary,
-                        }}
-                    >
-                        Speicherung
-                    </Typography>
-                    <Radio
-                        value={saveSetting}
-                        onChange={(e) => dispatch(setAutoSave(e.target.value))}
-                        row
-                        options={[
-                            { value: true, label: 'automatisch' },
-                            { value: false, label: 'manuell' },
-                        ]}
-                    />
-                </Box>
-                <Box>
-                    <Typography
-                        component="div"
-                        variant="body1"
-                        sx={{
-                            display: 'flex',
-                            marginBottom: '10px',
-                            fontWeight: 'bold',
-                            color: (theme) => theme.palette.text.primary,
-                        }}
-                    >
-                        Anwendung
-                    </Typography>
-                    <Radio
-                        value={simpleSetting}
-                        onChange={(e) => dispatch(setSimple(e.target.value))}
-                        row
-                        options={[
-                            { value: true, label: 'vereinfacht' },
-                            { value: false, label: 'vollumfänglich' },
-                        ]}
-                    />
-                </Box>
+                {isAuthenticated && (
+                    <>
+                        <Dashboard />
+                        <Box>
+                            <Typography
+                                component="div"
+                                variant="body1"
+                                sx={{
+                                    display: 'flex',
+                                    marginBottom: '10px',
+                                    fontWeight: 'bold',
+                                    color: (theme) =>
+                                        theme.palette.text.primary,
+                                }}
+                            >
+                                Speicherung
+                            </Typography>
+                            <Radio
+                                value={saveSetting}
+                                onChange={(e) =>
+                                    dispatch(setAutoSave(e.target.value))
+                                }
+                                disabled={authType === 'locale'}
+                                row
+                                options={[
+                                    { value: true, label: 'automatisch' },
+                                    { value: false, label: 'manuell' },
+                                ]}
+                            />
+                        </Box>
+                        <Box>
+                            <Typography
+                                component="div"
+                                variant="body1"
+                                sx={{
+                                    display: 'flex',
+                                    marginBottom: '10px',
+                                    fontWeight: 'bold',
+                                    color: (theme) =>
+                                        theme.palette.text.primary,
+                                }}
+                            >
+                                Anwendung
+                            </Typography>
+                            <Radio
+                                value={simpleSetting}
+                                onChange={(e) =>
+                                    dispatch(setSimple(e.target.value))
+                                }
+                                row
+                                options={[
+                                    { value: true, label: 'vereinfacht' },
+                                    { value: false, label: 'vollumfänglich' },
+                                ]}
+                            />
+                        </Box>
+                    </>
+                )}
                 <Theme />
-                <Button variant="outlined" onClick={() => dispatch(reset())}>
-                    Einstellungen zurücksetzen
-                </Button>
+                {isAuthenticated && (
+                    <Button
+                        variant="outlined"
+                        onClick={() => dispatch(reset())}
+                    >
+                        Einstellungen zurücksetzen
+                    </Button>
+                )}
             </Stack>
         </Box>
     );

@@ -84,8 +84,10 @@ export const setColor =
             );
     };
 
-export const reset = () => (dispatch) => {
-    dispatch(setAutoSave('true', false));
+export const reset = () => (dispatch, getState) => {
+    if (getState().auth.type !== 'locale') {
+        dispatch(setAutoSave('true', false));
+    }
     dispatch(setSimple('false', false));
     dispatch(setMode('system', false));
     dispatch(

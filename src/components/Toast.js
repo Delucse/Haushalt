@@ -39,6 +39,7 @@ function Toast() {
     const art = useSelector((state) => state.message.art);
     const message = useSelector((state) => state.message.message);
     const type = useSelector((state) => state.message.type);
+    const autoClose = useSelector((state) => state.message.autoClose);
 
     const theme = useTheme();
 
@@ -52,7 +53,9 @@ function Toast() {
     return (
         <StyledToastContainer
             position="bottom-left"
-            autoClose={type === 'updateApp' ? false : 3000}
+            autoClose={
+                type === 'updateApp' || autoClose === false ? false : 3000
+            }
             limit={4}
             hideProgressBar={false}
             newestOnTop={true}

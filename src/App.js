@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import PrivateRoute from './components/PrivateRoute';
 
 import Dashboard from './components/Dashboard';
-import Login from './components/Login';
+import Source from './components/Login';
 import Layout from './components/Layout';
 import UmsatzTable from './components/UmsatzTable';
 import Einstellungen from './components/Einstellungen';
@@ -67,7 +67,7 @@ function App() {
                 <Route path="/" element={<Layout />}>
                     {/* Coming soon Page */}
                     <Route index element={<Announcement />} />
-                    <Route path="/beta" element={<Login />} />
+                    <Route path="/beta" element={<Source />} />
                     <Route
                         path="/dashboard"
                         element={

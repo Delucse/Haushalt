@@ -1,6 +1,6 @@
 import { FormControlLabel, RadioGroup, Radio as MuiRadio } from '@mui/material';
 
-const Radio = ({ value, onChange, row, options }) => {
+const Radio = ({ value, onChange, row, options, disabled }) => {
     return (
         <RadioGroup
             value={value}
@@ -14,6 +14,7 @@ const Radio = ({ value, onChange, row, options }) => {
                 <FormControlLabel
                     key={i}
                     value={o.value}
+                    disabled={disabled}
                     control={
                         <MuiRadio sx={i > 0 && row && { marginLeft: '20px' }} />
                     }

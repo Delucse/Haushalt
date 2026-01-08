@@ -1,6 +1,12 @@
 import moment from 'moment/moment';
+import DataFrame from 'dataframe-js';
+
 import { uploadFile } from './fileActions';
 import { setFilterCategories, setFilterTimeRange } from './filterActions';
+import { snackbarErrorMessage, snackbarMessage } from './messageActions';
+
+import { getCookieDefaultBoolean } from '../reducers/settingsReducer';
+
 import {
     DATAFRAME_FILTER,
     DATAFRAME_INIT,
@@ -10,14 +16,21 @@ import {
     DATAFRAME_ORIGINAL_KATEGORIEN,
     DATAFRAME_ORIGINAL_WIEDERKEHRENDERUMSATZ,
     DATAFRAME_INIT_PROGRESS,
+    SETTING_AUTOSAVE_MANUAL,
 } from './types';
-
-import DataFrame from 'dataframe-js';
-import { snackbarErrorMessage, snackbarMessage } from './messageActions';
 
 export const initDataframe = () => async (dispatch, getState) => {
     try {
-        const file = getState().file;
+        const state = getState();
+        const type = state.auth.type;
+        const file = state.file;
+
+        if (type === 'locale') {
+            dispatch({ type: SETTING_AUTOSAVE_MANUAL, payload: false });
+        } else {
+            const autosave = getCookieDefaultBoolean('autoSave', true);
+            dispatch({ type: SETTING_AUTOSAVE_MANUAL, payload: autosave });
+        }
 
         var kategorienDf = await DataFrame.fromText(file.kategorien, ';');
         kategorienDf = kategorienDf.filter(

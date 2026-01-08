@@ -1,6 +1,7 @@
 import {
     SETTING_DASHBOARD,
     SETTING_AUTOSAVE,
+    SETTING_AUTOSAVE_MANUAL,
     SETTING_SIMPLE,
     SETTING_MODE,
     SETTING_COLOR,
@@ -36,7 +37,7 @@ const removeCookie = (cname) => {
     document.cookie = `${cname}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
 };
 
-const defaultBoolean = (cookie, defaultValue) => {
+export const getCookieDefaultBoolean = (cookie, defaultValue) => {
     const value = getCookie(cookie);
     if (value) {
         return value === 'true';
@@ -54,16 +55,19 @@ const initialState = {
         },
         mode: getCookie('theme.mode') || 'system',
     },
-    autoSave: defaultBoolean('autoSave', true),
+    autoSave: getCookieDefaultBoolean('autoSave', true),
     dashboard: {
-        stats: defaultBoolean('dashboard.stats', true),
-        einnahmen: defaultBoolean('dashboard.einnahmen', true),
-        ausgaben: defaultBoolean('dashboard.ausgaben', true),
-        gesamt: defaultBoolean('dashboard.gesamt', true),
-        ausgabenTyp: defaultBoolean('dashboard.ausgabenTyp', true),
-        ausgabenKategorie: defaultBoolean('dashboard.ausgabenKategorie', true),
+        stats: getCookieDefaultBoolean('dashboard.stats', true),
+        einnahmen: getCookieDefaultBoolean('dashboard.einnahmen', true),
+        ausgaben: getCookieDefaultBoolean('dashboard.ausgaben', true),
+        gesamt: getCookieDefaultBoolean('dashboard.gesamt', true),
+        ausgabenTyp: getCookieDefaultBoolean('dashboard.ausgabenTyp', true),
+        ausgabenKategorie: getCookieDefaultBoolean(
+            'dashboard.ausgabenKategorie',
+            true
+        ),
     },
-    simple: defaultBoolean('simple', false),
+    simple: getCookieDefaultBoolean('simple', false),
 };
 
 const reducer = (state = initialState, action) => {
@@ -86,6 +90,11 @@ const reducer = (state = initialState, action) => {
             } else {
                 setCookie('autoSave', action.payload);
             }
+            return {
+                ...state,
+                autoSave: action.payload,
+            };
+        case SETTING_AUTOSAVE_MANUAL:
             return {
                 ...state,
                 autoSave: action.payload,

@@ -21,16 +21,19 @@ export const alertMessage = (message, type) => (dispatch) => {
     });
 };
 
-export const snackbarMessage = (message, type) => (dispatch) => {
-    dispatch({
-        type: SUCCESS_MESSAGE,
-        payload: {
-            message,
-            type,
-            art: 'snackbar',
-        },
-    });
-};
+export const snackbarMessage =
+    (message, type, autoClose = true) =>
+    (dispatch) => {
+        dispatch({
+            type: SUCCESS_MESSAGE,
+            payload: {
+                message,
+                type,
+                art: 'snackbar',
+                autoClose,
+            },
+        });
+    };
 
 export const alertErrorMessage = (message, type) => (dispatch) => {
     dispatch({
@@ -43,13 +46,16 @@ export const alertErrorMessage = (message, type) => (dispatch) => {
     });
 };
 
-export const snackbarErrorMessage = (message, type) => (dispatch) => {
-    dispatch({
-        type: ERROR_MESSAGE,
-        payload: {
-            message,
-            type,
-            art: 'snackbar',
-        },
-    });
-};
+export const snackbarErrorMessage =
+    (message, type, autoClose = true) =>
+    (dispatch) => {
+        dispatch({
+            type: ERROR_MESSAGE,
+            payload: {
+                message,
+                type,
+                art: 'snackbar',
+                autoClose,
+            },
+        });
+    };
