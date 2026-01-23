@@ -7,14 +7,14 @@ import { useTheme } from '@mui/material';
 
 function AusgabenPieChart() {
     const umsatzAusgabe = useSelector(
-        (state) => state.dataframe.filtered.umsatz
+        (state) => state.dataframe.filtered.umsatz,
     )?.filter({ Art: 'Ausgabe' });
     const umsatzAusgabeCollection = umsatzAusgabe
         ?.filter(
             (row) =>
                 row.get('Kategorie') !== 'nicht gelistet' ||
                 (row.get('Kategorie') === 'nicht gelistet' &&
-                    row.get('Betrag') !== 0)
+                    row.get('Betrag') !== 0),
         )
         .toCollection();
 
@@ -29,7 +29,7 @@ function AusgabenPieChart() {
     const colors = generateColor(
         theme.palette.secondary.main,
         theme.palette.secondary.light,
-        aggregatedCollection.length
+        aggregatedCollection.length,
     );
 
     return umsatzAusgabeCollection ? (
@@ -55,6 +55,7 @@ function AusgabenPieChart() {
                         },
                         tooltip: {
                             enabled: true,
+                            cornerRadius: 0,
                             callbacks: {
                                 label: (context) => [
                                     ` ${(
@@ -63,7 +64,7 @@ function AusgabenPieChart() {
                                     ).toLocaleString('de-DE', {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
-                                    })} %`,
+                                    })} % bzw.`,
                                     ` ${context.raw.toLocaleString('de-DE', {
                                         minimumFractionDigits: 2,
                                     })} €`,

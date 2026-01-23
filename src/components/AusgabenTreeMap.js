@@ -11,10 +11,10 @@ Chart.register(TreemapController, TreemapElement);
 
 function AusgabenTreeMap() {
     const filterCategoryType = useSelector(
-        (state) => state.filter.kategorieTyp
+        (state) => state.filter.kategorieTyp,
     );
     const umsatzAusgabe = useSelector(
-        (state) => state.dataframe.filtered.umsatz
+        (state) => state.dataframe.filtered.umsatz,
     )?.filter({ Art: 'Ausgabe' });
     const umsatzAusgabeCollection = umsatzAusgabe?.toCollection();
 
@@ -29,7 +29,7 @@ function AusgabenTreeMap() {
     const colors = generateColor(
         theme.palette.secondary.main,
         theme.palette.secondary.light,
-        aggregatedCollection.length
+        aggregatedCollection.length,
     );
 
     const [duration, setDuration] = useState(1000);
@@ -44,9 +44,6 @@ function AusgabenTreeMap() {
                 data={{
                     datasets: [
                         {
-                            // label: aggregatedCollection.map(
-                            //     (c) => c[filterCategoryType]
-                            // ),
                             tree: aggregatedCollection.map((c, i) => {
                                 return {
                                     label: c[filterCategoryType],
@@ -65,14 +62,7 @@ function AusgabenTreeMap() {
                                 display: true,
                                 position: 'bottom',
                                 align: 'left',
-                                formatter: (ctx) => {
-                                    // return `${
-                                    //     ctx.raw._data.label
-                                    // }: ${ctx.raw._data.data.toLocaleString(
-                                    //     'de-DE'
-                                    // )} €`;
-                                    return ctx.raw._data.label;
-                                },
+                                formatter: (ctx) => ctx.raw._data.label,
                             },
                             borderWidth: 0,
                             spacing: 1,
@@ -103,38 +93,25 @@ function AusgabenTreeMap() {
                         },
                         tooltip: {
                             enabled: true,
-                            usePointStyle: true,
+                            cornerRadius: 0,
                             callbacks: {
-                                label: function (ctx) {
-                                    return [
-                                        ` ${(
-                                            (ctx.raw._data.data / sum) *
-                                            100
-                                        ).toLocaleString('de-DE', {
+                                label: (ctx) => [
+                                    ` ${(
+                                        (ctx.raw._data.data / sum) *
+                                        100
+                                    ).toLocaleString('de-DE', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    })} % bzw.`,
+                                    ` ${ctx.raw._data.data.toLocaleString(
+                                        'de-DE',
+                                        {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
-                                        })} %`,
-                                        ` ${ctx.raw._data.data.toLocaleString(
-                                            'de-DE',
-                                            {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            }
-                                        )} €`,
-                                        // 'Test',
-                                    ];
-                                },
-                                title: function (ctx) {
-                                    // console.log(ctx);
-                                    return ctx[0].raw._data.label;
-                                },
-                                labelPointStyle: function (context) {
-                                    return {
-                                        pointStyle: 'triangle',
-                                        rotation: 0,
-                                        radius: 0.1,
-                                    };
-                                },
+                                        },
+                                    )} €`,
+                                ],
+                                title: (ctx) => ctx[0].raw._data.label,
                             },
                         },
                     },
