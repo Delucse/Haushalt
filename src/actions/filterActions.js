@@ -7,7 +7,6 @@ import {
     FILTER_TIME_RANGE,
     FILTER_TYPE,
     FILTER_TIME_INTERVAL,
-    FILTER_TIME_LABELS,
 } from './types';
 
 export const setFilterCategoryType = (type) => (dispatch) => {
@@ -35,63 +34,6 @@ export const setFilterTypes =
         dispatch({ type: FILTER_TYPE, payload: types });
         update && dispatch(filterDataframe());
     };
-
-export const setFilterTimeLabels = () => (dispatch, getState) => {
-    const { range, interval } = getState().filter.time;
-    var startTimestamp = range[0];
-    const endTimestamp = range[1];
-    const labels = [];
-    switch (interval) {
-        case 'Quartal':
-            while (startTimestamp < endTimestamp) {
-                var startDate = moment(startTimestamp);
-                var quarter = startDate.quarter();
-                var label = `Q${quarter}`;
-                if (quarter === 1 || startTimestamp === range[0]) {
-                    label += ` '${startDate.format('YY')}`;
-                }
-                labels.push({
-                    Label: label,
-                    Jahr: startDate.year(),
-                    Quartal: quarter,
-                });
-                startTimestamp = startDate.add(1, 'quarter');
-            }
-            break;
-        case 'Jahr':
-            while (startTimestamp < endTimestamp) {
-                // eslint-disable-next-line
-                var startDate = moment(startTimestamp);
-                // eslint-disable-next-line
-                var year = startDate.year();
-                labels.push({ Label: year, Jahr: year });
-                startTimestamp = startDate.add(1, 'year');
-            }
-            break;
-        default:
-            while (startTimestamp < endTimestamp) {
-                // eslint-disable-next-line
-                var startDate = moment(startTimestamp);
-                var monthString = startDate.format('MMM');
-                // eslint-disable-next-line
-                var label = monthString;
-                if (monthString === 'Jan' || startTimestamp === range[0]) {
-                    label += ` '${startDate.format('YY')}`;
-                }
-                labels.push({
-                    Label: label,
-                    Jahr: startDate.year(),
-                    Monat: monthString,
-                });
-                startTimestamp = startDate.add(1, 'month');
-            }
-            break;
-    }
-    dispatch({
-        type: FILTER_TIME_LABELS,
-        payload: labels,
-    });
-};
 
 export const setFilterTimeInterval = (interval) => (dispatch, getState) => {
     var range = getState().filter.time.range;
@@ -127,8 +69,8 @@ export const setFilterTimeRange =
                     interval === 'Monat'
                         ? 'month'
                         : interval === 'Quartal'
-                        ? 'quarter'
-                        : 'year'
+                          ? 'quarter'
+                          : 'year',
                 )
                 .valueOf();
         }
@@ -136,6 +78,5 @@ export const setFilterTimeRange =
             type: FILTER_TIME_RANGE,
             payload: range,
         });
-        dispatch(setFilterTimeLabels());
         update && dispatch(filterDataframe());
     };

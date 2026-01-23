@@ -1,29 +1,27 @@
-import 'chart.js/auto';
-import { Bar } from 'react-chartjs-2';
-
 import { useSelector } from 'react-redux';
-import generateColor from '../utils/color';
+
 import { useTheme } from '@mui/material';
+
+import TimeSeriesBarChart from './TimeSeriesBarChart';
+
+import generateColor from '../utils/color';
 
 function AusgabenBarChart() {
     const filterCategoryType = useSelector(
-        (state) => state.filter.kategorieTyp
+        (state) => state.filter.kategorieTyp,
     );
     const interval = useSelector((state) => state.filter.time.interval);
     const groups = ['Jahr', filterCategoryType];
     interval !== 'Jahr' && groups.push(interval);
     const umsatzAusgabe = useSelector(
-        (state) => state.dataframe.filtered.umsatz
-    )?.filter({ Art: 'Ausgabe' });
-    const umsatzAusgabeCollection = umsatzAusgabe
-        ?.filter(
-            (row) =>
-                row.get('Kategorie') !== 'nicht gelistet' ||
+        (state) => state.dataframe.filtered.umsatz,
+    )?.filter(
+        (row) =>
+            row.get('Art') === 'Ausgabe' &&
+            (row.get('Kategorie') !== 'nicht gelistet' ||
                 (row.get('Kategorie') === 'nicht gelistet' &&
-                    row.get('Betrag') !== 0)
-        )
-        .toCollection();
-
+                    row.get('Betrag') !== 0)),
+    );
     const aggregated = umsatzAusgabe
         .groupBy(...groups)
         .aggregate((group) => group.stat.sum('Betrag'))
@@ -32,107 +30,33 @@ function AusgabenBarChart() {
     const categories =
         aggregated?.unique(filterCategoryType).toDict()[filterCategoryType] ||
         [];
-    const labels = useSelector((state) => state.filter.time.labels) || [];
 
     const theme = useTheme();
     const colors = generateColor(
         theme.palette.secondary.main,
         theme.palette.secondary.light,
-        categories.length
+        categories.length,
     );
 
-    return umsatzAusgabeCollection ? (
-        umsatzAusgabeCollection.length > 0 ? (
-            <Bar
-                data={{
-                    labels: labels.map((l) => l.Label),
-                    datasets: categories.map((c, i) => {
-                        var data = Array.from(
-                            { length: labels.length },
-                            (v, i) => 0
-                        );
-                        aggregatedCollection
-                            .filter((u) => u[filterCategoryType] === c)
-                            .forEach(
-                                (u) =>
-                                    (data[
-                                        labels.findIndex(
-                                            (elem) =>
-                                                elem.Jahr === u.Jahr &&
-                                                elem[interval] === u[interval]
-                                        )
-                                    ] = u.Betrag)
-                            );
-                        return {
-                            label: c,
-                            data: data,
-                            backgroundColor: colors[i],
-                            borderColor: theme.palette.background.default,
-                        };
-                    }),
-                }}
-                options={{
-                    scales: {
-                        x: {
-                            stacked: true,
-                            grid: {
-                                display: false,
-                                // color: (ctx) => {
-                                //     if (ctx.tick && ctx.tick.value === 0)
-                                //         return theme.palette.text.disabled;
-                                // },
-                                drawTicks: true,
-                            },
-                            ticks: {
-                                color: theme.palette.text.primary,
-                            },
-                        },
-                        y: {
-                            stacked: true,
-                            min: 0,
-                            ticks: {
-                                callback: function (value, index, values) {
-                                    return value + ' €';
-                                },
-                                color: theme.palette.text.primary,
-                            },
-                            grid: {
-                                drawTicks: true,
-                                // color: theme.palette.text.disabled,
-                            },
-                        },
-                    },
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            display: false,
-                        },
-                        tooltip: {
-                            enabled: true,
-                            callbacks: {
-                                label: (context) => [
-                                    `${
-                                        context.dataset.label
-                                    }: ${context.raw.toLocaleString('de-DE', {
-                                        minimumFractionDigits: 2,
-                                    })} €`,
-                                ],
-                            },
-                        },
-                        title: {
-                            display: false,
-                            text: 'Ausgaben',
-                            color: theme.palette.text.primary,
-                        },
-                    },
-                }}
-            />
-        ) : (
-            'keine Daten'
-        )
-    ) : null;
+    return (
+        <TimeSeriesBarChart
+            datasets={categories.map((c, i) => {
+                return {
+                    label: c,
+                    data: aggregatedCollection
+                        .filter((u) => u[filterCategoryType] === c)
+                        .map((d) => {
+                            return {
+                                x: `${d.Jahr}-${d[interval]}`,
+                                y: d.Betrag,
+                            };
+                        }),
+                    backgroundColor: colors[i],
+                    borderColor: theme.palette.background.default,
+                };
+            })}
+        />
+    );
 }
 
 export default AusgabenBarChart;

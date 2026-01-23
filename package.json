@@ -13,6 +13,7 @@
         "@mui/x-tree-view": "^7.28.1",
         "axios": "^1.7.9",
         "chart.js": "^4.4.7",
+        "chartjs-adapter-moment": "^1.0.1",
         "chartjs-chart-treemap": "^3.1.0",
         "cra-template-pwa": "2.0.0",
         "dataframe-js": "^1.4.4",

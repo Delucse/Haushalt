@@ -4,7 +4,6 @@ import {
     FILTER_TYPE,
     FILTER_ART,
     FILTER_TIME_RANGE,
-    FILTER_TIME_LABELS,
     FILTER_TIME_INTERVAL,
     FILTER_RESET,
 } from '../actions/types';
@@ -17,7 +16,6 @@ const initialState = {
     time: {
         range: [],
         interval: 'Monat',
-        labels: [],
     },
 };
 
@@ -53,11 +51,6 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 time: { ...state.time, interval: action.payload },
             };
-        case FILTER_TIME_LABELS:
-            return {
-                ...state,
-                time: { ...state.time, labels: action.payload },
-            };
         case FILTER_RESET:
             return {
                 ...state,
@@ -68,7 +61,6 @@ const reducer = (state = initialState, action) => {
                 time: {
                     range: [],
                     interval: 'Monat',
-                    labels: [],
                 },
             };
         default:

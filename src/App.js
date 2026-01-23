@@ -20,6 +20,14 @@ import UmbuchungTable from './components/UmbuchungTable';
 import Faq from './components/Faq';
 import Announcement from './components/Announcement';
 
+import { Chart as ChartJS, TimeSeriesScale, BarElement } from 'chart.js';
+import 'chartjs-adapter-moment';
+import moment from 'moment';
+import 'moment/locale/de';
+
+ChartJS.register(BarElement, TimeSeriesScale);
+moment.locale('de');
+
 function App() {
     const theme = useSelector((state) => state.settings.theme);
 
