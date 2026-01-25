@@ -1,82 +1,75 @@
 import moment from 'moment';
 import { filterDataframe } from './datafraneActions';
 import {
-    FILTER_ART,
-    FILTER_CATEGORIES,
-    FILTER_CATEGORY_TYPE,
-    FILTER_TIME_RANGE,
-    FILTER_TYPE,
-    FILTER_TIME_INTERVAL,
+    FILTER,
+    FILTER_PREV_ART,
+    FILTER_PREV_CATEGORIES,
+    FILTER_PREV_CATEGORY_TYPE,
+    FILTER_PREV_TIME_RANGE,
+    FILTER_PREV_TYPE,
+    FILTER_PREV_TIME_INTERVAL,
+    FILTER_PREV_RESET,
+    FILTER_PREV_WORD,
 } from './types';
 
-export const setFilterCategoryType = (type) => (dispatch) => {
-    dispatch({ type: FILTER_CATEGORY_TYPE, payload: type });
-    dispatch(setFilterCategories([]));
+export const setFilter =
+    (update = true) =>
+    (dispatch) => {
+        dispatch({ type: FILTER });
+        update && dispatch(filterDataframe());
+    };
+
+export const setPrevFilterWord = (word) => (dispatch) => {
+    dispatch({ type: FILTER_PREV_WORD, payload: word });
 };
 
-export const setFilterCategories =
-    (categories, update = true) =>
-    (dispatch) => {
-        dispatch({ type: FILTER_CATEGORIES, payload: categories });
-        update && dispatch(filterDataframe());
-    };
+export const setPrevFilterCategoryType = (type) => (dispatch) => {
+    dispatch({ type: FILTER_PREV_CATEGORY_TYPE, payload: type });
+    dispatch(setPrevFilterCategories([]));
+};
 
-export const setFilterArts =
-    (arts, update = true) =>
-    (dispatch) => {
-        dispatch({ type: FILTER_ART, payload: arts });
-        update && dispatch(filterDataframe());
-    };
+export const setPrevFilterCategories = (categories) => (dispatch) => {
+    dispatch({ type: FILTER_PREV_CATEGORIES, payload: categories });
+};
 
-export const setFilterTypes =
-    (types, update = true) =>
-    (dispatch) => {
-        dispatch({ type: FILTER_TYPE, payload: types });
-        update && dispatch(filterDataframe());
-    };
+export const setPrevFilterArts = (arts) => (dispatch) => {
+    dispatch({ type: FILTER_PREV_ART, payload: arts });
+};
 
-export const setFilterTimeInterval = (interval) => (dispatch, getState) => {
-    var range = getState().filter.time.range;
+export const setPrevFilterTypes = (types) => (dispatch) => {
+    dispatch({ type: FILTER_PREV_TYPE, payload: types });
+};
+
+export const setPrevFilterTimeInterval = (interval) => (dispatch, getState) => {
+    const state = getState();
+    var range = state.filter.prev?.time?.range || state.filter.time.range;
     dispatch({
-        type: FILTER_TIME_INTERVAL,
+        type: FILTER_PREV_TIME_INTERVAL,
         payload: interval,
     });
     var startDate = moment(range[0]);
     var endDate = moment(range[1]);
-    switch (interval) {
-        case 'Quartal':
-            range = [
-                startDate.startOf('quarter').valueOf(),
-                endDate.endOf('quarter').valueOf(),
-            ];
-            break;
-        case 'Jahr':
-            range = [startDate.startOf('year'), endDate.endOf('year')];
-            break;
-        default:
-            break;
-    }
-    dispatch(setFilterTimeRange(range));
+    const momentInterval =
+        interval === 'Monat'
+            ? 'month'
+            : interval === 'Quartal'
+              ? 'quarter'
+              : 'year';
+
+    range = [
+        startDate.startOf(momentInterval).valueOf(),
+        endDate.endOf(momentInterval).valueOf(),
+    ];
+    dispatch(setPrevFilterTimeRange(range));
 };
 
-export const setFilterTimeRange =
-    (range, update = true) =>
-    (dispatch, getState) => {
-        if (range[0] > range[1]) {
-            const interval = getState().filter.time.interval;
-            range[1] = moment(range[0])
-                .endOf(
-                    interval === 'Monat'
-                        ? 'month'
-                        : interval === 'Quartal'
-                          ? 'quarter'
-                          : 'year',
-                )
-                .valueOf();
-        }
-        dispatch({
-            type: FILTER_TIME_RANGE,
-            payload: range,
-        });
-        update && dispatch(filterDataframe());
-    };
+export const setPrevFilterTimeRange = (range) => (dispatch) => {
+    dispatch({
+        type: FILTER_PREV_TIME_RANGE,
+        payload: range,
+    });
+};
+
+export const setResetPrevFilter = () => (dispatch) => {
+    dispatch({ type: FILTER_PREV_RESET });
+};

@@ -1,79 +1,22 @@
 import React, { useState } from 'react';
 
 import { useSelector } from 'react-redux';
+
 import { Typography, Box } from '@mui/material';
+
 import Icon from '@mdi/react';
-import { mdiDelete, mdiMagnify, mdiPencil } from '@mdi/js';
-import Textfield from './Textfield';
+import { mdiPencil } from '@mdi/js';
+
 import AddUmsatz from './AddUmsatz';
 import Table from './Table';
 import IconButton from './IconButton';
-import Filter from './Filter';
+import Search from './Search';
 
-const Search = ({ submit }) => {
-    const [word, setWord] = useState('');
-    return (
-        <Textfield
-            placeholder="Suche"
-            variant="outlined"
-            value={word}
-            onChange={(e) => setWord(e.target.value)}
-            onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                    submit(word.toLowerCase());
-                }
-            }}
-            style={{ margin: '0 16px' }}
-            labelStyle={{ marginLeft: '16px' }}
-            start={<Icon path={mdiMagnify} size={1.1} />}
-            end={
-                <>
-                    {word.length > 0 && (
-                        <>
-                            <IconButton
-                                onClick={() => {
-                                    setWord('');
-                                    submit('');
-                                }}
-                                onMouseDown={(e) => e.preventDefault()}
-                                sx={{
-                                    '&:hover': {
-                                        color: (theme) =>
-                                            theme.palette.primary.main,
-                                    },
-                                }}
-                            >
-                                <Icon path={mdiDelete} size={1} />
-                            </IconButton>
-                            <span style={{ margin: '0 10px 0 2px' }}>|</span>
-                        </>
-                    )}
-                    <Filter icon />
-                </>
-            }
-            fullWidth
-        />
-    );
-};
-
-function UmsatzTable() {
+const UmsatzTable = () => {
     const [data, setData] = useState({});
-    const [search, setSearch] = useState('');
     const umsatzFiltered = useSelector(
-        (state) => state.dataframe.filtered.umsatz
-    )?.filter(
-        (row) =>
-            row.get('KategorieID') !== '1' &&
-            (search === '' ||
-                row.get('Bemerkung').toLowerCase().includes(search) ||
-                row.get('Datum').includes(search) ||
-                // row.get('Betrag').toLowerCase().includes(search) ||
-                row.get('Art').toLowerCase().includes(search) ||
-                row.get('Kategorie').toLowerCase().includes(search) ||
-                row.get('Typ').toLowerCase().includes(search) ||
-                row.get('Beschreibung').toLowerCase().includes(search))
+        (state) => state.dataframe.filtered.umsatz,
     );
-    // .sortBy('Zeitstempel');
     const umsatzFilteredCollection = umsatzFiltered.toCollection();
 
     return (
@@ -108,7 +51,7 @@ function UmsatzTable() {
                         width: '100%',
                     }}
                 >
-                    <Search submit={setSearch} />
+                    <Search filter />
                     {umsatzFilteredCollection ? (
                         <Typography
                             component="div"
@@ -224,7 +167,7 @@ function UmsatzTable() {
                                             {
                                                 value: row['Bemerkung'],
                                             },
-                                        ]
+                                        ],
                                     )}
                                 />
                                 <AddUmsatz
@@ -255,6 +198,6 @@ function UmsatzTable() {
             ) : null}
         </>
     );
-}
+};
 
 export default UmsatzTable;

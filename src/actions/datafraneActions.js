@@ -2,7 +2,11 @@ import moment from 'moment/moment';
 import DataFrame from 'dataframe-js';
 
 import { uploadFile } from './fileActions';
-import { setFilterCategories, setFilterTimeRange } from './filterActions';
+import {
+    setPrevFilterCategories,
+    setPrevFilterTimeRange,
+    setFilter,
+} from './filterActions';
 import { snackbarErrorMessage, snackbarMessage } from './messageActions';
 
 import { getCookieDefaultBoolean } from '../reducers/settingsReducer';
@@ -320,11 +324,12 @@ export const initDataframe = () => async (dispatch, getState) => {
                 ? moment(umsatzDf.stat.max('Zeitstempel'))
                 : moment();
         dispatch(
-            setFilterTimeRange([
+            setPrevFilterTimeRange([
                 maxUmsatzDate.clone().startOf('month').valueOf(),
                 maxUmsatzDate.clone().endOf('month').valueOf(),
             ]),
         );
+        dispatch(setFilter());
         setTimeout(() => {
             dispatch({
                 type: DATAFRAME_INIT_PROGRESS,
@@ -501,7 +506,7 @@ const updateNichtGelistet =
 
 export const filterDataframe = () => (dispatch, getState) => {
     const { dataframe, filter } = getState();
-    const { kategorien, kategorieTyp, art, typ, time } = filter;
+    const { word, kategorien, kategorieTyp, art, typ, time } = filter;
     var { range } = time;
     // console.log(kategorien);
     var umsatzDfFiltered = dataframe.original.umsatz.slice();
@@ -511,12 +516,6 @@ export const filterDataframe = () => (dispatch, getState) => {
         umsatzDfFiltered = umsatzDfFiltered.filter((row) => row.get('ID') <= 0);
     } else {
         if (range && range.length === 2) {
-            // range = [
-            //     range[0] +
-            //         new Date(range[0]).getTimezoneOffset() * 60 * 1000 * -1,
-            //     range[1] +
-            //         new Date(range[1]).getTimezoneOffset() * 60 * 1000 * -1,
-            // ];
             umsatzDfFiltered = umsatzDfFiltered.filter(
                 (row) =>
                     row.get('Zeitstempel') >= range[0] &&
@@ -548,6 +547,19 @@ export const filterDataframe = () => (dispatch, getState) => {
                 );
                 // abschlussDfFiltered = abschlussDfFiltered.sortBy(['Zeitstempel']);
             }
+        }
+        if (word && word.length > 0) {
+            const lowerWord = word.toLowerCase();
+            umsatzDfFiltered = umsatzDfFiltered.filter(
+                (row) =>
+                    row.get('Bemerkung').toLowerCase().includes(lowerWord) ||
+                    row.get('Datum').includes(lowerWord) ||
+                    // row.get('Betrag').toLowerCase().includes(lowerWord) ||
+                    row.get('Art').toLowerCase().includes(lowerWord) ||
+                    row.get('Kategorie').toLowerCase().includes(lowerWord) ||
+                    row.get('Typ').toLowerCase().includes(lowerWord) ||
+                    row.get('Beschreibung').toLowerCase().includes(lowerWord),
+            );
         }
         if (art && art.length > 0) {
             umsatzDfFiltered = umsatzDfFiltered.filter((row) =>
@@ -895,7 +907,8 @@ export const changeKategorie =
                         ? oberkategorie
                         : unterkategorie;
             }
-            dispatch(setFilterCategories(kategorieFilter, false));
+            dispatch(setPrevFilterCategories(kategorieFilter));
+            dispatch(setFilter(false));
         }
 
         dispatch(filterDataframe());
@@ -985,7 +998,8 @@ export const deleteKategorie = (id) => (dispatch, getState) => {
             (kat) => kat !== kategorie[kategorieFilterTyp],
         );
         if (kategorieFilter.length > newKategorieFilter.length) {
-            dispatch(setFilterCategories(newKategorieFilter, false));
+            dispatch(setPrevFilterCategories(newKategorieFilter));
+            dispatch(setFilter(false));
         }
     }
     dispatch(filterDataframe());

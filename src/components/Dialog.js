@@ -70,13 +70,13 @@ function Dialog(props) {
                     width: props.width
                         ? `calc(${props.width} + 2 * 16px)`
                         : props.fullWidth
-                        ? '100%'
-                        : 'unset',
+                          ? '100%'
+                          : 'unset',
                     margin: props.position
                         ? '24px'
                         : props.fullScreen
-                        ? 0
-                        : '32px',
+                          ? 0
+                          : '32px',
                 },
             }}
             fullScreen={props.fullScreen}
@@ -116,7 +116,14 @@ function Dialog(props) {
                 </DialogContent>
             )}
             {props.actions ? (
-                <DialogActions sx={{ margin: 0, padding: 2, paddingTop: 0 }}>
+                <DialogActions
+                    sx={{
+                        margin: 0,
+                        padding: 2,
+                        paddingTop: 0,
+                        ...props.sxActions,
+                    }}
+                >
                     {props.actions}
                 </DialogActions>
             ) : null}

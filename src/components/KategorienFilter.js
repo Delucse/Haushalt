@@ -1,19 +1,23 @@
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    setFilterCategories,
-    setFilterCategoryType,
+    setPrevFilterCategories,
+    setPrevFilterCategoryType,
 } from '../actions/filterActions';
+
 import { Grid } from '@mui/material';
+
 import Autocomplete from './Autocomplete';
 
 const KategorienFilter = () => {
     const dispatch = useDispatch();
-    const filterCategories = useSelector((state) => state.filter.kategorien);
+    const filterCategories = useSelector(
+        (state) => state.filter.prev?.kategorien || state.filter.kategorien,
+    );
     const filterCategoryType = useSelector(
-        (state) => state.filter.kategorieTyp
+        (state) => state.filter.prev?.kategorieTyp || state.filter.kategorieTyp,
     );
     const categories = useSelector(
-        (state) => state.dataframe.original.kategorien
+        (state) => state.dataframe.original.kategorien,
     )
         ?.unique(filterCategoryType)
         .toDict()
@@ -27,7 +31,9 @@ const KategorienFilter = () => {
                     options={['Oberkategorie', 'Unterkategorie']}
                     placeholder={'Kategorie'}
                     fullWidth
-                    onChange={(value) => dispatch(setFilterCategoryType(value))}
+                    onChange={(value) =>
+                        dispatch(setPrevFilterCategoryType(value))
+                    }
                     select
                 />
             </Grid>
@@ -44,7 +50,7 @@ const KategorienFilter = () => {
                         fullWidth
                         multiple
                         onChange={(value) =>
-                            dispatch(setFilterCategories(value))
+                            dispatch(setPrevFilterCategories(value))
                         }
                     />
                 </Grid>

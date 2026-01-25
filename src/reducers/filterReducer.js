@@ -1,10 +1,13 @@
 import {
-    FILTER_CATEGORIES,
-    FILTER_CATEGORY_TYPE,
-    FILTER_TYPE,
-    FILTER_ART,
-    FILTER_TIME_RANGE,
-    FILTER_TIME_INTERVAL,
+    FILTER,
+    FILTER_PREV_WORD,
+    FILTER_PREV_CATEGORIES,
+    FILTER_PREV_CATEGORY_TYPE,
+    FILTER_PREV_TYPE,
+    FILTER_PREV_ART,
+    FILTER_PREV_TIME_RANGE,
+    FILTER_PREV_TIME_INTERVAL,
+    FILTER_PREV_RESET,
     FILTER_RESET,
 } from '../actions/types';
 
@@ -13,43 +16,87 @@ const initialState = {
     kategorieTyp: 'Oberkategorie',
     art: [],
     typ: [],
+    word: '',
     time: {
         range: [],
         interval: 'Monat',
     },
+    prev: {},
 };
 
 const reducer = (state = initialState, action) => {
     switch (action.type) {
-        case FILTER_CATEGORIES:
+        case FILTER:
             return {
                 ...state,
-                kategorien: action.payload,
+                ...state.prev,
+                prev: {},
             };
-        case FILTER_ART:
+        case FILTER_PREV_WORD:
             return {
                 ...state,
-                art: action.payload,
+                prev: { ...state.prev, word: action.payload },
             };
-        case FILTER_TYPE:
+        case FILTER_PREV_CATEGORIES:
             return {
                 ...state,
-                typ: action.payload,
+                prev: {
+                    ...state.prev,
+                    kategorien: action.payload,
+                },
             };
-        case FILTER_CATEGORY_TYPE:
+        case FILTER_PREV_ART:
             return {
                 ...state,
-                kategorieTyp: action.payload,
+                prev: {
+                    ...state.prev,
+                    art: action.payload,
+                },
             };
-        case FILTER_TIME_RANGE:
+        case FILTER_PREV_TYPE:
             return {
                 ...state,
-                time: { ...state.time, range: action.payload },
+                prev: {
+                    ...state.prev,
+                    typ: action.payload,
+                },
             };
-        case FILTER_TIME_INTERVAL:
+        case FILTER_PREV_CATEGORY_TYPE:
             return {
                 ...state,
-                time: { ...state.time, interval: action.payload },
+                prev: {
+                    ...state.prev,
+                    kategorieTyp: action.payload,
+                },
+            };
+        case FILTER_PREV_TIME_RANGE:
+            return {
+                ...state,
+                prev: {
+                    ...state.prev,
+                    time: {
+                        ...state.time,
+                        ...state.prev.time,
+                        range: action.payload,
+                    },
+                },
+            };
+        case FILTER_PREV_TIME_INTERVAL:
+            return {
+                ...state,
+                prev: {
+                    ...state.prev,
+                    time: {
+                        ...state.time,
+                        ...state.prev.time,
+                        interval: action.payload,
+                    },
+                },
+            };
+        case FILTER_PREV_RESET:
+            return {
+                ...state,
+                prev: {},
             };
         case FILTER_RESET:
             return {
@@ -58,10 +105,12 @@ const reducer = (state = initialState, action) => {
                 kategorieTyp: 'Oberkategorie',
                 art: [],
                 typ: [],
+                word: '',
                 time: {
                     range: [],
                     interval: 'Monat',
                 },
+                prev: {},
             };
         default:
             return state;

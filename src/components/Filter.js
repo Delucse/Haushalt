@@ -1,14 +1,22 @@
+import { useState } from 'react';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { setFilter, setResetPrevFilter } from '../actions/filterActions';
+
 import { Badge, Box, Divider, Grid, Typography } from '@mui/material';
+
+import Icon from '@mdi/react';
+import { mdiFilterVariant } from '@mdi/js';
+
+import moment from 'moment';
+
 import Arten from './Arten';
 import KategorienFilter from './KategorienFilter';
 import Typen from './Typen';
 import Zeitrange from './Zeitrange';
-import { mdiFilterVariant } from '@mdi/js';
-import { useState } from 'react';
-import Icon from '@mdi/react';
-import { useSelector } from 'react-redux';
-import moment from 'moment';
 import Dialog from './Dialog';
+import Button from './Button';
+import Search from './Search';
 
 const Zeitangabe = ({ margin }) => {
     const { range, interval } = useSelector((state) => state.filter.time);
@@ -32,8 +40,8 @@ const Zeitangabe = ({ margin }) => {
                     `${quarterRange[1]} ${yearRange[1]}`
                     ? `${quarterRange[0]} ${yearRange[0]}`
                     : yearRange[0] === yearRange[1]
-                    ? `von ${quarterRange[0]} bis ${quarterRange[1]} ${yearRange[1]}`
-                    : `von ${quarterRange[0]} ${yearRange[0]} bis ${quarterRange[1]} ${yearRange[1]}`;
+                      ? `von ${quarterRange[0]} bis ${quarterRange[1]} ${yearRange[1]}`
+                      : `von ${quarterRange[0]} ${yearRange[0]} bis ${quarterRange[1]} ${yearRange[1]}`;
             default:
                 // month
                 const monthRange = [
@@ -44,8 +52,8 @@ const Zeitangabe = ({ margin }) => {
                     `${monthRange[1]} ${yearRange[1]}`
                     ? `${monthRange[0]} ${yearRange[0]}`
                     : yearRange[0] === yearRange[1]
-                    ? `von ${monthRange[0]} bis ${monthRange[1]} ${yearRange[1]}`
-                    : `von ${monthRange[0]} ${yearRange[0]} bis ${monthRange[1]} ${yearRange[1]}`;
+                      ? `von ${monthRange[0]} bis ${monthRange[1]} ${yearRange[1]}`
+                      : `von ${monthRange[0]} ${yearRange[0]} bis ${monthRange[1]} ${yearRange[1]}`;
         }
     };
 
@@ -63,11 +71,13 @@ const Zeitangabe = ({ margin }) => {
 
 const Filter = ({ icon }) => {
     const [open, setOpen] = useState(false);
+
+    const dispatch = useDispatch();
     const filterCount = useSelector(
         (state) =>
             state.filter.kategorien.length +
             state.filter.typ.length +
-            state.filter.art.length
+            state.filter.art.length,
     );
 
     return (
@@ -132,8 +142,11 @@ const Filter = ({ icon }) => {
 
             <Dialog
                 open={open}
-                onClose={() => setOpen(false)}
-                closeIcon={true}
+                onClose={() => {
+                    dispatch(setResetPrevFilter());
+                    setOpen(false);
+                }}
+                closeIcon={false}
                 sxTitle={{
                     border: (theme) =>
                         `4px solid ${theme.palette.primary.main}`,
@@ -158,6 +171,7 @@ const Filter = ({ icon }) => {
                     border: (theme) =>
                         `4px solid ${theme.palette.primary.main}`,
                     borderTop: 'none',
+                    borderBottom: 'none',
                 }}
                 content={
                     <>
@@ -171,6 +185,9 @@ const Filter = ({ icon }) => {
                             }}
                         />
                         <Grid container spacing={1.5}>
+                            <Grid item sm={12}>
+                                <Search />
+                            </Grid>
                             <Grid item xxs={12} sm={3}>
                                 <Arten />
                             </Grid>
@@ -181,58 +198,35 @@ const Filter = ({ icon }) => {
                         </Grid>
                     </>
                 }
+                actions={
+                    <>
+                        <Button
+                            onClick={() => {
+                                dispatch(setResetPrevFilter());
+                                setOpen(false);
+                            }}
+                            variant="outlined"
+                        >
+                            Abbrechen
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                dispatch(setFilter());
+                                setOpen(false);
+                            }}
+                            variant="contained"
+                        >
+                            Übernehmen
+                        </Button>
+                    </>
+                }
+                sxActions={{
+                    border: (theme) =>
+                        `4px solid ${theme.palette.primary.main}`,
+                    borderTop: 'none',
+                }}
             />
         </>
-        // <Accordion
-        //     expanded={open}
-        //     onChange={() => setOpen(!open)}
-        //     disableGutters
-        //     sx={{
-        //         boxShadow: 'none',
-        //         background: (theme) => theme.palette.background.default,
-        //     }}
-        // >
-        //     <AccordionSummary
-        //         sx={{
-        //             padding: 0,
-        //             '& .MuiAccordionSummary-content': {
-        //                 margin: 0,
-        //             },
-        //             minHeight: 'fit-content',
-        //         }}
-        //     >
-        //         <Box sx={{ color: (theme) => theme.palette.primary.main }}>
-        //             <Icon path={mdiFilterVariant} size={1.4} />
-        //         </Box>
-        //         {!open && <Zeitangabe />}
-        //     </AccordionSummary>
-        //     <AccordionDetails
-        //         sx={{
-        //             border: (theme) =>
-        //                 `1px solid ${theme.palette.primary.main}`,
-        //             padding: '12px',
-        //             marginTop: '12px',
-        //         }}
-        //     >
-        //         <Zeitrange />
-        //         <Divider
-        //             orientation="horizontal"
-        //             sx={{
-        //                 borderColor: (theme) => theme.palette.primary.main,
-        //                 margin: '12px 0',
-        //             }}
-        //         />
-        //         <Grid container spacing={1.5}>
-        //             <Grid item xxs={12} sm={3}>
-        //                 <Arten />
-        //             </Grid>
-        //             <Grid item xxs={12} sm={3}>
-        //                 <Typen />{' '}
-        //             </Grid>
-        //             <KategorienFilter />
-        //         </Grid>
-        //     </AccordionDetails>
-        // </Accordion>
     );
 };
 

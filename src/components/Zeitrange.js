@@ -1,17 +1,29 @@
-import { Grid } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    setFilterTimeInterval,
-    setFilterTimeRange,
+    setPrevFilterTimeInterval,
+    setPrevFilterTimeRange,
 } from '../actions/filterActions';
-import Datefield from './Datefield';
+
+import { Grid } from '@mui/material';
+
 import moment from 'moment';
+
+import Datefield from './Datefield';
 import Autocomplete from './Autocomplete';
 
 const Zeitrange = () => {
     const dispatch = useDispatch();
     const umsatzDf = useSelector((state) => state.dataframe.original.umsatz);
-    const { range, interval } = useSelector((state) => state.filter.time);
+    const { range, interval } = useSelector(
+        (state) => state.filter.prev?.time || state.filter.time,
+    );
+
+    const momentInterval =
+        interval === 'Monat'
+            ? 'month'
+            : interval === 'Quartal'
+              ? 'quarter'
+              : 'year';
 
     return (
         umsatzDf && (
@@ -29,7 +41,7 @@ const Zeitrange = () => {
                         select={true}
                         fullWidth
                         onChange={(opt) =>
-                            dispatch(setFilterTimeInterval(opt.value))
+                            dispatch(setPrevFilterTimeInterval(opt.value))
                         }
                     />
                 </Grid>
@@ -42,33 +54,48 @@ const Zeitrange = () => {
                         }
                         minDate={moment(
                             umsatzDf.count() > 0 &&
-                                umsatzDf.stat.min('Zeitstempel')
+                                umsatzDf.stat.min('Zeitstempel'),
                         ).startOf('year')}
                         maxDate={moment(
                             umsatzDf.count() > 0 &&
-                                umsatzDf.stat.max('Zeitstempel')
+                                umsatzDf.stat.max('Zeitstempel'),
                         ).endOf('year')}
-                        onChange={(newValue) =>
-                            dispatch(
-                                setFilterTimeRange([
-                                    newValue.startOf('month').valueOf(),
-                                    range[1],
-                                ])
-                            )
-                        }
+                        onChange={(newValue) => {
+                            if (newValue.valueOf() > range[1]) {
+                                dispatch(
+                                    setPrevFilterTimeRange([
+                                        newValue
+                                            .startOf(momentInterval)
+                                            .valueOf(),
+                                        newValue
+                                            .endOf(momentInterval)
+                                            .valueOf(),
+                                    ]),
+                                );
+                            } else {
+                                dispatch(
+                                    setPrevFilterTimeRange([
+                                        newValue
+                                            .startOf(momentInterval)
+                                            .valueOf(),
+                                        range[1],
+                                    ]),
+                                );
+                            }
+                        }}
                         toolbarFormat={`[von ] ${
                             interval === 'Monat'
                                 ? 'MMM YYYY'
                                 : interval === 'Quartal'
-                                ? '[Q]Q YYYY'
-                                : 'YYYY'
+                                  ? '[Q]Q YYYY'
+                                  : 'YYYY'
                         }`}
                         format={`[von] ${
                             interval === 'Monat'
                                 ? 'MMMM YYYY'
                                 : interval === 'Quartal'
-                                ? '[Q]Q YYYY'
-                                : 'YYYY'
+                                  ? '[Q]Q YYYY'
+                                  : 'YYYY'
                         }`}
                     />
                 </Grid>
@@ -79,32 +106,50 @@ const Zeitrange = () => {
                         views={
                             interval === 'Jahr' ? ['year'] : ['month', 'year']
                         }
-                        minDate={moment(range[0])}
+                        minDate={moment(
+                            umsatzDf.count() > 0 &&
+                                umsatzDf.stat.min('Zeitstempel'),
+                        ).startOf('year')}
                         maxDate={moment(
                             umsatzDf.count() > 0 &&
-                                umsatzDf.stat.max('Zeitstempel')
+                                umsatzDf.stat.max('Zeitstempel'),
                         ).endOf('year')}
-                        onChange={(newValue) =>
-                            dispatch(
-                                setFilterTimeRange([
-                                    range[0],
-                                    newValue.endOf('month').valueOf(),
-                                ])
-                            )
-                        }
+                        onChange={(newValue) => {
+                            if (newValue.valueOf() < range[0]) {
+                                dispatch(
+                                    setPrevFilterTimeRange([
+                                        newValue
+                                            .startOf(momentInterval)
+                                            .valueOf(),
+                                        newValue
+                                            .endOf(momentInterval)
+                                            .valueOf(),
+                                    ]),
+                                );
+                            } else {
+                                dispatch(
+                                    setPrevFilterTimeRange([
+                                        range[0],
+                                        newValue
+                                            .endOf(momentInterval)
+                                            .valueOf(),
+                                    ]),
+                                );
+                            }
+                        }}
                         toolbarFormat={`[bis] ${
                             interval === 'Monat'
                                 ? 'MMM YYYY'
                                 : interval === 'Quartal'
-                                ? '[Q]Q YYYY'
-                                : 'YYYY'
+                                  ? '[Q]Q YYYY'
+                                  : 'YYYY'
                         }`}
                         format={`[bis] ${
                             interval === 'Monat'
                                 ? 'MMMM YYYY'
                                 : interval === 'Quartal'
-                                ? '[Q]Q YYYY'
-                                : 'YYYY'
+                                  ? '[Q]Q YYYY'
+                                  : 'YYYY'
                         }`}
                     />
                 </Grid>

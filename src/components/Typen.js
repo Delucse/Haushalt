@@ -1,14 +1,13 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { setFilterTypes } from '../actions/filterActions';
+import { setPrevFilterTypes } from '../actions/filterActions';
+
 import Autocomplete from './Autocomplete';
 
 const Typen = () => {
     const dispatch = useDispatch();
-    const filterTypes = useSelector((state) => state.filter.typ);
-    // const types = useSelector((state) => state.dataframe.original.umsatz)
-    //     ?.unique('Typ')
-    //     .toDict()
-    //     .Typ.sort();
+    const filterTypes = useSelector(
+        (state) => state.filter.prev?.typ || state.filter.typ,
+    );
     const types = useSelector((state) => state.dataframe.original.kategorien)
         ?.unique('Typ')
         .toDict()
@@ -22,7 +21,7 @@ const Typen = () => {
                 placeholder={filterTypes.length > 0 ? 'Typ' : 'alle Typen'}
                 fullWidth
                 multiple
-                onChange={(value) => dispatch(setFilterTypes(value))}
+                onChange={(value) => dispatch(setPrevFilterTypes(value))}
             />
         )
     );

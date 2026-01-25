@@ -58,7 +58,7 @@ function Autocomplete({ value = '', ...props }) {
                     ? (props, option, { selected }) => {
                           const { key, ...optionProps } = props;
                           return (
-                              <li key={key} {...optionProps}>
+                              <li key={props.key} {...optionProps}>
                                   <Checkbox checked={selected} />
                                   {option}
                               </li>
@@ -81,7 +81,7 @@ function Autocomplete({ value = '', ...props }) {
                           if (props.optionLabel) {
                           }
                           const isExisting = options.some(
-                              (option) => inputValue === option
+                              (option) => inputValue === option,
                           );
                           if (inputValue !== '' && !isExisting) {
                               //   var object = { inputValue };
