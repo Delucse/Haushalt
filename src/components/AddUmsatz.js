@@ -5,7 +5,7 @@ import {
     addUmsatz,
     changeUmsatz,
     deleteUmsatz,
-} from '../actions/datafraneActions';
+} from '../actions/dataframeActions/umsatzActions';
 import { useEffect, useState } from 'react';
 import Textfield from './Textfield';
 import Numberfield from './Numberfield';
@@ -29,7 +29,7 @@ const AddUmsatz = ({
     onClose,
 }) => {
     const kategorien = useSelector(
-        (state) => state.dataframe.original.kategorien
+        (state) => state.dataframe.original.kategorien,
     )
         ?.filter((row) => row.get('KategorieID') > 2)
         .toCollection();
@@ -48,29 +48,29 @@ const AddUmsatz = ({
             dispatch(
                 alertErrorMessage(
                     'Die Angabe des Betrages ist verpflichtend.',
-                    'umsatzBetrag'
-                )
+                    'umsatzBetrag',
+                ),
             );
         } else if (betragError) {
             dispatch(
                 alertErrorMessage(
                     'Betrag: Ungültige Zahl bzw. arithmetischer Ausdruck.',
-                    'umsatzBetrag'
-                )
+                    'umsatzBetrag',
+                ),
             );
         } else if (newBetrag === 0) {
             dispatch(
                 alertErrorMessage(
                     'Der Betrag darf nicht 0,00 € betragen.',
-                    'umsatzBetrag'
-                )
+                    'umsatzBetrag',
+                ),
             );
         } else if (!newKategorie) {
             dispatch(
                 alertErrorMessage(
                     'Es muss eine Kategorie ausgewählt werden.',
-                    'umsatzKategorie'
-                )
+                    'umsatzKategorie',
+                ),
             );
         } else {
             var calcTimestamp = newTimestamp;
@@ -103,8 +103,8 @@ const AddUmsatz = ({
                                 kategorie,
                                 beschreibung,
                                 bemerkung,
-                            }
-                        )
+                            },
+                        ),
                     );
                 }
             } else {
@@ -115,8 +115,8 @@ const AddUmsatz = ({
                         newBetrag,
                         newKategorie.KategorieID,
                         newBeschreibung,
-                        newBemerkung
-                    )
+                        newBemerkung,
+                    ),
                 );
             }
             close();
@@ -145,7 +145,7 @@ const AddUmsatz = ({
         setNewBetrag(betrag);
         setNewKategorie(
             kategorien &&
-                kategorien.filter((k) => k.KategorieID === kategorie)[0]
+                kategorien.filter((k) => k.KategorieID === kategorie)[0],
         );
         setNewBeschreibung(beschreibung);
         setNewBemerkung(bemerkung);
@@ -204,7 +204,7 @@ const AddUmsatz = ({
                                             setNewTimestamp(
                                                 newValue
                                                     .startOf('day')
-                                                    .valueOf()
+                                                    .valueOf(),
                                             )
                                         }
                                         toolbarFormat={'DD. MMMM'}

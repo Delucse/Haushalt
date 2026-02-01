@@ -5,7 +5,7 @@ import {
     addKategorie,
     changeKategorie,
     deleteKategorie,
-} from '../actions/datafraneActions';
+} from '../actions/dataframeActions/kategorienActions';
 import { useEffect, useState } from 'react';
 import Textfield from './Textfield';
 import Alert from './Alert';
@@ -23,7 +23,7 @@ const AddKategorie = ({
     const dispatch = useDispatch();
     const error = useSelector((state) => state.message.error);
     const kategorien = useSelector(
-        (state) => state.dataframe.original.kategorien
+        (state) => state.dataframe.original.kategorien,
     )
         ?.filter((row) => row.get('ID') !== id)
         .toDict()['Kategorie'];
@@ -55,8 +55,8 @@ const AddKategorie = ({
                                 id,
                                 newOberkategorie,
                                 newUnterkategorie,
-                                newTyp
-                            )
+                                newTyp,
+                            ),
                         );
                     }
                 } else {
@@ -64,8 +64,8 @@ const AddKategorie = ({
                         addKategorie(
                             newOberkategorie,
                             newUnterkategorie,
-                            newTyp
-                        )
+                            newTyp,
+                        ),
                     );
                 }
                 close();
@@ -73,16 +73,16 @@ const AddKategorie = ({
                 dispatch(
                     alertErrorMessage(
                         `Die Kategorie "${newKategorie}" existiert bereits.`,
-                        'kategorie'
-                    )
+                        'kategorie',
+                    ),
                 );
             }
         } else {
             dispatch(
                 alertErrorMessage(
                     'Die Angabe einer Oberkategorie und Typs sind verpflichtend.',
-                    'kategorie'
-                )
+                    'kategorie',
+                ),
             );
         }
     };

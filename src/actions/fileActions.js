@@ -9,7 +9,7 @@ import {
     AUTH_TYPE,
 } from './types';
 
-import { initDataframe } from './datafraneActions';
+import { initDataframe } from './dataframeActions/initActions';
 import {
     alertErrorMessage,
     resetMessage,
@@ -38,7 +38,7 @@ const openZipFolder = async () => {
                 JSZip.loadAsync(input.files[0]).then(
                     (zip) => {
                         const filenames = Object.keys(zip.files).map(
-                            (filename) => filename
+                            (filename) => filename,
                         );
                         const promises = Promise.all(
                             filenames.map((filename) =>
@@ -46,9 +46,9 @@ const openZipFolder = async () => {
                                     (blob) =>
                                         new File([blob], filename, {
                                             type: 'text/csv',
-                                        })
-                                )
-                            )
+                                        }),
+                                ),
+                            ),
                         );
                         promises.then((files) => {
                             resolve(files);
@@ -57,7 +57,7 @@ const openZipFolder = async () => {
                     (e) => {
                         console.log(e);
                         resolve('error');
-                    }
+                    },
                 );
             } else {
                 resolve('error');
@@ -154,8 +154,8 @@ export const setFilesLocale = () => async (dispatch) => {
                     die benötigten Dateien erstellen.
                 </div>,
                 'localeImport',
-                false
-            )
+                false,
+            ),
         );
     }
 };
@@ -178,12 +178,12 @@ export const setFilesFilen = (uuid) => async (dispatch, getState) => {
             uuid: token.baseFolderUUID,
         });
         const path = Object.keys(items).filter(
-            (i) => items[i].uuid === uuid
+            (i) => items[i].uuid === uuid,
         )[0];
 
         var filePath = path + '/Kategorien.csv';
         var download = new Response(
-            filen.cloud().downloadFileToReadableStream(items[filePath])
+            filen.cloud().downloadFileToReadableStream(items[filePath]),
         );
         var file = await download.text();
         var blob = new Blob([file], { type: items[filePath].mime });
@@ -193,7 +193,7 @@ export const setFilesFilen = (uuid) => async (dispatch, getState) => {
 
         filePath = path + '/Umsatz.csv';
         download = new Response(
-            filen.cloud().downloadFileToReadableStream(items[filePath])
+            filen.cloud().downloadFileToReadableStream(items[filePath]),
         );
         file = await download.text();
         blob = new Blob([file], { type: items[filePath].mime });
@@ -203,7 +203,7 @@ export const setFilesFilen = (uuid) => async (dispatch, getState) => {
 
         filePath = path + '/wiederkehrenderUmsatz.csv';
         download = new Response(
-            filen.cloud().downloadFileToReadableStream(items[filePath])
+            filen.cloud().downloadFileToReadableStream(items[filePath]),
         );
         file = await download.text();
         blob = new Blob([file], { type: items[filePath].mime });
@@ -213,7 +213,7 @@ export const setFilesFilen = (uuid) => async (dispatch, getState) => {
 
         filePath = path + '/Umbuchung.csv';
         download = new Response(
-            filen.cloud().downloadFileToReadableStream(items[filePath])
+            filen.cloud().downloadFileToReadableStream(items[filePath]),
         );
         file = await download.text();
         blob = new Blob([file], { type: items[filePath].mime });
@@ -223,7 +223,7 @@ export const setFilesFilen = (uuid) => async (dispatch, getState) => {
 
         filePath = path + '/Abschluss.csv';
         download = new Response(
-            filen.cloud().downloadFileToReadableStream(items[filePath])
+            filen.cloud().downloadFileToReadableStream(items[filePath]),
         );
         file = await download.text();
         blob = new Blob([file], { type: items[filePath].mime });
@@ -269,8 +269,8 @@ export const setFilesFilen = (uuid) => async (dispatch, getState) => {
                     </span>{' '}
                     die benötigten Dateien erstellen.
                 </div>,
-                'tree'
-            )
+                'tree',
+            ),
         );
     }
 };
@@ -285,7 +285,7 @@ const uploadRaw = (uuid) => (dispatch) => {
         ['Datum;Betrag;Art;Kategorie;Beschreibung;Bemerkung\n\r'],
         {
             type: 'text/csv',
-        }
+        },
     );
     var umsatz = new File([blob], 'Umsatz.csv', {
         type: 'text/csv',
@@ -294,7 +294,7 @@ const uploadRaw = (uuid) => (dispatch) => {
         ['Tag;Datum;Betrag;Art;Kategorie;Beschreibung;Bemerkung\n\r'],
         {
             type: 'text/csv',
-        }
+        },
     );
     var wiederkehrenderUmsatz = new File([blob], 'wiederkehrenderUmsatz.csv', {
         type: 'text/csv',
@@ -365,7 +365,7 @@ const getFile = (fileName) => (dispatch, getState) => {
                     'Art',
                     'KategorieID',
                     'Beschreibung',
-                    'Bemerkung'
+                    'Bemerkung',
                 )
                 .rename('KategorieID', 'Kategorie')
                 .toText(';');
@@ -381,7 +381,7 @@ const getFile = (fileName) => (dispatch, getState) => {
                     'Art',
                     'KategorieID',
                     'Beschreibung',
-                    'Bemerkung'
+                    'Bemerkung',
                 )
                 .rename('KategorieID', 'Kategorie')
                 .toText(';');
@@ -452,7 +452,7 @@ export const uploadFiles = () => (dispatch) => {
     dispatch(uploadFile('Kategorien'));
     dispatch(changeFile(false));
     dispatch(
-        snackbarMessage('Der aktuelle Stand wurde erfolgreich gespeichert')
+        snackbarMessage('Der aktuelle Stand wurde erfolgreich gespeichert'),
     );
 };
 
@@ -463,7 +463,7 @@ export const downloadFiles = () => (dispatch) => {
     zip.file('Umsatz.csv', dispatch(getFile('Umsatz')));
     zip.file(
         'wiederkehrenderUmsatz.csv',
-        dispatch(getFile('wiederkehrenderUmsatz'))
+        dispatch(getFile('wiederkehrenderUmsatz')),
     );
     zip.file('Umbuchung.csv', dispatch(getFile('Umbuchung')));
     zip.file('Abschluss.csv', dispatch(getFile('Abschluss')));
@@ -472,11 +472,11 @@ export const downloadFiles = () => (dispatch) => {
     zip.generateAsync({ type: 'blob' }).then((content) => {
         saveAs(
             content,
-            `haushalt_delucse__${moment().format('YYYY_MM_DD__HH_mm_ss')}.zip`
+            `haushalt_delucse__${moment().format('YYYY_MM_DD__HH_mm_ss')}.zip`,
         );
     });
     dispatch(changeFile(false));
     dispatch(
-        snackbarMessage('Der aktuelle Stand wurde erfolgreich heruntergeladen')
+        snackbarMessage('Der aktuelle Stand wurde erfolgreich heruntergeladen'),
     );
 };

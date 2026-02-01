@@ -5,7 +5,7 @@ import {
     addAbschluss,
     changeAbschluss,
     deleteAbschluss,
-} from '../actions/datafraneActions';
+} from '../actions/dataframeActions/abschlussActions';
 import { useEffect, useState } from 'react';
 import Numberfield from './Numberfield';
 import Alert from './Alert';
@@ -53,8 +53,8 @@ const AddAbschluss = ({ open, id, timestamp, konto, bargeld, onClose }) => {
                                     timestamp,
                                     konto,
                                     bargeld,
-                                }
-                            )
+                                },
+                            ),
                         );
                     }
                 } else {
@@ -62,8 +62,8 @@ const AddAbschluss = ({ open, id, timestamp, konto, bargeld, onClose }) => {
                         addAbschluss(
                             calcTimestamp, // ? newTimestamp : new Date(),
                             newKonto,
-                            newBargeld
-                        )
+                            newBargeld,
+                        ),
                     );
                 }
                 close();
@@ -73,16 +73,16 @@ const AddAbschluss = ({ open, id, timestamp, konto, bargeld, onClose }) => {
                         `${
                             kontoError ? 'Konto: ' : 'Bargeld: '
                         }Ungültige Zahl bzw. arithmetischer Ausdruck.`,
-                        'abschlussKontoBargeld'
-                    )
+                        'abschlussKontoBargeld',
+                    ),
                 );
             }
         } else {
             dispatch(
                 alertErrorMessage(
                     'Die Angabe des Kontostandes und des Bargeldbestandes sind verpflichtend.',
-                    'abschlussBetrag'
-                )
+                    'abschlussBetrag',
+                ),
             );
         }
     };
@@ -127,7 +127,7 @@ const AddAbschluss = ({ open, id, timestamp, konto, bargeld, onClose }) => {
                             value={newTimestamp}
                             onChange={(newValue) =>
                                 setNewTimestamp(
-                                    newValue.startOf('day').valueOf()
+                                    newValue.startOf('day').valueOf(),
                                 )
                             }
                             toolbarFormat={'DD. MMMM'}

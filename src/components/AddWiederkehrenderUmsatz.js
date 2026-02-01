@@ -5,7 +5,7 @@ import {
     addWiederkehrenderUmsatz,
     changeWiederkehrenderUmsatz,
     deleteWiederkehrenderUmsatz,
-} from '../actions/datafraneActions';
+} from '../actions/dataframeActions/wiederkehrenderUmsatz';
 import { useEffect, useState } from 'react';
 import Textfield from './Textfield';
 import Numberfield from './Numberfield';
@@ -27,10 +27,10 @@ const AddWiederkehrenderUmsatz = ({
     onClose,
 }) => {
     const errorType = useSelector((state) =>
-        state.message.error ? state.message.type : ''
+        state.message.error ? state.message.type : '',
     );
     const kategorien = useSelector(
-        (state) => state.dataframe.original.kategorien
+        (state) => state.dataframe.original.kategorien,
     )
         ?.filter((row) => row.get('KategorieID') > 2)
         .toCollection();
@@ -55,36 +55,36 @@ const AddWiederkehrenderUmsatz = ({
             dispatch(
                 alertErrorMessage(
                     'Der Tag muss mindestens 1 und darf nicht größer 31 sein (ganzzahlig).',
-                    'wiederkehrenderUmsatzTag'
-                )
+                    'wiederkehrenderUmsatzTag',
+                ),
             );
         } else if (newBetrag === undefined || newBetrag === '') {
             dispatch(
                 alertErrorMessage(
                     'Die Angabe des Betrages ist verpflichtend.',
-                    'wiederkehrenderUmsatzBetrag'
-                )
+                    'wiederkehrenderUmsatzBetrag',
+                ),
             );
         } else if (betragError) {
             dispatch(
                 alertErrorMessage(
                     'Betrag: Ungültige Zahl bzw. arithmetischer Ausdruck.',
-                    'wiederkehrenderUmsatzBetrag'
-                )
+                    'wiederkehrenderUmsatzBetrag',
+                ),
             );
         } else if (newBetrag === 0) {
             dispatch(
                 alertErrorMessage(
                     'Der Betrag darf nicht 0,00 € betragen.',
-                    'wiederkehrenderUmsatzBetrag'
-                )
+                    'wiederkehrenderUmsatzBetrag',
+                ),
             );
         } else if (!newKategorie?.KategorieID) {
             dispatch(
                 alertErrorMessage(
                     'Es muss eine Kategorie ausgewählt werden.',
-                    'wiederkehrenderUmsatzKategorie'
-                )
+                    'wiederkehrenderUmsatzKategorie',
+                ),
             );
         } else {
             if (id) {
@@ -114,8 +114,8 @@ const AddWiederkehrenderUmsatz = ({
                                 kategorie,
                                 beschreibung,
                                 bemerkung,
-                            }
-                        )
+                            },
+                        ),
                     );
                 }
             } else {
@@ -126,8 +126,8 @@ const AddWiederkehrenderUmsatz = ({
                         newBetrag,
                         newKategorie.KategorieID,
                         newBeschreibung,
-                        newBemerkung
-                    )
+                        newBemerkung,
+                    ),
                 );
             }
             close();
@@ -156,7 +156,7 @@ const AddWiederkehrenderUmsatz = ({
         setNewBetrag(betrag);
         setNewKategorie(
             kategorien &&
-                kategorien.filter((k) => k.KategorieID === kategorie)[0]
+                kategorien.filter((k) => k.KategorieID === kategorie)[0],
         );
         setNewBeschreibung(beschreibung);
         setNewBemerkung(bemerkung);
@@ -376,7 +376,7 @@ const AddWiederkehrenderUmsatz = ({
                                 <Button
                                     onClick={() => {
                                         dispatch(
-                                            deleteWiederkehrenderUmsatz(id)
+                                            deleteWiederkehrenderUmsatz(id),
                                         );
                                         onClose();
                                         setDeleteOpen(false);
