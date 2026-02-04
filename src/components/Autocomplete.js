@@ -161,6 +161,7 @@ function Autocomplete({ value = '', ...props }) {
                 '.MuiTouchRipple-root': {
                     display: 'none',
                 },
+                ...props.style,
             }}
             componentsProps={{
                 paper: {
@@ -180,7 +181,7 @@ function Autocomplete({ value = '', ...props }) {
             PopperComponent={({ style, ...props }) => (
                 <Popper
                     {...props}
-                    style={{
+                    sx={{
                         ...style,
                         zIndex: 99999,
                     }}
@@ -193,7 +194,6 @@ function Autocomplete({ value = '', ...props }) {
             openText="öffnen"
             noOptionsText="keine Ergebnisse"
             loadingText="lädt ..."
-            style={props.style}
             multiple={props.multiple}
             disableCloseOnSelect={props.multiple}
             limitTags={props.multiple ? 1 : -1}
@@ -216,6 +216,7 @@ function Autocomplete({ value = '', ...props }) {
             //     })
             // }
             disableClearable={props.select}
+            disabled={props.disabled}
         />
     );
 }

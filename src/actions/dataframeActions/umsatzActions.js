@@ -15,6 +15,7 @@ export const initUmsatz = async (file, abschluss, umbuchung, kategorien) => {
             row.get('Datum') !== undefined &&
             row.get('Betrag') !== undefined &&
             row.get('Art') !== undefined &&
+            row.get('Typ') !== undefined &&
             row.get('Kategorie') !== undefined &&
             row.get('Beschreibung') !== undefined &&
             row.get('Bemerkung') !== undefined,
@@ -56,6 +57,24 @@ export const initUmsatz = async (file, abschluss, umbuchung, kategorien) => {
         moment(row.get('Zeitstempel')).year(),
     );
     umsatz = umsatz.withColumn('ID', (row, index) => index + 1);
+    umsatz = umsatz.restructure([
+        'ID',
+        'Datum',
+        'Zeitstempel',
+        'Monat',
+        'Quartal',
+        'Jahr',
+        'Betrag',
+        'Art',
+        'Umsatz',
+        'Typ',
+        'KategorieID',
+        'Kategorie',
+        'Oberkategorie',
+        'Unterkategorie',
+        'Beschreibung',
+        'Bemerkung',
+    ]);
     return umsatz;
 };
 
@@ -63,11 +82,11 @@ const setUmsatzOhneKategorie = (umsatz) => {
     if (umsatz.countValue(undefined, 'Kategorie') > 0) {
         var umsatzOhneKategorie = umsatz.chain(
             (row) => row.get('Kategorie') === undefined,
+            (row) => row.set('KategorieID', '2'),
+            (row) => row.set('Kategorie', 'nicht zugeordnet'),
             (row) => row.set('Oberkategorie', 'nicht zugeordnet'),
             (row) => row.set('Unterkategorie', ''),
-            (row) => row.set('Kategorie', 'nicht zugeordnet'),
             (row) => row.set('Typ', 'variabel'),
-            (row) => row.set('KategorieID', '2'),
         );
         umsatz = umsatz
             .filter((row) => row.get('Kategorie') !== undefined)
@@ -80,11 +99,17 @@ const calcNichtGelistet = (umsatz, abschluss, umbuchung) => {
     if (umsatz.count() > 0) {
         var startDate = umsatz.stat.min('Zeitstempel');
         var endDate = umsatz.stat.max('Zeitstempel');
-        console.log(
-            moment(startDate).format('DD.MM.YYYY'),
-            moment(endDate).format('DD.MM.YYYY'),
-        );
-
+        umsatz = umsatz.restructure([
+            'Datum',
+            'Zeitstempel',
+            'Betrag',
+            'Art',
+            'Umsatz',
+            'Typ',
+            'KategorieID',
+            'Beschreibung',
+            'Bemerkung',
+        ]);
         while (startDate <= endDate) {
             const { datum, betrag } = nichtGelistet(
                 startDate,
@@ -92,16 +117,16 @@ const calcNichtGelistet = (umsatz, abschluss, umbuchung) => {
                 umbuchung,
                 umsatz,
             );
-            console.log(datum.format('DD.MM.YYYY'), betrag);
             umsatz = umsatz.push([
                 datum.format('DD.MM.YYYY'),
+                datum.valueOf(),
                 betrag,
                 'Ausgabe',
+                betrag * -1,
+                'variabel',
                 '1',
                 '',
                 '',
-                datum.valueOf(),
-                betrag * -1,
             ]);
             startDate = moment(startDate).startOf('month').add(1, 'month');
         }
@@ -110,7 +135,7 @@ const calcNichtGelistet = (umsatz, abschluss, umbuchung) => {
 };
 
 export const addUmsatz =
-    (timestamp, art, betrag, kategorie, beschreibung, bemerkung) =>
+    (timestamp, betrag, art, typ, kategorie, beschreibung, bemerkung) =>
     (dispatch, getState) => {
         var { umsatz, kategorien } = getState().dataframe.original;
         kategorie = kategorien.find(
@@ -118,22 +143,22 @@ export const addUmsatz =
         );
         var date = moment(timestamp);
         umsatz = umsatz.push([
+            umsatz.count() + 1,
             date.format('DD.MM.YYYY'),
-            betrag,
-            art,
-            kategorie.get('KategorieID'),
-            beschreibung,
-            bemerkung,
             timestamp,
-            art !== 'Einnahme' ? betrag * -1 : betrag,
-            kategorie.get('Oberkategorie'),
-            kategorie.get('Unterkategorie'),
-            kategorie.get('Typ'),
-            kategorie.get('Kategorie'),
             date.month() + 1,
             date.quarter(),
             date.year(),
-            umsatz.count() + 1,
+            betrag,
+            art,
+            art !== 'Einnahme' ? betrag * -1 : betrag,
+            typ,
+            kategorie.get('KategorieID'),
+            kategorie.get('Kategorie'),
+            kategorie.get('Oberkategorie'),
+            kategorie.get('Unterkategorie'),
+            beschreibung,
+            bemerkung,
         ]);
         dispatch({
             type: DATAFRAME_ORIGINAL_UMSATZ,
@@ -152,21 +177,22 @@ export const changeUmsatz = (id, update, old) => (dispatch, getState) => {
     umsatz = umsatz.setRow(id - 1, (row) => {
         row = row.set('Betrag', update.betrag);
         row = row.set('Art', update.art);
-        row = row.set('KategorieID', update.kategorie);
-        row = row.set('Beschreibung', update.beschreibung);
-        row = row.set('Bemerkung', update.bemerkung);
         row = row.set(
             'Umsatz',
             update.art !== 'Einnahme' ? update.betrag * -1 : update.betrag,
         );
+        row = row.set('Typ', update.typ);
+        row = row.set('KategorieID', update.kategorie);
+        row = row.set('Beschreibung', update.beschreibung);
+        row = row.set('Bemerkung', update.bemerkung);
+
         if (update.kategorie !== old.kategorie) {
             var kategorie = kategorien.find(
                 (row) => row.get('KategorieID') === `${update.kategorie}`,
             );
+            row = row.set('Kategorie', kategorie.get('Kategorie'));
             row = row.set('Oberkategorie', kategorie.get('Oberkategorie'));
             row = row.set('Unterkategorie', kategorie.get('Unterkategorie'));
-            row = row.set('Typ', kategorie.get('Typ'));
-            row = row.set('Kategorie', kategorie.get('Kategorie'));
         }
         if (isNewTimestamp) {
             row = row.set('Datum', newDate.format('DD.MM.YYYY'));
@@ -205,20 +231,12 @@ export const deleteUmsatz = (id, timestamp) => (dispatch, getState) => {
 };
 
 export const nichtGelistet = (timestamp, abschluss, umbuchung, umsatz) => {
-    console.log('');
     var date = moment(timestamp);
     var letzterMonatsTag = date.clone().endOf('month');
-    console.log('letzterMonatsTag', letzterMonatsTag.format('DD.MM.YYYY'));
     var monatDateRaw = date.clone().startOf('month');
     var monatDate = monatDateRaw.valueOf();
-    console.log('monatDate', moment(monatDate).format('DD.MM.YYYY'));
     var naechsterMonatDate = monatDateRaw.clone().add(1, 'month').valueOf();
-    console.log(
-        'naechsterMonatDate',
-        moment(naechsterMonatDate).format('DD.MM.YYYY'),
-    );
     var vormonatDate = monatDateRaw.clone().add(-1, 'month').valueOf();
-    console.log('vormonatDate', moment(vormonatDate).format('DD.MM.YYYY'));
     var abschlussMonat = abschluss
         .slice()
         .filter(
@@ -256,7 +274,6 @@ export const nichtGelistet = (timestamp, abschluss, umbuchung, umsatz) => {
                           100,
                   ) / 100
                 : 0;
-        console.log('geldbestand', geldbestand);
         var umbuchungSum =
             Math.round(
                 umbuchung
@@ -268,7 +285,6 @@ export const nichtGelistet = (timestamp, abschluss, umbuchung, umsatz) => {
                     )
                     .stat.sum('Betrag') * 100,
             ) / 100;
-        console.log('umbuchungSum', umbuchungSum);
         var dokumentierterUmsatz =
             Math.round(
                 umsatz
@@ -280,7 +296,6 @@ export const nichtGelistet = (timestamp, abschluss, umbuchung, umsatz) => {
                     )
                     .stat.sum('Umsatz') * 100,
             ) / 100;
-        console.log('dokumentierterUmsatz', dokumentierterUmsatz);
         betrag =
             Math.round(
                 (geldbestandVormonat +
@@ -328,22 +343,22 @@ export const updateNichtGelistet =
                 umsatz.filter((row) => row.get('KategorieID') !== '1'),
             );
             umsatz = umsatz.push([
+                umsatz.count() + 1,
                 letzterMonatsTag.format('DD.MM.YYYY'),
-                betrag,
-                'Ausgabe',
-                '1',
-                '',
-                '',
                 letzterMonatsTag.valueOf(),
-                betrag * -1,
-                'nicht gelistet',
-                'nicht gelistet',
-                'variabel',
-                'nicht gelistet',
                 letzterMonatsTag.month() + 1,
                 letzterMonatsTag.quarter(),
                 letzterMonatsTag.year(),
-                umsatz.count() + 1,
+                betrag,
+                'Ausgabe',
+                betrag * -1,
+                'variabel',
+                '1',
+                'nicht gelistet',
+                'nicht gelistet',
+                'nicht gelistet',
+                '',
+                '',
             ]);
             dispatch({
                 type: DATAFRAME_ORIGINAL_UMSATZ,

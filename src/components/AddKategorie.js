@@ -10,16 +10,8 @@ import { useEffect, useState } from 'react';
 import Textfield from './Textfield';
 import Alert from './Alert';
 import { alertErrorMessage, resetMessage } from '../actions/messageActions';
-import Autocomplete from './Autocomplete';
 
-const AddKategorie = ({
-    open,
-    id,
-    oberkategorie,
-    unterkategorie,
-    typ,
-    onClose,
-}) => {
+const AddKategorie = ({ open, id, oberkategorie, unterkategorie, onClose }) => {
     const dispatch = useDispatch();
     const error = useSelector((state) => state.message.error);
     const kategorien = useSelector(
@@ -31,15 +23,9 @@ const AddKategorie = ({
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [newOberkategorie, setNewOberkategorie] = useState('');
     const [newUnterkategorie, setNewUnterkategorie] = useState('');
-    const [newTyp, setNewTyp] = useState('');
 
     const submit = () => {
-        if (
-            newOberkategorie &&
-            newOberkategorie.trim().length > 0 &&
-            newTyp &&
-            newTyp.trim().length > 0
-        ) {
+        if (newOberkategorie && newOberkategorie.trim().length > 0) {
             const newKategorie = `${newOberkategorie}${
                 newUnterkategorie && ` | ${newUnterkategorie}`
             }`;
@@ -47,26 +33,18 @@ const AddKategorie = ({
                 if (id) {
                     if (
                         newOberkategorie !== oberkategorie ||
-                        newUnterkategorie !== unterkategorie ||
-                        newTyp !== typ
+                        newUnterkategorie !== unterkategorie
                     ) {
                         dispatch(
                             changeKategorie(
                                 id,
                                 newOberkategorie,
                                 newUnterkategorie,
-                                newTyp,
                             ),
                         );
                     }
                 } else {
-                    dispatch(
-                        addKategorie(
-                            newOberkategorie,
-                            newUnterkategorie,
-                            newTyp,
-                        ),
-                    );
+                    dispatch(addKategorie(newOberkategorie, newUnterkategorie));
                 }
                 close();
             } else {
@@ -80,7 +58,7 @@ const AddKategorie = ({
         } else {
             dispatch(
                 alertErrorMessage(
-                    'Die Angabe einer Oberkategorie und Typs sind verpflichtend.',
+                    'Die Angabe einer Oberkategorie ist verpflichtend.',
                     'kategorie',
                 ),
             );
@@ -91,13 +69,11 @@ const AddKategorie = ({
         onClose();
         setNewOberkategorie('');
         setNewUnterkategorie('');
-        setNewTyp('');
     };
 
     useEffect(() => {
         setNewOberkategorie(oberkategorie);
         setNewUnterkategorie(unterkategorie);
-        setNewTyp(typ);
         // eslint-disable-next-line
     }, [id]);
 
@@ -111,7 +87,7 @@ const AddKategorie = ({
             }
         };
         // eslint-disable-next-line
-    }, [newOberkategorie, newTyp]);
+    }, [newOberkategorie]);
 
     return (
         <>
@@ -139,21 +115,10 @@ const AddKategorie = ({
                         />
                         <Textfield
                             placeholder={'Unterkategorie'}
-                            style={{ marginBottom: '20px' }}
                             value={newUnterkategorie}
                             onChange={(e) => {
                                 setNewUnterkategorie(e.target.value);
                             }}
-                        />
-                        <Autocomplete
-                            value={newTyp}
-                            placeholder={'Typ'}
-                            options={['fix', 'variabel']}
-                            fullWidth
-                            onChange={(value) => {
-                                setNewTyp(value);
-                            }}
-                            freeSolo
                         />
                     </div>
                 }

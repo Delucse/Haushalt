@@ -11,7 +11,7 @@ import Textfield from './Textfield';
 import Numberfield from './Numberfield';
 import Alert from './Alert';
 import Datefield from './Datefield';
-import { FormControlLabel, Radio, RadioGroup, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
 import { alertErrorMessage, resetMessage } from '../actions/messageActions';
 import Autocomplete from './Autocomplete';
 import { Link } from 'react-router-dom';
@@ -23,6 +23,7 @@ const AddUmsatz = ({
     timestamp,
     art,
     betrag,
+    typ,
     kategorie,
     beschreibung,
     bemerkung,
@@ -38,6 +39,7 @@ const AddUmsatz = ({
     const [newArt, setNewArt] = useState(art);
     const [newBetrag, setNewBetrag] = useState(betrag);
     const [betragError, setBetragError] = useState(false);
+    const [newTyp, setNewTyp] = useState(typ);
     const [newKategorie, setNewKategorie] = useState(kategorie);
     const [newBeschreibung, setNewBeschreibung] = useState(beschreibung);
     const [newBemerkung, setNewBemerkung] = useState(bemerkung);
@@ -81,6 +83,7 @@ const AddUmsatz = ({
                     calcTimestamp !== timestamp ||
                     newArt !== art ||
                     newBetrag !== betrag ||
+                    newTyp !== typ ||
                     newKategorie.KategorieID !== kategorie ||
                     newBeschreibung !== beschreibung ||
                     newBemerkung !== bemerkung
@@ -92,6 +95,7 @@ const AddUmsatz = ({
                                 timestamp: calcTimestamp,
                                 art: newArt,
                                 betrag: newBetrag,
+                                typ: newTyp,
                                 kategorie: newKategorie.KategorieID,
                                 beschreibung: newBeschreibung,
                                 bemerkung: newBemerkung,
@@ -100,6 +104,7 @@ const AddUmsatz = ({
                                 timestamp,
                                 art,
                                 betrag,
+                                typ,
                                 kategorie,
                                 beschreibung,
                                 bemerkung,
@@ -111,8 +116,9 @@ const AddUmsatz = ({
                 dispatch(
                     addUmsatz(
                         calcTimestamp,
-                        newArt,
                         newBetrag,
+                        newArt,
+                        newTyp,
                         newKategorie.KategorieID,
                         newBeschreibung,
                         newBemerkung,
@@ -133,6 +139,7 @@ const AddUmsatz = ({
         setNewTimestamp();
         setNewArt('Ausgabe');
         setNewBetrag('');
+        setNewTyp('variabel');
         setNewKategorie('');
         setNewBeschreibung('');
         setNewBemerkung('');
@@ -143,6 +150,7 @@ const AddUmsatz = ({
         setNewTimestamp(timestamp);
         setNewArt(art);
         setNewBetrag(betrag);
+        setNewTyp(typ);
         setNewKategorie(
             kategorien &&
                 kategorien.filter((k) => k.KategorieID === kategorie)[0],
@@ -168,34 +176,30 @@ const AddUmsatz = ({
                                     type={['umsatzBetrag', 'umsatzKategorie']}
                                     style={{ marginBottom: '20px' }}
                                 />
-                                <RadioGroup
-                                    value={newArt}
-                                    onChange={(e) => setNewArt(e.target.value)}
-                                    row
-                                >
-                                    <FormControlLabel
-                                        value="Einnahme"
-                                        control={<Radio />}
-                                        sx={{ marginRight: 0 }}
-                                        label="Einnahme"
-                                    />
-                                    <FormControlLabel
-                                        value="Ausgabe"
-                                        control={
-                                            <Radio
-                                                sx={{ marginLeft: '20px' }}
-                                            />
-                                        }
-                                        sx={{ marginRight: 0 }}
-                                        label="Ausgabe"
-                                    />
-                                </RadioGroup>
                                 <Stack
                                     direction={'row'}
                                     spacing={'20px'}
                                     sx={{
                                         display: 'flex',
-                                        marginTop: '10px',
+                                    }}
+                                >
+                                    <Autocomplete
+                                        select
+                                        value={newArt}
+                                        placeholder={'Art'}
+                                        options={['Einnahme', 'Ausgabe']}
+                                        fullWidth
+                                        onChange={(value) => {
+                                            setNewArt(value);
+                                        }}
+                                    />
+                                </Stack>
+                                <Stack
+                                    direction={'row'}
+                                    spacing={'20px'}
+                                    sx={{
+                                        display: 'flex',
+                                        marginTop: '20px',
                                     }}
                                 >
                                     <Datefield
@@ -225,22 +229,41 @@ const AddUmsatz = ({
                                         end="€"
                                     />
                                 </Stack>
-                                <Autocomplete
-                                    value={newKategorie}
-                                    placeholder={'Kategorie'}
-                                    options={kategorien}
-                                    optionLabel={'Kategorie'}
-                                    fullWidth
-                                    onChange={(value) => {
-                                        setNewKategorie(value);
+                                <Stack
+                                    direction={{ xs: 'column', sm: 'row' }}
+                                    spacing={'20px'}
+                                    sx={{
+                                        display: 'flex',
+                                        marginBottom: '20px',
                                     }}
-                                    style={{ marginBottom: '20px' }}
-                                />
-                                {/* <Textfield
-                                style={{ marginBottom: '20px' }}
-                                placeholder={'Kategorie'}
-                                value={newKategorie}
-                            /> */}
+                                >
+                                    <Autocomplete
+                                        select
+                                        value={newTyp}
+                                        placeholder={'Typ'}
+                                        options={['fix', 'variabel']}
+                                        fullWidth
+                                        onChange={(value) => {
+                                            setNewTyp(value);
+                                        }}
+                                        style={{
+                                            width: {
+                                                xs: '100%',
+                                                sm: '40%',
+                                            },
+                                        }}
+                                    />
+                                    <Autocomplete
+                                        value={newKategorie}
+                                        placeholder={'Kategorie'}
+                                        options={kategorien}
+                                        optionLabel={'Kategorie'}
+                                        fullWidth
+                                        onChange={(value) => {
+                                            setNewKategorie(value);
+                                        }}
+                                    />
+                                </Stack>
                                 <Textfield
                                     style={{ marginBottom: '20px' }}
                                     placeholder={'Beschreibung'}

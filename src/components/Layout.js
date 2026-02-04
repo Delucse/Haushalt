@@ -37,7 +37,7 @@ const Nav = () => {
 
     const simple = useSelector((state) => state.settings.simple);
     const isAuthenticated = useSelector(
-        (state) => state.auth.token || state.auth.type === 'locale'
+        (state) => state.auth.token || state.auth.type === 'locale',
     );
 
     const [umsatzOpen, setUmsatzOpen] = useState(false);
@@ -104,6 +104,7 @@ const Nav = () => {
                 onClose={() => setUmsatzOpen(false)}
                 art={'Ausgabe'}
                 betrag={''}
+                typ={'variabel'}
                 kategorie={''}
                 beschreibung={''}
                 bemerkung={''}
@@ -226,7 +227,7 @@ const Nav = () => {
 const Tab = ({ value }) => {
     const navigate = useNavigate();
     const isAuthenticated = useSelector(
-        (state) => state.auth.token || state.auth.type === 'locale'
+        (state) => state.auth.token || state.auth.type === 'locale',
     );
 
     return (
@@ -335,10 +336,10 @@ const Layout = () => {
                             color: (theme) =>
                                 theme.palette.mode === 'light'
                                     ? theme.palette.getContrastText(
-                                          theme.palette.primary.main
+                                          theme.palette.primary.main,
                                       )
                                     : theme.palette.getContrastText(
-                                          theme.palette.primary.light
+                                          theme.palette.primary.light,
                                       ),
                         }}
                     >
@@ -388,10 +389,10 @@ const Layout = () => {
                             color: (theme) =>
                                 theme.palette.mode === 'light'
                                     ? theme.palette.getContrastText(
-                                          theme.palette.primary.main
+                                          theme.palette.primary.main,
                                       )
                                     : theme.palette.getContrastText(
-                                          theme.palette.primary.light
+                                          theme.palette.primary.light,
                                       ),
                         }}
                     >

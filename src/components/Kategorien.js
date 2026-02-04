@@ -13,7 +13,7 @@ const Kategorien = () => {
     const [data, setData] = useState({});
     const [open, setOpen] = useState(false);
     const kategorien = useSelector(
-        (state) => state.dataframe.original.kategorien
+        (state) => state.dataframe.original.kategorien,
     )
         ?.filter((row) => row.get('KategorieID') > 2)
         // .sortBy('KategorieLow')
@@ -37,20 +37,15 @@ const Kategorien = () => {
                 id={data.id}
                 oberkategorie={data.oberkategorie}
                 unterkategorie={data.unterkategorie}
-                typ={data.typ}
             />
             {kategorien.length > 0 ? (
                 <Table
                     type="kategorie"
                     orderBy={'Kategorie'}
-                    head={[
-                        { value: '' },
-                        { value: 'Kategorie', sort: true },
-                        { value: 'Typ', sort: true },
-                    ]}
+                    head={[{ value: '' }, { value: 'Kategorie', sort: true }]}
                     body={kategorien.map((row) => {
                         var unterkategorie = row['Kategorie'].startsWith(
-                            `${row['Oberkategorie']} | `
+                            `${row['Oberkategorie']} | `,
                         )
                             ? row['Unterkategorie']
                             : '';
@@ -65,7 +60,6 @@ const Kategorien = () => {
                                                 oberkategorie:
                                                     row['Oberkategorie'],
                                                 unterkategorie: unterkategorie,
-                                                typ: row['Typ'],
                                             });
                                             setOpen(true);
                                         }}
@@ -81,9 +75,6 @@ const Kategorien = () => {
                             },
                             {
                                 value: row['Kategorie'],
-                            },
-                            {
-                                value: row['Typ'],
                             },
                         ];
                     })}

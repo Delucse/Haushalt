@@ -13,7 +13,7 @@ const WiederkehrenderUmsatz = () => {
     const [data, setData] = useState({});
     const [open, setOpen] = useState(false);
     const wiederkehrenderUmsatz = useSelector(
-        (state) => state.dataframe.original.wiederkehrenderUmsatz
+        (state) => state.dataframe.original.wiederkehrenderUmsatz,
     )
         // ?.sortBy('Tag')
         .toCollection();
@@ -48,11 +48,9 @@ const WiederkehrenderUmsatz = () => {
                     head={[
                         { value: '' },
                         { value: 'Tag', sort: true },
-                        { value: 'Datum', sort: true },
                         { value: 'Betrag', sort: true },
                         { value: 'Art', sort: true },
                         { value: 'Kategorie', sort: true },
-                        { value: 'Typ', sort: true },
                         { value: 'Beschreibung', sort: true },
                         { value: 'Bemerkung', sort: true },
                     ]}
@@ -88,10 +86,6 @@ const WiederkehrenderUmsatz = () => {
                             sortValue: Number(row['Tag']),
                         },
                         {
-                            value: row['Datum'],
-                            sortValue: row['Zeitstempel'],
-                        },
-                        {
                             value: `${row['Betrag'].toLocaleString('de-DE', {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
@@ -104,9 +98,6 @@ const WiederkehrenderUmsatz = () => {
                         },
                         {
                             value: row['Kategorie'],
-                        },
-                        {
-                            value: row['Typ'],
                         },
                         {
                             value: row['Beschreibung'],

@@ -109,6 +109,7 @@ const UmsatzTable = () => {
                                                                 betrag: row[
                                                                     'Betrag'
                                                                 ],
+                                                                typ: row['Typ'],
                                                                 kategorie:
                                                                     row[
                                                                         'KategorieID'
@@ -177,6 +178,7 @@ const UmsatzTable = () => {
                                     timestamp={data.timestamp}
                                     art={data.art}
                                     betrag={data.betrag}
+                                    typ={data.typ}
                                     kategorie={data.kategorie}
                                     beschreibung={data.beschreibung}
                                     bemerkung={data.bemerkung}

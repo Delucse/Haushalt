@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import Textfield from './Textfield';
 import Numberfield from './Numberfield';
 import Alert from './Alert';
-import { FormControlLabel, Radio, RadioGroup, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
 import { alertErrorMessage, resetMessage } from '../actions/messageActions';
 import Autocomplete from './Autocomplete';
 import { Link } from 'react-router-dom';
@@ -221,34 +221,21 @@ const AddWiederkehrenderUmsatz = ({
                                     style={{ marginBottom: '20px' }}
                                 />
 
-                                <RadioGroup
+                                <Autocomplete
                                     value={newArt}
-                                    onChange={(e) => setNewArt(e.target.value)}
-                                    row
-                                >
-                                    <FormControlLabel
-                                        value="Einnahme"
-                                        control={<Radio />}
-                                        sx={{ marginRight: 0 }}
-                                        label="Einnahme"
-                                    />
-                                    <FormControlLabel
-                                        value="Ausgabe"
-                                        control={
-                                            <Radio
-                                                sx={{ marginLeft: '20px' }}
-                                            />
-                                        }
-                                        sx={{ marginRight: 0 }}
-                                        label="Ausgabe"
-                                    />
-                                </RadioGroup>
+                                    placeholder={'Art'}
+                                    options={['Einnahme', 'Ausgabe']}
+                                    fullWidth
+                                    onChange={(value) => {
+                                        setNewArt(value);
+                                    }}
+                                />
                                 <Stack
                                     direction={'row'}
                                     spacing={'20px'}
                                     sx={{
                                         display: 'flex',
-                                        marginTop: '10px',
+                                        marginTop: '20px',
                                     }}
                                 >
                                     <Textfield
@@ -274,17 +261,39 @@ const AddWiederkehrenderUmsatz = ({
                                         end="€"
                                     />
                                 </Stack>
-                                <Autocomplete
-                                    value={newKategorie}
-                                    placeholder={'Kategorie'}
-                                    options={kategorien}
-                                    optionLabel={'Kategorie'}
-                                    fullWidth
-                                    onChange={(value) => {
-                                        setNewKategorie(value);
+                                <Stack
+                                    direction={{ xs: 'column', sm: 'row' }}
+                                    spacing={'20px'}
+                                    sx={{
+                                        display: 'flex',
+                                        marginBottom: '20px',
                                     }}
-                                    style={{ marginBottom: '20px' }}
-                                />
+                                >
+                                    <Autocomplete
+                                        select
+                                        value={'fix'}
+                                        placeholder={'Typ'}
+                                        options={['fix', 'variabel']}
+                                        disabled
+                                        fullWidth
+                                        style={{
+                                            width: {
+                                                xs: '100%',
+                                                sm: '40%',
+                                            },
+                                        }}
+                                    />
+                                    <Autocomplete
+                                        value={newKategorie}
+                                        placeholder={'Kategorie'}
+                                        options={kategorien}
+                                        optionLabel={'Kategorie'}
+                                        fullWidth
+                                        onChange={(value) => {
+                                            setNewKategorie(value);
+                                        }}
+                                    />
+                                </Stack>
                                 <Textfield
                                     style={{ marginBottom: '20px' }}
                                     placeholder={'Beschreibung'}

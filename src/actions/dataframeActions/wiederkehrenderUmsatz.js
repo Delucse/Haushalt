@@ -67,6 +67,21 @@ export const initWiederkehrenderUmsatz = async (file, kategorien) => {
         'ID',
         (row, index) => index + 1,
     );
+    wiederkehrenderUmsatz = wiederkehrenderUmsatz.restructure([
+        'ID',
+        'Datum',
+        'Zeitstempel',
+        'Tag',
+        'Betrag',
+        'Art',
+        'Umsatz',
+        'KategorieID',
+        'Kategorie',
+        'Oberkategorie',
+        'Unterkategorie',
+        'Beschreibung',
+        'Bemerkung',
+    ]);
     return wiederkehrenderUmsatz;
 };
 
@@ -79,20 +94,19 @@ export const addWiederkehrenderUmsatz =
             (row) => row.get('KategorieID') === `${kategorie}`,
         );
         wiederkehrenderUmsatz = wiederkehrenderUmsatz.push([
-            tag,
+            wiederkehrenderUmsatz.count() + 1,
             '',
+            '',
+            tag,
             betrag,
             art,
-            kategorie.get('KategorieID'),
-            beschreibung,
-            bemerkung,
-            '',
             art !== 'Einnahme' ? betrag * -1 : betrag,
+            kategorie.get('KategorieID'),
+            kategorie.get('Kategorie'),
             kategorie.get('Oberkategorie'),
             kategorie.get('Unterkategorie'),
-            kategorie.get('Typ'),
-            kategorie.get('Kategorie'),
-            wiederkehrenderUmsatz.count() + 1,
+            beschreibung,
+            bemerkung,
         ]);
 
         dispatch({
@@ -115,30 +129,30 @@ export const changeWiederkehrenderUmsatz =
         wiederkehrenderUmsatz = wiederkehrenderUmsatz.setRow(id - 1, (row) => {
             if (update.Tag !== old.Tag) {
                 if (row.get('Datum') !== '') newDate = true;
-                row = row.set('Tag', update.tag);
                 row = row.set('Datum', '');
                 row = row.set('Zeitstempel', '');
+                row = row.set('Tag', update.tag);
             }
             row = row.set('Betrag', update.betrag);
             row = row.set('Art', update.art);
-            row = row.set('KategorieID', update.kategorie);
-            row = row.set('Beschreibung', update.beschreibung);
-            row = row.set('Bemerkung', update.bemerkung);
             row = row.set(
                 'Umsatz',
                 update.art !== 'Einnahme' ? update.betrag * -1 : update.betrag,
             );
+            row = row.set('KategorieID', update.kategorie);
+            row = row.set('Beschreibung', update.beschreibung);
+            row = row.set('Bemerkung', update.bemerkung);
+
             if (update.kategorie !== old.kategorie) {
                 var kategorie = kategorien.find(
                     (row) => row.get('KategorieID') === `${update.kategorie}`,
                 );
+                row = row.set('Kategorie', kategorie.get('Kategorie'));
                 row = row.set('Oberkategorie', kategorie.get('Oberkategorie'));
                 row = row.set(
                     'Unterkategorie',
                     kategorie.get('Unterkategorie'),
                 );
-                row = row.set('Typ', kategorie.get('Typ'));
-                row = row.set('Kategorie', kategorie.get('Kategorie'));
             }
             return row;
         });
@@ -306,24 +320,24 @@ export const addMonatsposten = (jahr, monat) => (dispatch, getState) => {
                 },
             );
             umsatz = umsatz.push([
+                umsatz.count() + 1,
                 datum.format('DD.MM.YYYY'),
-                row.get('Betrag'),
-                row.get('Art'),
-                row.get('KategorieID'),
-                row.get('Beschreibung'),
-                row.get('Bemerkung'),
                 datum.valueOf(),
-                row.get('Art') !== 'Einnahme'
-                    ? row.get('Betrag') * -1
-                    : row.get('Betrag'),
-                row.get('Oberkategorie'),
-                row.get('Unterkategorie'),
-                row.get('Typ'),
-                row.get('Kategorie'),
                 datum.month() + 1,
                 datum.quarter(),
                 datum.year(),
-                umsatz.count() + 1,
+                row.get('Betrag'),
+                row.get('Art'),
+                row.get('Art') !== 'Einnahme'
+                    ? row.get('Betrag') * -1
+                    : row.get('Betrag'),
+                'fix',
+                row.get('KategorieID'),
+                row.get('Kategorie'),
+                row.get('Oberkategorie'),
+                row.get('Unterkategorie'),
+                row.get('Beschreibung'),
+                row.get('Bemerkung'),
             ]);
             index++;
         }

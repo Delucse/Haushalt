@@ -282,7 +282,7 @@ const uploadRaw = (uuid) => (dispatch) => {
     });
     dispatch(resetMessage());
     var blob = new Blob(
-        ['Datum;Betrag;Art;Kategorie;Beschreibung;Bemerkung\n\r'],
+        ['Datum;Betrag;Art;Typ;Kategorie;Beschreibung;Bemerkung\n\r'],
         {
             type: 'text/csv',
         },
@@ -305,7 +305,7 @@ const uploadRaw = (uuid) => (dispatch) => {
     var umbuchung = new File([blob], 'Umbuchung.csv', {
         type: 'text/csv',
     });
-    blob = new Blob(['ID;Oberkategorie;Unterkategorie;Typ\n\r'], {
+    blob = new Blob(['ID;Oberkategorie;Unterkategorie\n\r'], {
         type: 'text/csv',
     });
     var kategorien = new File([blob], 'Kategorien.csv', {
@@ -351,7 +351,7 @@ const getFile = (fileName) => (dispatch, getState) => {
                     }
                     return '';
                 })
-                .select('KategorieID', 'Oberkategorie', 'Unterkategorie', 'Typ')
+                .select('KategorieID', 'Oberkategorie', 'Unterkategorie')
                 .rename('KategorieID', 'ID')
                 .toText(';');
             break;
@@ -363,6 +363,7 @@ const getFile = (fileName) => (dispatch, getState) => {
                     'Datum',
                     'Betrag',
                     'Art',
+                    'Typ',
                     'KategorieID',
                     'Beschreibung',
                     'Bemerkung',
