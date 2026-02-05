@@ -262,35 +262,48 @@ const calcOstern = (jahr) => {
     return moment(datum);
 };
 
-const calcDate = (datum, monat, feiertage, trend = 0) => {
-    datum = datum.add(trend, 'day');
-    // console.log(datum.format('DD.MM.YYYY'), trend);
-    if (datum.month() + 1 !== monat) {
-        trend = -1;
-        datum = calcDate(datum, monat, feiertage, trend);
-    } else {
-        if (trend === 0) {
-            trend = 1;
-        }
-        // else {
-        //     diff = diff + 1;
-        // }
-        if (datum.weekday() > 4) {
-            datum = calcDate(datum, monat, feiertage, trend);
-        } else {
-            feiertage.forEach((tag) => {
-                // console.log(
-                //     '\n',
-                //     tag.format('DD.MM.YYYY'),
-                //     datum.format('DD.MM.YYYY')
-                // );
-                // console.log(tag.valueOf(), datum.valueOf());
-                if (tag.valueOf() === datum.valueOf()) {
-                    datum = calcDate(datum, monat, feiertage, trend);
-                }
-            });
-        }
+const isWochenende = (datum) => {
+    return datum.weekday() > 4;
+};
+
+const isFeiertag = (datum, feiertage) => {
+    return feiertage.some((f) => f.valueOf() === datum.valueOf());
+};
+
+const dateIsValid = (datum, feiertage) => {
+    return !isWochenende(datum) && !isFeiertag(datum, feiertage);
+};
+
+const calcDate = (jahr, monat, tag, feiertage) => {
+    var datum = moment([jahr, monat - 1, tag]);
+    if (!datum.isValid()) {
+        datum = moment([
+            jahr,
+            monat - 1,
+            moment([jahr, monat - 1]).daysInMonth(),
+        ]);
     }
+    // zuerst das Ursprungsdatum prüfen
+    if (dateIsValid(datum, feiertage)) {
+        return datum;
+    }
+    // vorwärts suchen
+    let forward = datum.clone().add(1, 'day');
+    while (forward.month() + 1 === monat) {
+        if (dateIsValid(forward, feiertage)) {
+            return forward;
+        }
+        forward.add(1, 'day');
+    }
+    // rückwärts suchen
+    let backward = datum.clone().subtract(1, 'day');
+    while (backward.month() + 1 === monat) {
+        if (dateIsValid(backward, feiertage)) {
+            return backward;
+        }
+        backward.subtract(1, 'day');
+    }
+    // nichts gefunden → unmöglich
     return datum;
 };
 
@@ -302,15 +315,7 @@ export const addMonatsposten = (jahr, monat) => (dispatch, getState) => {
         var index = 0;
         while (index < count) {
             const row = wiederkehrenderUmsatz.getRow(index);
-            const datum = calcDate(
-                moment({
-                    year: jahr,
-                    month: monat - 1,
-                    day: row.get('Tag'),
-                }),
-                monat,
-                feiertage,
-            );
+            const datum = calcDate(jahr, monat, row.get('Tag'), feiertage);
             wiederkehrenderUmsatz = wiederkehrenderUmsatz.setRow(
                 index,
                 (row) => {
@@ -355,10 +360,12 @@ export const addMonatsposten = (jahr, monat) => (dispatch, getState) => {
             ),
         );
         dispatch(filterDataframe());
-        dispatch(
-            snackbarMessage(
-                `Alle ${count} hinterlegten wiederkehrenden Umsätze wurden erfolgreich hinzugefügt.`,
-            ),
-        );
+        setTimeout(() => {
+            dispatch(
+                snackbarMessage(
+                    `Alle ${count} hinterlegten wiederkehrenden Umsätze wurden erfolgreich hinzugefügt.`,
+                ),
+            );
+        }, 500);
     }
 };
