@@ -10,7 +10,7 @@ import IconButton from './IconButton';
 function AbschlussTable() {
     const [data, setData] = useState({});
     const abschlussFilteredCollection = useSelector(
-        (state) => state.dataframe.filtered.abschluss
+        (state) => state.dataframe.filtered.abschluss,
     )?.toCollection();
 
     return (
@@ -37,7 +37,6 @@ function AbschlussTable() {
                                 { value: 'Datum', sort: true },
                                 { value: 'Konto', sort: true },
                                 { value: 'Bargeld', sort: true },
-                                { value: 'Monatsposten', sort: true },
                             ]}
                             body={abschlussFilteredCollection.map((row) => [
                                 {
@@ -74,7 +73,7 @@ function AbschlussTable() {
                                         {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
-                                        }
+                                        },
                                     )} €`,
                                     sortValue: row['Konto'],
                                     align: 'right',
@@ -85,19 +84,9 @@ function AbschlussTable() {
                                         {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
-                                        }
+                                        },
                                     )} €`,
                                     sortValue: row['Bargeld'],
-                                    align: 'right',
-                                },
-                                {
-                                    value: `${row[
-                                        'Monatsposten'
-                                    ].toLocaleString('de-DE', {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })} €`,
-                                    sortValue: row['Monatsposten'],
                                     align: 'right',
                                 },
                             ])}

@@ -1,4 +1,4 @@
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Button from './Button';
 import Dialog from './Dialog';
 import {
@@ -23,65 +23,85 @@ const AddAbschluss = ({ open, id, timestamp, konto, bargeld, onClose }) => {
     const [bargeldError, setBargeldError] = useState(false);
 
     const dispatch = useDispatch();
+    const abschluss = useSelector(
+        (state) => state.dataframe.original.abschluss,
+    );
 
     const submit = () => {
-        if (
-            newKonto !== undefined &&
-            newKonto !== '' &&
-            newBargeld !== undefined &&
-            newBargeld !== ''
-        ) {
-            if (!kontoError && !bargeldError) {
-                var calcTimestamp = newTimestamp;
-                if (!newTimestamp)
-                    calcTimestamp = moment().startOf('day').valueOf();
-                if (id) {
-                    if (
-                        calcTimestamp !== timestamp ||
-                        newKonto !== konto ||
-                        newBargeld !== bargeld
-                    ) {
+        var calcTimestamp = newTimestamp;
+        if (!newTimestamp) calcTimestamp = moment().startOf('day').valueOf();
+        const existOtherAbschluss = abschluss.find((row) => {
+            if (id) {
+                return (
+                    row.get('Zeitstempel') === calcTimestamp &&
+                    row.get('ID') !== id
+                );
+            }
+            return row.get('Zeitstempel') === calcTimestamp;
+        });
+        if (!existOtherAbschluss) {
+            if (
+                newKonto !== undefined &&
+                newKonto !== '' &&
+                newBargeld !== undefined &&
+                newBargeld !== ''
+            ) {
+                if (!kontoError && !bargeldError) {
+                    if (id) {
+                        if (
+                            calcTimestamp !== timestamp ||
+                            newKonto !== konto ||
+                            newBargeld !== bargeld
+                        ) {
+                            dispatch(
+                                changeAbschluss(
+                                    id,
+                                    {
+                                        timestamp: calcTimestamp,
+                                        konto: newKonto,
+                                        bargeld: newBargeld,
+                                    },
+                                    {
+                                        timestamp,
+                                        konto,
+                                        bargeld,
+                                    },
+                                ),
+                            );
+                        }
+                    } else {
                         dispatch(
-                            changeAbschluss(
-                                id,
-                                {
-                                    timestamp: calcTimestamp,
-                                    konto: newKonto,
-                                    bargeld: newBargeld,
-                                },
-                                {
-                                    timestamp,
-                                    konto,
-                                    bargeld,
-                                },
+                            addAbschluss(
+                                calcTimestamp, // ? newTimestamp : new Date(),
+                                newKonto,
+                                newBargeld,
                             ),
                         );
                     }
+                    close();
                 } else {
                     dispatch(
-                        addAbschluss(
-                            calcTimestamp, // ? newTimestamp : new Date(),
-                            newKonto,
-                            newBargeld,
+                        alertErrorMessage(
+                            `${
+                                kontoError ? 'Konto: ' : 'Bargeld: '
+                            }Ungültige Zahl bzw. arithmetischer Ausdruck.`,
+                            'abschlussKontoBargeld',
                         ),
                     );
                 }
-                close();
             } else {
                 dispatch(
                     alertErrorMessage(
-                        `${
-                            kontoError ? 'Konto: ' : 'Bargeld: '
-                        }Ungültige Zahl bzw. arithmetischer Ausdruck.`,
-                        'abschlussKontoBargeld',
+                        'Die Angabe des Kontostandes und des Bargeldbestandes sind verpflichtend.',
+                        'abschlussBetrag',
                     ),
                 );
             }
         } else {
             dispatch(
                 alertErrorMessage(
-                    'Die Angabe des Kontostandes und des Bargeldbestandes sind verpflichtend.',
-                    'abschlussBetrag',
+                    'Das gewählte Datum existiert bereits - aktualisiere bitte den entsprechenden Eintrag.',
+                    'abschlussZeitstempel',
                 ),
             );
         }
@@ -119,7 +139,11 @@ const AddAbschluss = ({ open, id, timestamp, konto, bargeld, onClose }) => {
                 content={
                     <div>
                         <Alert
-                            type={['abschlussBetrag', 'abschlussKontoBargeld']}
+                            type={[
+                                'abschlussBetrag',
+                                'abschlussKontoBargeld',
+                                'abschlussZeitstempel',
+                            ]}
                             style={{ marginBottom: '10px' }}
                         />
 

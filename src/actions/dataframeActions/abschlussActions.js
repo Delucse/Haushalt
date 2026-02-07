@@ -40,34 +40,36 @@ export const initAbschluss = async (file, wiederkehrenderUmsatz) => {
         (val) => val && Number(val.replace(',', '.')),
     );
     if (abschluss.count() > 0) {
-        var maxAbschluss = abschluss.stat.max('Zeitstempel');
-        abschluss = abschluss.withColumn('Monatsposten', (row) => {
-            if (row.get('Zeitstempel') === maxAbschluss) {
-                return wiederkehrenderUmsatz
-                    .filter((row) => row.get('Zeitstempel') > maxAbschluss)
-                    .stat.sum('Umsatz');
-            }
-            return 0;
-        });
+        abschluss = calcMonatsposten(abschluss, wiederkehrenderUmsatz);
     } else {
         abschluss = abschluss.withColumn('Monatsposten', (row) => 0);
     }
     abschluss = abschluss.withColumn('ID', (row, index) => index + 1);
+    abschluss = abschluss.restructure([
+        'ID',
+        'Datum',
+        'Zeitstempel',
+        'Konto',
+        'Bargeld',
+        'Monatsposten',
+    ]);
     return abschluss;
 };
 
 export const addAbschluss =
     (timestamp, konto, bargeld) => (dispatch, getState) => {
-        var abschluss = getState().dataframe.original.abschluss;
+        var { abschluss, wiederkehrenderUmsatz } =
+            getState().dataframe.original;
         var newDate = moment(timestamp);
         abschluss = abschluss.push([
+            abschluss.count() + 1,
             newDate.format('DD.MM.YYYY'),
+            timestamp,
             konto,
             bargeld,
-            timestamp,
-            konto + bargeld,
-            abschluss.count() + 1,
+            0,
         ]);
+        abschluss = calcMonatsposten(abschluss, wiederkehrenderUmsatz);
         dispatch({
             type: DATAFRAME_ORIGINAL_ABSCHLUSS,
             payload: abschluss,
@@ -87,24 +89,15 @@ export const changeAbschluss = (id, update, old) => (dispatch, getState) => {
     var { abschluss, wiederkehrenderUmsatz } = getState().dataframe.original;
     var newDate = moment(update.timestamp);
     abschluss = abschluss.setRow(id - 1, (row) => {
+        row = row.set('Datum', newDate.format('DD.MM.YYYY'));
+        row = row.set('Zeitstempel', update.timestamp);
         row = row.set('Konto', update.konto);
         row = row.set('Bargeld', update.bargeld);
-        row = row.set('Datum', newDate.format('DD.MM.YYYY'));
         return row;
     });
     var isNewTimestamp = update.timestamp !== old.timestamp;
     if (isNewTimestamp) {
-        var maxAbschluss = abschluss.stat.max('Zeitstempel');
-        abschluss = abschluss.withColumn('Monatsposten', () => 0);
-        id = abschluss
-            .find((row) => row.get('Zeitstempel') === maxAbschluss)
-            .get('ID');
-        var monatsposten = wiederkehrenderUmsatz
-            .filter((row) => row.get('Zeitstempel') > maxAbschluss)
-            .stat.sum('Umsatz');
-        abschluss = abschluss.setRow(id - 1, (row) =>
-            row.set('Monatsposten', monatsposten),
-        );
+        abschluss = calcMonatsposten(abschluss, wiederkehrenderUmsatz);
     }
     dispatch({
         type: DATAFRAME_ORIGINAL_ABSCHLUSS,
@@ -119,9 +112,10 @@ export const changeAbschluss = (id, update, old) => (dispatch, getState) => {
 };
 
 export const deleteAbschluss = (id, timestamp) => (dispatch, getState) => {
-    var abschluss = getState().dataframe.original.abschluss;
+    var { abschluss, wiederkehrenderUmsatz } = getState().dataframe.original;
     abschluss = abschluss.filter((row) => row.get('ID') !== id);
     abschluss = abschluss.withColumn('ID', (row, index) => index + 1);
+    abschluss = calcMonatsposten(abschluss, wiederkehrenderUmsatz);
     dispatch({
         type: DATAFRAME_ORIGINAL_ABSCHLUSS,
         payload: abschluss,
@@ -131,4 +125,17 @@ export const deleteAbschluss = (id, timestamp) => (dispatch, getState) => {
     dispatch(updateNichtGelistet(moment(timestamp).add(1, 'month').valueOf()));
     dispatch(filterDataframe());
     dispatch(snackbarMessage(`Der Abschluss wurde erfolgreich entfernt.`));
+};
+
+const calcMonatsposten = (abschluss, wiederkehrenderUmsatz) => {
+    var maxAbschluss = abschluss.stat.max('Zeitstempel');
+    abschluss = abschluss.withColumn('Monatsposten', (row) => {
+        if (row.get('Zeitstempel') === maxAbschluss) {
+            return wiederkehrenderUmsatz
+                .filter((row) => row.get('Zeitstempel') > maxAbschluss)
+                .stat.sum('Umsatz');
+        }
+        return 0;
+    });
+    return abschluss;
 };
