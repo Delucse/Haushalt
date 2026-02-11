@@ -16,28 +16,8 @@ export const initAbschluss = async (file, wiederkehrenderUmsatz) => {
             row.get('Konto') !== undefined &&
             row.get('Bargeld') !== undefined,
     );
-    if (
-        abschluss.count() > 0 &&
-        !moment(
-            abschluss.toCollection()[0]['Datum'],
-            'DD.MM.YYYY',
-            true,
-        ).isValid()
-    ) {
-        abschluss = abschluss.cast('Datum', (val) =>
-            moment(Date.UTC(0, 0, val - 1)).format('DD.MM.YYYY'),
-        );
-    }
     abschluss = abschluss.withColumn('Zeitstempel', (row) =>
         moment(row.get('Datum'), 'DD.MM.YYYY', true).valueOf(),
-    );
-    abschluss = abschluss.cast(
-        'Konto',
-        (val) => val && Number(val.replace(',', '.')),
-    );
-    abschluss = abschluss.cast(
-        'Bargeld',
-        (val) => val && Number(val.replace(',', '.')),
     );
     if (abschluss.count() > 0) {
         abschluss = calcMonatsposten(abschluss, wiederkehrenderUmsatz);

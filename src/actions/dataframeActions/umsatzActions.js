@@ -21,20 +21,8 @@ export const initUmsatz = async (file, abschluss, umbuchung, kategorien) => {
             row.get('Bemerkung') !== undefined,
     );
     umsatz = umsatz.rename('Kategorie', 'KategorieID');
-    if (
-        umsatz.count() > 0 &&
-        !moment(umsatz.toCollection()[0]['Datum'], 'DD.MM.YYYY', true).isValid()
-    ) {
-        umsatz = umsatz.cast('Datum', (val) =>
-            moment(Date.UTC(0, 0, val - 1)).format('DD.MM.YYYY'),
-        );
-    }
     umsatz = umsatz.withColumn('Zeitstempel', (row) =>
         moment(row.get('Datum'), 'DD.MM.YYYY', true).valueOf(),
-    );
-    umsatz = umsatz.cast(
-        'Betrag',
-        (val) => val && Number(val.replace(',', '.')),
     );
     umsatz = umsatz.withColumn('Umsatz', (row) => {
         if (row.get('Art') === 'Einnahme') {

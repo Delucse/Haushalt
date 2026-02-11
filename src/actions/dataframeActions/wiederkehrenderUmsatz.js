@@ -14,18 +14,6 @@ import { filterDataframe } from '../filterActions';
 
 export const initWiederkehrenderUmsatz = async (file, kategorien) => {
     var wiederkehrenderUmsatz = await DataFrame.fromText(file, ';');
-    if (!wiederkehrenderUmsatz.listColumns().includes('Datum')) {
-        wiederkehrenderUmsatz = wiederkehrenderUmsatz.withColumn(
-            'Datum',
-            () => '',
-        );
-    }
-    if (!wiederkehrenderUmsatz.listColumns().includes('Kategorie')) {
-        wiederkehrenderUmsatz = wiederkehrenderUmsatz.rename(
-            'KategorieID',
-            'Kategorie',
-        );
-    }
     wiederkehrenderUmsatz = wiederkehrenderUmsatz.filter(
         (row) =>
             row.get('Tag') !== undefined &&
@@ -43,10 +31,6 @@ export const initWiederkehrenderUmsatz = async (file, kategorien) => {
     wiederkehrenderUmsatz = wiederkehrenderUmsatz.withColumn(
         'Zeitstempel',
         (row) => moment(row.get('Datum'), 'DD.MM.YYYY', true).valueOf(),
-    );
-    wiederkehrenderUmsatz = wiederkehrenderUmsatz.cast(
-        'Betrag',
-        (val) => val && Number(val.replace(',', '.')),
     );
     wiederkehrenderUmsatz = wiederkehrenderUmsatz.withColumn(
         'Umsatz',

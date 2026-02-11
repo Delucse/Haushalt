@@ -16,24 +16,8 @@ export const initUmbuchung = async (file) => {
             row.get('Betrag') !== undefined &&
             row.get('Bemerkung') !== undefined,
     );
-    if (
-        umbuchung.count() > 0 &&
-        !moment(
-            umbuchung.toCollection()[0]['Datum'],
-            'DD.MM.YYYY',
-            true,
-        ).isValid()
-    ) {
-        umbuchung = umbuchung.cast('Datum', (val) =>
-            moment(Date.UTC(0, 0, val - 1)).format('DD.MM.YYYY'),
-        );
-    }
     umbuchung = umbuchung.withColumn('Zeitstempel', (row) =>
         moment(row.get('Datum'), 'DD.MM.YYYY', true).valueOf(),
-    );
-    umbuchung = umbuchung.cast(
-        'Betrag',
-        (val) => val && Number(val.replace(',', '.')),
     );
     umbuchung = umbuchung.withColumn('ID', (row, index) => index + 1);
     return umbuchung;
