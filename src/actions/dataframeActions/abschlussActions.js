@@ -16,6 +16,8 @@ export const initAbschluss = async (file, wiederkehrenderUmsatz) => {
             row.get('Konto') !== undefined &&
             row.get('Bargeld') !== undefined,
     );
+    abschluss = abschluss.cast('Konto', (val) => Number(val));
+    abschluss = abschluss.cast('Bargeld', (val) => Number(val));
     abschluss = abschluss.withColumn('Zeitstempel', (row) =>
         moment(row.get('Datum'), 'DD.MM.YYYY', true).valueOf(),
     );

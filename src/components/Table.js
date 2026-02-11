@@ -100,7 +100,7 @@ const Table = ({ head, body, orderBy, order, type }) => {
                                                 setOrder(
                                                     orderTable === 'asc'
                                                         ? 'desc'
-                                                        : 'asc'
+                                                        : 'asc',
                                                 );
                                             }
                                         }}
@@ -137,6 +137,10 @@ const Table = ({ head, body, orderBy, order, type }) => {
                                             i === head.length - 1 ? 0 : 1,
                                         paddingTop: 1,
                                         paddingBottom: 1,
+                                        color: cell.disabled
+                                            ? (theme) =>
+                                                  theme.palette.text.disabled
+                                            : 'inherit',
                                     }}
                                 >
                                     {cell.value}

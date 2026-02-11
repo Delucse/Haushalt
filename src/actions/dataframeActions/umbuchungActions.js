@@ -16,6 +16,7 @@ export const initUmbuchung = async (file) => {
             row.get('Betrag') !== undefined &&
             row.get('Bemerkung') !== undefined,
     );
+    umbuchung = umbuchung.cast('Betrag', (val) => Number(val));
     umbuchung = umbuchung.withColumn('Zeitstempel', (row) =>
         moment(row.get('Datum'), 'DD.MM.YYYY', true).valueOf(),
     );

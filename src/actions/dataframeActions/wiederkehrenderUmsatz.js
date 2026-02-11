@@ -28,6 +28,12 @@ export const initWiederkehrenderUmsatz = async (file, kategorien) => {
         'Kategorie',
         'KategorieID',
     );
+    wiederkehrenderUmsatz = wiederkehrenderUmsatz.cast('Tag', (val) =>
+        Number(val),
+    );
+    wiederkehrenderUmsatz = wiederkehrenderUmsatz.cast('Betrag', (val) =>
+        Number(val),
+    );
     wiederkehrenderUmsatz = wiederkehrenderUmsatz.withColumn(
         'Zeitstempel',
         (row) => moment(row.get('Datum'), 'DD.MM.YYYY', true).valueOf(),
@@ -192,7 +198,7 @@ export const deleteWiederkehrenderUmsatz = (id) => (dispatch, getState) => {
     );
 };
 
-const calcFeiertage = (jahr, monat) => {
+export const calcFeiertage = (jahr, monat) => {
     var feiertage = [];
     switch (monat) {
         case 1:
@@ -258,7 +264,7 @@ const dateIsValid = (datum, feiertage) => {
     return !isWochenende(datum) && !isFeiertag(datum, feiertage);
 };
 
-const calcDate = (jahr, monat, tag, feiertage) => {
+export const calcDate = (jahr, monat, tag, feiertage) => {
     var datum = moment([jahr, monat - 1, tag]);
     if (!datum.isValid()) {
         datum = moment([

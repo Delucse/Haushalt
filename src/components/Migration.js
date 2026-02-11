@@ -4,6 +4,10 @@ import {
     resetMessage,
     snackbarMessage,
 } from '../actions/messageActions';
+import {
+    calcDate,
+    calcFeiertage,
+} from '../actions/dataframeActions/wiederkehrenderUmsatz';
 
 import DataFrame from 'dataframe-js';
 import moment from 'moment';
@@ -77,6 +81,30 @@ const Migration = () => {
         }
     };
 
+    const calcMonatspostenDate = (wiederkehrenderUmsatz, umsatz) => {
+        const count = wiederkehrenderUmsatz.count();
+        if (count > 0 && umsatz.count() > 0) {
+            const lastUmsatz = moment(umsatz.stat.max('Zeitstempel'));
+            const jahr = lastUmsatz.year();
+            const monat = lastUmsatz.month() + 1;
+            const feiertage = calcFeiertage(jahr, monat);
+            var index = 0;
+            while (index < count) {
+                const row = wiederkehrenderUmsatz.getRow(index);
+                const datum = calcDate(jahr, monat, row.get('Tag'), feiertage);
+                wiederkehrenderUmsatz = wiederkehrenderUmsatz.setRow(
+                    index,
+                    (row) => {
+                        row = row.set('Datum', datum.format('DD.MM.YYYY'));
+                        return row;
+                    },
+                );
+                index++;
+            }
+        }
+        return wiederkehrenderUmsatz;
+    };
+
     const migrateFiles = async (files) => {
         // Kategorien
         const kategorienEinnahmen = await DataFrame.fromText(
@@ -112,6 +140,9 @@ const Migration = () => {
         var umsatz = await DataFrame.fromText(files['Umsatz.csv'], ';');
         umsatz = umsatz.cast('Datum', (val) =>
             moment(Date.UTC(0, 0, val - 1)).format('DD.MM.YYYY'),
+        );
+        umsatz = umsatz.withColumn('Zeitstempel', (row) =>
+            moment(row.get('Datum'), 'DD.MM.YYYY', true).valueOf(),
         );
         umsatz = umsatz.cast(
             'Betrag',
@@ -167,6 +198,10 @@ const Migration = () => {
             wiederkehrenderUmsatz = wiederkehrenderUmsatz.withColumn(
                 'Datum',
                 () => '',
+            );
+            wiederkehrenderUmsatz = calcMonatspostenDate(
+                wiederkehrenderUmsatz,
+                umsatz,
             );
             wiederkehrenderUmsatz = wiederkehrenderUmsatz.cast(
                 'Betrag',

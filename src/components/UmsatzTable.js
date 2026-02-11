@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { Typography, Box } from '@mui/material';
 
 import Icon from '@mdi/react';
-import { mdiPencil } from '@mdi/js';
+import { mdiPencil, mdiPencilLock } from '@mdi/js';
 
 import AddUmsatz from './AddUmsatz';
 import Table from './Table';
@@ -17,7 +17,21 @@ const UmsatzTable = () => {
     const umsatzFiltered = useSelector(
         (state) => state.dataframe.filtered.umsatz,
     );
-    const umsatzFilteredCollection = umsatzFiltered.toCollection();
+    const abschluss = useSelector(
+        (state) => state.dataframe.original.abschluss,
+    );
+    const wiederkehrenderUmsatz = useSelector(
+        (state) => state.dataframe.original.wiederkehrenderUmsatz,
+    );
+    const maxAbschluss = abschluss?.stat.max('Zeitstempel');
+    const monatsposten = wiederkehrenderUmsatz?.filter(
+        (row) => row.get('Zeitstempel') > maxAbschluss,
+    );
+    const umsatzFilteredWithoutNichtGelistet = umsatzFiltered?.filter(
+        (row) => row.get('KategorieID') > 1,
+    );
+    const umsatzFilteredCollection =
+        umsatzFilteredWithoutNichtGelistet?.toCollection();
 
     return (
         <>
@@ -65,7 +79,7 @@ const UmsatzTable = () => {
                         >
                             {umsatzFilteredCollection.length} Posten
                             <br />
-                            {`${umsatzFiltered.stat
+                            {`${umsatzFilteredWithoutNichtGelistet.stat
                                 .sum('Umsatz')
                                 .toLocaleString('de-DE', {
                                     minimumFractionDigits: 2,
@@ -93,82 +107,153 @@ const UmsatzTable = () => {
                                         { value: 'Bemerkung', sort: true },
                                     ]}
                                     body={umsatzFilteredCollection.map(
-                                        (row) => [
-                                            {
-                                                value: (
-                                                    <IconButton
-                                                        color="inherit"
-                                                        onClick={() =>
-                                                            setData({
-                                                                id: row['ID'],
-                                                                timestamp:
-                                                                    row[
-                                                                        'Zeitstempel'
-                                                                    ],
-                                                                art: row['Art'],
-                                                                betrag: row[
-                                                                    'Betrag'
+                                        (row) => {
+                                            const monatspostenNotActive =
+                                                monatsposten
+                                                    .filter(
+                                                        (r) =>
+                                                            r.get(
+                                                                'Zeitstempel',
+                                                            ) ===
+                                                                row[
+                                                                    'Zeitstempel'
+                                                                ] &&
+                                                            r.get('Art') ===
+                                                                row['Art'] &&
+                                                            r.get('Betrag') ===
+                                                                row['Betrag'] &&
+                                                            'fix' ===
+                                                                row['Typ'] &&
+                                                            r.get(
+                                                                'KategorieID',
+                                                            ) ===
+                                                                row[
+                                                                    'KategorieID'
+                                                                ] &&
+                                                            r.get(
+                                                                'Beschreibung',
+                                                            ) ===
+                                                                row[
+                                                                    'Beschreibung'
+                                                                ] &&
+                                                            r.get(
+                                                                'Bemerkung',
+                                                            ) ===
+                                                                row[
+                                                                    'Bemerkung'
                                                                 ],
-                                                                typ: row['Typ'],
-                                                                kategorie:
-                                                                    row[
-                                                                        'KategorieID'
+                                                    )
+                                                    .count() > 0;
+                                            return [
+                                                {
+                                                    value: (
+                                                        <IconButton
+                                                            color="inherit"
+                                                            onClick={() =>
+                                                                setData({
+                                                                    id: row[
+                                                                        'ID'
                                                                     ],
-                                                                beschreibung:
-                                                                    row[
-                                                                        'Beschreibung'
+                                                                    timestamp:
+                                                                        row[
+                                                                            'Zeitstempel'
+                                                                        ],
+                                                                    art: row[
+                                                                        'Art'
                                                                     ],
-                                                                bemerkung:
-                                                                    row[
-                                                                        'Bemerkung'
+                                                                    betrag: row[
+                                                                        'Betrag'
                                                                     ],
-                                                            })
-                                                        }
-                                                        sx={{
-                                                            color: (theme) =>
-                                                                theme.palette
-                                                                    .text
-                                                                    .secondary,
-                                                        }}
-                                                    >
-                                                        <Icon
-                                                            path={mdiPencil}
-                                                            size={0.8}
-                                                        />
-                                                    </IconButton>
-                                                ),
-                                                width: '35px',
-                                            },
-                                            {
-                                                value: row['Datum'],
-                                                sortValue: row['Zeitstempel'],
-                                            },
-                                            {
-                                                value: `${row[
-                                                    'Betrag'
-                                                ].toLocaleString('de-DE', {
-                                                    minimumFractionDigits: 2,
-                                                    maximumFractionDigits: 2,
-                                                })} €`,
-                                                sortValue: row['Betrag'],
-                                                align: 'right',
-                                            },
-                                            {
-                                                value: row['Art'],
-                                            },
-                                            {
-                                                value: row['Kategorie'],
-                                            },
-                                            {
-                                                value: row['Typ'],
-                                            },
-                                            {
-                                                value: row['Beschreibung'],
-                                            },
-                                            {
-                                                value: row['Bemerkung'],
-                                            },
-                                        ],
+                                                                    typ: row[
+                                                                        'Typ'
+                                                                    ],
+                                                                    kategorie:
+                                                                        row[
+                                                                            'KategorieID'
+                                                                        ],
+                                                                    beschreibung:
+                                                                        row[
+                                                                            'Beschreibung'
+                                                                        ],
+                                                                    bemerkung:
+                                                                        row[
+                                                                            'Bemerkung'
+                                                                        ],
+                                                                })
+                                                            }
+                                                            sx={{
+                                                                color: (
+                                                                    theme,
+                                                                ) =>
+                                                                    monatspostenNotActive
+                                                                        ? theme
+                                                                              .palette
+                                                                              .text
+                                                                              .disabled
+                                                                        : theme
+                                                                              .palette
+                                                                              .text
+                                                                              .secondary,
+                                                            }}
+                                                        >
+                                                            <Icon
+                                                                path={
+                                                                    monatspostenNotActive
+                                                                        ? mdiPencilLock
+                                                                        : mdiPencil
+                                                                }
+                                                                size={0.8}
+                                                            />
+                                                        </IconButton>
+                                                    ),
+                                                    width: '35px',
+                                                },
+                                                {
+                                                    value: row['Datum'],
+                                                    sortValue:
+                                                        row['Zeitstempel'],
+                                                    disabled:
+                                                        monatspostenNotActive,
+                                                },
+                                                {
+                                                    value: `${row[
+                                                        'Betrag'
+                                                    ].toLocaleString('de-DE', {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2,
+                                                    })} €`,
+                                                    sortValue: row['Betrag'],
+                                                    align: 'right',
+                                                    disabled:
+                                                        monatspostenNotActive,
+                                                },
+                                                {
+                                                    value: row['Art'],
+                                                    disabled:
+                                                        monatspostenNotActive,
+                                                },
+                                                {
+                                                    value: row['Kategorie'],
+                                                    disabled:
+                                                        monatspostenNotActive,
+                                                },
+                                                {
+                                                    value: row['Typ'],
+                                                    disabled:
+                                                        monatspostenNotActive,
+                                                },
+                                                {
+                                                    value: row['Beschreibung'],
+                                                    disabled:
+                                                        monatspostenNotActive,
+                                                },
+                                                {
+                                                    value: row['Bemerkung'],
+                                                    disabled:
+                                                        monatspostenNotActive,
+                                                },
+                                            ];
+                                        },
                                     )}
                                 />
                                 <AddUmsatz

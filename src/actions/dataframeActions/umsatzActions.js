@@ -21,6 +21,7 @@ export const initUmsatz = async (file, abschluss, umbuchung, kategorien) => {
             row.get('Bemerkung') !== undefined,
     );
     umsatz = umsatz.rename('Kategorie', 'KategorieID');
+    umsatz = umsatz.cast('Betrag', (val) => Number(val));
     umsatz = umsatz.withColumn('Zeitstempel', (row) =>
         moment(row.get('Datum'), 'DD.MM.YYYY', true).valueOf(),
     );
