@@ -47,10 +47,14 @@ const Stat = ({ betrag, percent, icon, prevBetrag, avgBetrag }) => {
                             fontSize: '20px',
                         }}
                     >
-                        {betrag.toLocaleString('de-DE', {
-                            minimumFractionDigits: 2,
-                        })}{' '}
-                        €
+                        {betrag
+                            .toLocaleString('de-DE', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                                style: 'currency',
+                                currency: 'EUR',
+                            })
+                            .replace('-', '- ')}
                     </Box>
                     {percent && (
                         <Box
@@ -61,11 +65,13 @@ const Stat = ({ betrag, percent, icon, prevBetrag, avgBetrag }) => {
                                 display: 'flex',
                             }}
                         >
-                            {(percent * 100).toLocaleString('de-DE', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                            })}{' '}
-                            %
+                            {percent
+                                .toLocaleString('de-DE', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                    style: 'percent',
+                                })
+                                .replace('-', '- ')}
                         </Box>
                     )}
                 </Stack>
@@ -92,8 +98,11 @@ const Stat = ({ betrag, percent, icon, prevBetrag, avgBetrag }) => {
                         {prevBetrag &&
                             (betrag - prevBetrag).toLocaleString('de-DE', {
                                 minimumFractionDigits: 2,
-                            })}{' '}
-                        €
+                                maximumFractionDigits: 2,
+                                style: 'currency',
+                                currency: 'EUR',
+                            })
+                            .replace('-', '- ')}
                     </Box>
                     <Divider
                         flexItem
@@ -110,8 +119,11 @@ const Stat = ({ betrag, percent, icon, prevBetrag, avgBetrag }) => {
                         {false &&
                             avgBetrag.toLocaleString('de-DE', {
                                 minimumFractionDigits: 2,
-                            })}{' '}
-                        €
+                                maximumFractionDigits: 2,
+                                style: 'currency',
+                                currency: 'EUR',
+                            })
+                            .replace('-', '- ')}
                     </Box>
                 </Stack> */}
             </Stack>
@@ -121,7 +133,7 @@ const Stat = ({ betrag, percent, icon, prevBetrag, avgBetrag }) => {
 
 const Stats = () => {
     const umsatzFilteredDf = useSelector(
-        (state) => state.dataframe.filtered.umsatz
+        (state) => state.dataframe.filtered.umsatz,
     );
     const einnahmen = umsatzFilteredDf
         ?.filter({ Art: 'Einnahme' })

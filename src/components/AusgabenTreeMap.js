@@ -96,20 +96,21 @@ function AusgabenTreeMap() {
                             cornerRadius: 0,
                             callbacks: {
                                 label: (ctx) => [
-                                    ` ${(
-                                        (ctx.raw._data.data / sum) *
-                                        100
-                                    ).toLocaleString('de-DE', {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })} % bzw.`,
-                                    ` ${ctx.raw._data.data.toLocaleString(
-                                        'de-DE',
-                                        {
+                                    ` ${(ctx.raw._data.data / sum)
+                                        .toLocaleString('de-DE', {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
-                                        },
-                                    )} €`,
+                                            style: 'percent',
+                                        })
+                                        .replace('-', '- ')} bzw.`,
+                                    ` ${ctx.raw._data.data
+                                        .toLocaleString('de-DE', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                            style: 'currency',
+                                            currency: 'EUR',
+                                        })
+                                        .replace('-', '- ')}`,
                                 ],
                                 title: (ctx) => ctx[0].raw._data.label,
                             },

@@ -80,9 +80,13 @@ function UmsatzBarChart() {
                 },
                 ticks: {
                     callback: (tickValue) =>
-                        tickValue.toLocaleString('de-DE', {
-                            minimumFractionDigits: 0,
-                        }) + ' €',
+                        tickValue
+                            .toLocaleString('de-DE', {
+                                minimumFractionDigits: 0,
+                                style: 'currency',
+                                currency: 'EUR',
+                            })
+                            .replace('-', '- '),
                     color: theme.palette.text.primary,
                 },
             };

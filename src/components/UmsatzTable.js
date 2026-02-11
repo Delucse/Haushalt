@@ -79,11 +79,15 @@ const UmsatzTable = () => {
                         >
                             {umsatzFilteredCollection.length} Posten
                             <br />
-                            {`${umsatzFilteredWithoutNichtGelistet.stat
+                            {umsatzFilteredWithoutNichtGelistet.stat
                                 .sum('Umsatz')
                                 .toLocaleString('de-DE', {
                                     minimumFractionDigits: 2,
-                                })} €`}
+                                    maximumFractionDigits: 2,
+                                    style: 'currency',
+                                    currency: 'EUR',
+                                })
+                                .replace('-', '- ')}
                         </Typography>
                     ) : null}
                 </Box>
@@ -216,12 +220,17 @@ const UmsatzTable = () => {
                                                         monatspostenNotActive,
                                                 },
                                                 {
-                                                    value: `${row[
-                                                        'Betrag'
-                                                    ].toLocaleString('de-DE', {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2,
-                                                    })} €`,
+                                                    value: row['Betrag']
+                                                        .toLocaleString(
+                                                            'de-DE',
+                                                            {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                                style: 'currency',
+                                                                currency: 'EUR',
+                                                            },
+                                                        )
+                                                        .replace('-', '- '),
                                                     sortValue: row['Betrag'],
                                                     align: 'right',
                                                     disabled:

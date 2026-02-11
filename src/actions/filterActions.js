@@ -16,7 +16,6 @@ export const filterDataframe = () => (dispatch, getState) => {
     const { dataframe, filter } = getState();
     const { word, kategorien, kategorieTyp, art, typ, time } = filter;
     var { range } = time;
-    // console.log(kategorien);
     var umsatzDfFiltered = dataframe.original.umsatz.slice();
     var umbuchungDfFiltered = dataframe.original.umbuchung.slice();
     var abschlussDfFiltered = dataframe.original.abschluss.slice();
@@ -53,7 +52,6 @@ export const filterDataframe = () => (dispatch, getState) => {
                         .find((row) => row.get('Zeitstempel') === maxTimestamp)
                         .toArray(),
                 );
-                // abschlussDfFiltered = abschlussDfFiltered.sortBy(['Zeitstempel']);
             }
         }
         if (word && word.length > 0) {
@@ -62,7 +60,14 @@ export const filterDataframe = () => (dispatch, getState) => {
                 (row) =>
                     row.get('Bemerkung').toLowerCase().includes(lowerWord) ||
                     row.get('Datum').includes(lowerWord) ||
-                    // row.get('Betrag').toLowerCase().includes(lowerWord) ||
+                    row
+                        .get('Betrag')
+                        .toLocaleString('de-DE', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        })
+                        .replace('-', '- ')
+                        .includes(lowerWord) ||
                     row.get('Art').toLowerCase().includes(lowerWord) ||
                     row.get('Kategorie').toLowerCase().includes(lowerWord) ||
                     row.get('Typ').toLowerCase().includes(lowerWord) ||
@@ -80,7 +85,6 @@ export const filterDataframe = () => (dispatch, getState) => {
             );
         }
         if (kategorien && kategorien.length > 0) {
-            // console.log(kategorien);
             umsatzDfFiltered = umsatzDfFiltered.filter((row) =>
                 kategorien.includes(row.get(kategorieTyp)),
             );

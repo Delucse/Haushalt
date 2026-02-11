@@ -10,7 +10,7 @@ import IconButton from './IconButton';
 function UmbuchungTable() {
     const [data, setData] = useState({});
     const umbuchungFilteredCollection = useSelector(
-        (state) => state.dataframe.filtered.umbuchung
+        (state) => state.dataframe.filtered.umbuchung,
     )?.toCollection();
 
     return (
@@ -68,13 +68,14 @@ function UmbuchungTable() {
                                     sortValue: row['Zeitstempel'],
                                 },
                                 {
-                                    value: `${row['Betrag'].toLocaleString(
-                                        'de-DE',
-                                        {
+                                    value: row['Betrag']
+                                        .toLocaleString('de-DE', {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
-                                        }
-                                    )} €`,
+                                            style: 'currency',
+                                            currency: 'EUR',
+                                        })
+                                        .replace('-', '- '),
                                     sortValue: row['Betrag'],
                                     align: 'right',
                                 },

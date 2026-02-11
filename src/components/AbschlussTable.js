@@ -68,24 +68,26 @@ function AbschlussTable() {
                                     sortValue: row['Zeitstempel'],
                                 },
                                 {
-                                    value: `${row['Konto'].toLocaleString(
-                                        'de-DE',
-                                        {
+                                    value: row['Konto']
+                                        .toLocaleString('de-DE', {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
-                                        },
-                                    )} €`,
+                                            style: 'currency',
+                                            currency: 'EUR',
+                                        })
+                                        .replace('-', '- '),
                                     sortValue: row['Konto'],
                                     align: 'right',
                                 },
                                 {
-                                    value: `${row['Bargeld'].toLocaleString(
-                                        'de-DE',
-                                        {
+                                    value: row['Bargeld']
+                                        .toLocaleString('de-DE', {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
-                                        },
-                                    )} €`,
+                                            style: 'currency',
+                                            currency: 'EUR',
+                                        })
+                                        .replace('-', '- '),
                                     sortValue: row['Bargeld'],
                                     align: 'right',
                                 },

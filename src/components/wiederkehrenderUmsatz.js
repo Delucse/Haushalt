@@ -86,10 +86,14 @@ const WiederkehrenderUmsatz = () => {
                             sortValue: Number(row['Tag']),
                         },
                         {
-                            value: `${row['Betrag'].toLocaleString('de-DE', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                            })} €`,
+                            value: row['Betrag']
+                                .toLocaleString('de-DE', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                    style: 'currency',
+                                    currency: 'EUR',
+                                })
+                                .replace('-', '- '),
                             sortValue: row['Betrag'],
                             align: 'right',
                         },

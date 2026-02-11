@@ -128,9 +128,13 @@ function TimeSeriesBarChart({ datasets, scales, tooltip }) {
                             min: 0,
                             ticks: {
                                 callback: (tickValue) =>
-                                    tickValue.toLocaleString('de-DE', {
-                                        minimumFractionDigits: 0,
-                                    }) + ' €',
+                                    tickValue
+                                        .toLocaleString('de-DE', {
+                                            minimumFractionDigits: 0,
+                                            style: 'currency',
+                                            currency: 'EUR',
+                                        })
+                                        .replace('-', '- '),
                                 color: theme.palette.text.primary,
                             },
                             grid: {
@@ -154,11 +158,13 @@ function TimeSeriesBarChart({ datasets, scales, tooltip }) {
                             itemSort: (a, b) => b.datasetIndex - a.datasetIndex,
                             callbacks: {
                                 label: (context) => [
-                                    ` ${
-                                        context.dataset.label
-                                    }: ${context.raw.y.toLocaleString('de-DE', {
-                                        minimumFractionDigits: 2,
-                                    })} €`,
+                                    ` ${context.dataset.label}: ${context.raw.y
+                                        .toLocaleString('de-DE', {
+                                            minimumFractionDigits: 2,
+                                            style: 'currency',
+                                            currency: 'EUR',
+                                        })
+                                        .replace('-', '- ')}`,
                                 ],
                                 footer: (context) => [
                                     '     _________________',
@@ -171,7 +177,10 @@ function TimeSeriesBarChart({ datasets, scales, tooltip }) {
                                         )
                                         .toLocaleString('de-DE', {
                                             minimumFractionDigits: 2,
-                                        })} €`,
+                                            style: 'currency',
+                                            currency: 'EUR',
+                                        })
+                                        .replace('-', '- ')}`,
                                 ],
                             },
                             footerFont: { weight: 'normal' },

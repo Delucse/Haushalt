@@ -58,16 +58,21 @@ function AusgabenPieChart() {
                             cornerRadius: 0,
                             callbacks: {
                                 label: (context) => [
-                                    ` ${(
-                                        (context.raw / sum) *
-                                        100
-                                    ).toLocaleString('de-DE', {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })} % bzw.`,
-                                    ` ${context.raw.toLocaleString('de-DE', {
-                                        minimumFractionDigits: 2,
-                                    })} €`,
+                                    ` ${(context.raw / sum)
+                                        .toLocaleString('de-DE', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                            style: 'percent',
+                                        })
+                                        .replace('-', '- ')} bzw.`,
+                                    ` ${context.raw
+                                        .toLocaleString('de-DE', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                            style: 'currency',
+                                            currency: 'EUR',
+                                        })
+                                        .replace('-', '- ')}`,
                                 ],
                             },
                         },
