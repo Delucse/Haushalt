@@ -14,6 +14,10 @@ import Search from './Search';
 
 const UmsatzTable = () => {
     const [data, setData] = useState({});
+
+    const search = useSelector((state) => state.filter.word.toLowerCase());
+    const isSearch = search.length > 0;
+
     const umsatzFiltered = useSelector(
         (state) => state.dataframe.filtered.umsatz,
     );
@@ -217,6 +221,11 @@ const UmsatzTable = () => {
                                                     value: row['Datum'],
                                                     sortValue:
                                                         row['Zeitstempel'],
+                                                    highlighted:
+                                                        isSearch &&
+                                                        row['Datum'].includes(
+                                                            search,
+                                                        ),
                                                     disabled:
                                                         monatspostenNotActive,
                                                 },
@@ -234,31 +243,68 @@ const UmsatzTable = () => {
                                                         .replace('-', '- '),
                                                     sortValue: row['Betrag'],
                                                     align: 'right',
+                                                    highlighted:
+                                                        isSearch &&
+                                                        row['Betrag']
+                                                            .toLocaleString(
+                                                                'de-DE',
+                                                                {
+                                                                    minimumFractionDigits: 2,
+                                                                    maximumFractionDigits: 2,
+                                                                },
+                                                            )
+                                                            .replace('-', '- ')
+                                                            .includes(search),
                                                     disabled:
                                                         monatspostenNotActive,
                                                 },
                                                 {
                                                     value: row['Art'],
+                                                    highlighted:
+                                                        isSearch &&
+                                                        row['Art']
+                                                            .toLowerCase()
+                                                            .includes(search),
                                                     disabled:
                                                         monatspostenNotActive,
                                                 },
                                                 {
                                                     value: row['Kategorie'],
+                                                    highlighted:
+                                                        isSearch &&
+                                                        row['Kategorie']
+                                                            .toLowerCase()
+                                                            .includes(search),
                                                     disabled:
                                                         monatspostenNotActive,
                                                 },
                                                 {
                                                     value: row['Typ'],
+                                                    highlighted:
+                                                        isSearch &&
+                                                        row['Typ']
+                                                            .toLowerCase()
+                                                            .includes(search),
                                                     disabled:
                                                         monatspostenNotActive,
                                                 },
                                                 {
                                                     value: row['Beschreibung'],
+                                                    highlighted:
+                                                        isSearch &&
+                                                        row['Beschreibung']
+                                                            .toLowerCase()
+                                                            .includes(search),
                                                     disabled:
                                                         monatspostenNotActive,
                                                 },
                                                 {
                                                     value: row['Bemerkung'],
+                                                    highlighted:
+                                                        isSearch &&
+                                                        row['Bemerkung']
+                                                            .toLowerCase()
+                                                            .includes(search),
                                                     disabled:
                                                         monatspostenNotActive,
                                                 },

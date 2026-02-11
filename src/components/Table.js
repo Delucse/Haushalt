@@ -141,6 +141,10 @@ const Table = ({ head, body, orderBy, order, type }) => {
                                             ? (theme) =>
                                                   theme.palette.text.disabled
                                             : 'inherit',
+                                        background: cell.highlighted
+                                            ? (theme) =>
+                                                  theme.palette.action.hover
+                                            : 'inherit',
                                     }}
                                 >
                                     {cell.value}
