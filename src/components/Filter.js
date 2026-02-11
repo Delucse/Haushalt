@@ -73,11 +73,14 @@ const Filter = ({ icon }) => {
     const [open, setOpen] = useState(false);
 
     const dispatch = useDispatch();
-    const filterCount = useSelector(
-        (state) =>
-            state.filter.kategorien.length +
+    const filterCount = useSelector((state) =>
+        state.filter.kategorien.length +
             state.filter.typ.length +
-            state.filter.art.length,
+            state.filter.art.length +
+            state.filter.word.length >
+        0
+            ? 1
+            : 0,
     );
 
     return (
@@ -185,7 +188,7 @@ const Filter = ({ icon }) => {
                             }}
                         />
                         <Grid container spacing={1.5}>
-                            <Grid item sm={12}>
+                            <Grid item xxs={12}>
                                 <Search />
                             </Grid>
                             <Grid item xxs={12} sm={3}>

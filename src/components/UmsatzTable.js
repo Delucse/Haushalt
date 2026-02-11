@@ -74,6 +74,7 @@ const UmsatzTable = () => {
                                 mt: 'auto',
                                 mb: 'auto',
                                 width: '100px',
+                                textAlign: 'right',
                                 color: (theme) => theme.palette.text.primary,
                             }}
                         >
