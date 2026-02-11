@@ -61,11 +61,12 @@ function UmbuchungTable() {
                                             <Icon path={mdiPencil} size={0.8} />
                                         </IconButton>
                                     ),
-                                    width: '35px',
+                                    width: '36px',
                                 },
                                 {
                                     value: row['Datum'],
                                     sortValue: row['Zeitstempel'],
+                                    width: '72px',
                                 },
                                 {
                                     value: row['Betrag']
@@ -78,6 +79,7 @@ function UmbuchungTable() {
                                         .replace('-', '- '),
                                     sortValue: row['Betrag'],
                                     align: 'right',
+                                    width: '100px',
                                 },
                                 {
                                     value: row['Bemerkung'],

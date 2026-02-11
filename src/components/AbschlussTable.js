@@ -37,6 +37,7 @@ function AbschlussTable() {
                                 { value: 'Datum', sort: true },
                                 { value: 'Konto', sort: true },
                                 { value: 'Bargeld', sort: true },
+                                { value: '' },
                             ]}
                             body={abschlussFilteredCollection.map((row) => [
                                 {
@@ -61,11 +62,12 @@ function AbschlussTable() {
                                             <Icon path={mdiPencil} size={0.8} />
                                         </IconButton>
                                     ),
-                                    width: '35px',
+                                    width: '36px',
                                 },
                                 {
                                     value: row['Datum'],
                                     sortValue: row['Zeitstempel'],
+                                    width: '72px',
                                 },
                                 {
                                     value: row['Konto']
@@ -78,6 +80,7 @@ function AbschlussTable() {
                                         .replace('-', '- '),
                                     sortValue: row['Konto'],
                                     align: 'right',
+                                    width: '100px',
                                 },
                                 {
                                     value: row['Bargeld']
@@ -90,6 +93,10 @@ function AbschlussTable() {
                                         .replace('-', '- '),
                                     sortValue: row['Bargeld'],
                                     align: 'right',
+                                    width: '100px',
+                                },
+                                {
+                                    value: '',
                                 },
                             ])}
                         />

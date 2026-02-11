@@ -215,7 +215,7 @@ const UmsatzTable = () => {
                                                             />
                                                         </IconButton>
                                                     ),
-                                                    width: '35px',
+                                                    width: '36px',
                                                 },
                                                 {
                                                     value: row['Datum'],
@@ -228,6 +228,7 @@ const UmsatzTable = () => {
                                                         ),
                                                     disabled:
                                                         monatspostenNotActive,
+                                                    width: '72px',
                                                 },
                                                 {
                                                     value: row['Betrag']
