@@ -127,12 +127,6 @@ const Migration = () => {
                 }
             });
         });
-        // distinct kategories
-        Object.keys(indistinctKategorien).forEach((key) => {
-            kategorienAusgaben = kategorienAusgaben.filter(
-                (row) => row.get('ID') !== indistinctKategorien[key],
-            );
-        });
         var kategorien = kategorienEinnahmen.union(kategorienAusgaben);
         kategorien = kategorien.rename('ID', 'KategorieID');
         kategorien = kategorien.push(['2', 'nicht zugeordnet', '', 'variabel']);
@@ -148,11 +142,6 @@ const Migration = () => {
             'Betrag',
             (val) => val && Number(val.replace(',', '.')),
         );
-        Object.keys(indistinctKategorien).forEach((key) => {
-            umsatz = umsatz.replace(indistinctKategorien[key], String(key), [
-                'Kategorie',
-            ]);
-        });
         umsatz = umsatz.rename('Kategorie', 'KategorieID');
         umsatz = umsatz.join(kategorien, 'KategorieID', 'left');
         var abschluss = await DataFrame.fromText(files['Abschluss.csv'], ';');
@@ -207,19 +196,73 @@ const Migration = () => {
                 'Betrag',
                 (val) => val && Number(val.replace(',', '.')),
             );
-            Object.keys(indistinctKategorien).forEach((key) => {
-                wiederkehrenderUmsatz = wiederkehrenderUmsatz.replace(
-                    indistinctKategorien[key],
-                    String(key),
-                    ['KategorieID'],
-                );
-            });
             wiederkehrenderUmsatz = wiederkehrenderUmsatz.join(
                 kategorien,
                 'KategorieID',
                 'left',
             );
         }
+
+        // distinct kategories
+        Object.keys(indistinctKategorien).forEach((key) => {
+            kategorien = kategorien.filter(
+                (row) => row.get('KategorieID') !== indistinctKategorien[key],
+            );
+            umsatz = umsatz.replace(indistinctKategorien[key], String(key), [
+                'KategorieID',
+            ]);
+            wiederkehrenderUmsatz = wiederkehrenderUmsatz.replace(
+                indistinctKategorien[key],
+                String(key),
+                ['KategorieID'],
+            );
+        });
+        // restructure kategorieID
+        kategorien = kategorien
+            .withColumn('ID', (r) => Number(r.get('KategorieID')))
+            .filter((r) => r.get('ID') > 2)
+            .sortBy('ID');
+        var id = 3;
+        kategorien.toCollection().forEach((kategorie) => {
+            if (kategorie['ID'] !== id) {
+                const kategorienKategorieID = kategorien.chain(
+                    (row) =>
+                        row.get('KategorieID') === kategorie['KategorieID'],
+                    (row) => row.set('KategorieID', id),
+                );
+                kategorien = kategorien
+                    .filter(
+                        (row) =>
+                            row.get('KategorieID') !== kategorie['KategorieID'],
+                    )
+                    .union(kategorienKategorieID);
+                const umsatzKategorieID = umsatz.chain(
+                    (row) =>
+                        row.get('KategorieID') === kategorie['KategorieID'],
+                    (row) => row.set('KategorieID', id),
+                );
+                umsatz = umsatz
+                    .filter(
+                        (row) =>
+                            row.get('KategorieID') !== kategorie['KategorieID'],
+                    )
+                    .union(umsatzKategorieID);
+                const wiederkehrenderUmsatzKategorieID =
+                    wiederkehrenderUmsatz.chain(
+                        (row) =>
+                            row.get('KategorieID') === kategorie['KategorieID'],
+                        (row) => row.set('KategorieID', id),
+                    );
+                wiederkehrenderUmsatz = wiederkehrenderUmsatz
+                    .filter(
+                        (row) =>
+                            row.get('KategorieID') !== kategorie['KategorieID'],
+                    )
+                    .union(wiederkehrenderUmsatzKategorieID);
+            }
+            id++;
+        });
+
         const zip = new JSZip();
         // create files
         zip.file('Umsatz.csv', getFile('Umsatz', umsatz));
@@ -249,7 +292,6 @@ const Migration = () => {
         switch (fileName) {
             case 'Kategorien':
                 fileContent = dataframe
-                    .filter((row) => row.get('KategorieID') > 2)
                     .select('KategorieID', 'Oberkategorie', 'Unterkategorie')
                     .rename('KategorieID', 'ID')
                     .toText(';');
