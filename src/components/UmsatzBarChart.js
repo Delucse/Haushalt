@@ -77,7 +77,9 @@ function UmsatzBarChart() {
                 position: 'right',
                 grid: {
                     display: false,
+                    tickLength: 3,
                 },
+                border: { display: false },
                 ticks: {
                     callback: (tickValue) =>
                         tickValue
