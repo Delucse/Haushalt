@@ -19,6 +19,7 @@ function AusgabenTreeMap() {
     const umsatzAusgabeCollection = umsatzAusgabe?.toCollection();
 
     const aggregated = umsatzAusgabe
+        .sortBy(filterCategoryType, true)
         .groupBy(filterCategoryType)
         .aggregate((group) => group.stat.sum('Betrag'))
         .rename('aggregation', 'Betrag');

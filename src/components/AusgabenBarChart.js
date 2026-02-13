@@ -28,8 +28,10 @@ function AusgabenBarChart() {
         .rename('aggregation', 'Betrag');
     const aggregatedCollection = aggregated?.toCollection();
     const categories =
-        aggregated?.unique(filterCategoryType).toDict()[filterCategoryType] ||
-        [];
+        aggregated
+            ?.unique(filterCategoryType)
+            .sortBy(filterCategoryType, true)
+            .toDict()[filterCategoryType] || [];
 
     const theme = useTheme();
     const colors = generateColor(
