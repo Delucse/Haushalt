@@ -1,0 +1,162 @@
+import { useEffect, useState } from 'react';
+
+import { useNavigate, useParams } from 'react-router-dom';
+
+import { Box, Divider, Typography } from '@mui/material';
+
+import Icon from '@mdi/react';
+import { mdiFolderOpen, mdiArrowLeftThin, mdiPiggyBank } from '@mdi/js';
+
+import { ReactComponent as FilenLogo } from '../../media/Filen_Logo.svg';
+import { ReactComponent as FilenLogoName } from '../../media/Filen_Logo_Name.svg';
+
+import Lokal from './Lokal';
+import Filen from './Filen';
+
+const sources = {
+    filen: {
+        background: 'black',
+        color: 'white',
+        prevIcon: <FilenLogoName style={{ height: '30px', width: 'auto' }} />,
+        icon: <FilenLogo style={{ height: '30px', width: 'auto' }} />,
+        component: <Filen />,
+    },
+    lokal: {
+        background: '#FFEBCD',
+        color: '#800000',
+        prevIcon: (
+            <>
+                <Icon path={mdiFolderOpen} size={1.4} color="#F4A460" />
+                <span style={{ marginLeft: '5px' }}>Lokal</span>
+            </>
+        ),
+        icon: <Icon path={mdiFolderOpen} size={1.4} color="#F4A460" />,
+        component: <Lokal />,
+    },
+};
+
+const Source = ({ active, preview, background, color, icon, set }) => {
+    return (
+        <Box
+            sx={{
+                background: background,
+                opacity: active || preview ? 1 : 0.4,
+                height: '100%',
+                color: color,
+                justifyContent: 'center',
+                alignItems: 'center',
+                display: 'flex',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                gridColumnStart: 1,
+                '&:hover': {
+                    opacity: 1,
+                },
+            }}
+            onClick={() => (preview || !active) && set()}
+        >
+            {icon}
+        </Box>
+    );
+};
+
+const Sources = ({ preview }) => {
+    const navigate = useNavigate();
+    const params = useParams();
+
+    const sourceKeys = Object.keys(sources);
+    const [source, setSource] = useState(params.source);
+
+    useEffect(() => {
+        if (source !== null && source !== params.source) {
+            navigate(`/beta/${source}`);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [source]);
+
+    useEffect(() => {
+        preview && setSource(null);
+    }, [preview]);
+
+    return (
+        <Box sx={{ padding: '20px' }}>
+            <Box sx={{ minHeight: '70px', display: 'flex' }}>
+                <Box
+                    sx={{
+                        width: '80px',
+                        marginRight: '10px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        cursor: !preview && 'pointer',
+                        gridColumnStart: 1,
+                        color: (theme) => theme.palette.primary.light,
+                        '&:hover': !preview && {
+                            color: (theme) => theme.palette.primary.main,
+                        },
+                    }}
+                    onClick={() => !preview && navigate('/beta')}
+                >
+                    <Icon
+                        path={preview ? mdiPiggyBank : mdiArrowLeftThin}
+                        size={preview ? 1.6 : 2}
+                        style={{ marginRight: '5px' }}
+                    />
+                </Box>
+                <Typography
+                    variant="h5"
+                    sx={{
+                        color: (theme) => theme.palette.primary.main,
+                        margin: 'auto 0',
+                    }}
+                >
+                    Haushalt{' '}
+                    <span style={{ fontFamily: 'LobsterTwo-Bold' }}>
+                        Delucse
+                    </span>
+                </Typography>
+            </Box>
+            <Divider
+                sx={{
+                    marginBottom: '10px',
+                    borderColor: (theme) => theme.palette.primary.main,
+                }}
+            />
+            <Box
+                sx={{
+                    width: 'calc(100%)',
+                    display: 'grid',
+                    gridTemplateColumns: preview ? 'auto' : '80px auto',
+                    gridTemplateRows: `repeat(${sourceKeys.length}, 80px)`,
+                    columnGap: '10px',
+                    rowGap: '10px',
+                }}
+            >
+                {sourceKeys.map((s) => (
+                    <Source
+                        key={s}
+                        active={source === s}
+                        preview={preview}
+                        set={() => setSource(s)}
+                        background={sources[s].background}
+                        color={sources[s].color}
+                        icon={preview ? sources[s].prevIcon : sources[s].icon}
+                    />
+                ))}
+                {!preview && (
+                    <Box
+                        sx={{
+                            gridColumnStart: 2,
+                            gridRowStart: 1,
+                            gridRowEnd: sourceKeys.length + 1,
+                        }}
+                    >
+                        {sources[source].component}
+                    </Box>
+                )}
+            </Box>
+        </Box>
+    );
+};
+
+export default Sources;

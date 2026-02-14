@@ -13,7 +13,6 @@ import { initDataframe } from './dataframeActions/initActions';
 import {
     alertErrorMessage,
     resetMessage,
-    snackbarErrorMessage,
     snackbarMessage,
 } from './messageActions';
 
@@ -138,7 +137,7 @@ export const setFilesLocale = () => async (dispatch) => {
             payload: null,
         });
         dispatch(
-            snackbarErrorMessage(
+            alertErrorMessage(
                 <div>
                     Stelle sicher, dass alle benötigten Dateien im gewählten
                     ZIP-Ordner vorhanden sind. Alternativ kannst du <br />
@@ -154,7 +153,6 @@ export const setFilesLocale = () => async (dispatch) => {
                     die benötigten Dateien erstellen.
                 </div>,
                 'localeImport',
-                false,
             ),
         );
     }

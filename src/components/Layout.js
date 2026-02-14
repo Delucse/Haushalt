@@ -320,7 +320,7 @@ const Layout = () => {
 
     return (
         <>
-            {pathname === '/beta' ? (
+            {pathname.startsWith('/beta') ? (
                 <Outlet />
             ) : (
                 <>
@@ -345,7 +345,7 @@ const Layout = () => {
                     >
                         <Toolbar sx={{ minHeight: '56px !important' }}>
                             <Typography
-                                variant="h6"
+                                variant="h5"
                                 component="div"
                                 sx={{ flexGrow: 1, fontWeight: 400 }}
                             >

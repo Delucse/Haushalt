@@ -1,29 +1,29 @@
+import { useEffect } from 'react';
+
+import { useSelector } from 'react-redux';
+
 import { Route, Routes } from 'react-router-dom';
 
-import PrivateRoute from './components/PrivateRoute';
+import { createTheme, ThemeProvider, useMediaQuery } from '@mui/material';
 
+import moment from 'moment';
+import 'moment/locale/de';
+
+import { Chart as ChartJS, TimeSeriesScale, BarElement } from 'chart.js';
+import 'chartjs-adapter-moment';
+
+import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './components/Dashboard';
-import Source from './components/Login';
+import Sources from './components/Login/Sources';
 import Layout from './components/Layout';
 import UmsatzTable from './components/UmsatzTable';
 import Einstellungen from './components/Einstellungen';
 import Kategorien from './components/Kategorien';
 import WiederkehrenderUmsatz from './components/wiederkehrenderUmsatz';
-
-// import Loader from './components/Loader';
-
-import { createTheme, ThemeProvider, useMediaQuery } from '@mui/material';
-import { useSelector } from 'react-redux';
-import { useEffect } from 'react';
 import AbschlussTable from './components/AbschlussTable';
 import UmbuchungTable from './components/UmbuchungTable';
 import Faq from './components/Faq';
 import Announcement from './components/Announcement';
-
-import { Chart as ChartJS, TimeSeriesScale, BarElement } from 'chart.js';
-import 'chartjs-adapter-moment';
-import moment from 'moment';
-import 'moment/locale/de';
 
 ChartJS.register(BarElement, TimeSeriesScale);
 moment.locale('de');
@@ -75,7 +75,10 @@ function App() {
                 <Route path="/" element={<Layout />}>
                     {/* Coming soon Page */}
                     <Route index element={<Announcement />} />
-                    <Route path="/beta" element={<Source />} />
+                    <Route path="/beta">
+                        <Route index element={<Sources preview />} />
+                        <Route path=":source" element={<Sources />} />
+                    </Route>
                     <Route
                         path="/dashboard"
                         element={
