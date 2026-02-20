@@ -1,14 +1,12 @@
-import { FilenSDK } from '@filen/sdk';
-
 import {
     FILE_CHANGED,
     FILE_ERROR,
     FILE_SUCCESS,
     FILE_PROGRESS,
     DATAFRAME_INIT_PROGRESS,
-    AUTH_TYPE,
 } from './types';
 
+import { setAuthType } from './authActions';
 import { initDataframe } from './dataframeActions/initActions';
 import {
     alertErrorMessage,
@@ -18,7 +16,12 @@ import {
 
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+
 import moment from 'moment';
+
+import { FilenSDK } from '@filen/sdk';
+
+import { Dropbox } from 'dropbox';
 
 const changeFile = (changed) => (dispatch) => {
     dispatch({
@@ -113,10 +116,7 @@ export const setFilesLocale = () => async (dispatch) => {
                         break;
                 }
             });
-            dispatch({
-                type: AUTH_TYPE,
-                payload: 'locale',
-            });
+            dispatch(setAuthType('lokal'));
             if (Object.keys(payload).length !== 5) {
                 throw new Error('Dataset is incomplete');
             }
@@ -273,6 +273,112 @@ export const setFilesFilen = (uuid) => async (dispatch, getState) => {
     }
 };
 
+export const setFilesDropbox = (path) => async (dispatch, getState) => {
+    try {
+        dispatch({
+            type: DATAFRAME_INIT_PROGRESS,
+            payload: true,
+        });
+        dispatch(resetMessage());
+        const auth = getState().auth.token;
+        var dropbox = new Dropbox({
+            auth: auth,
+        });
+
+        var filePath = path + '/Kategorien.csv';
+        var download = await dropbox.filesDownload({ path: filePath });
+        var kategorien = new File(
+            [download.result.fileBlob],
+            download.result.name,
+            {
+                type: 'text/csv',
+            },
+        );
+
+        filePath = path + '/Umsatz.csv';
+        download = await dropbox.filesDownload({ path: filePath });
+        var umsatz = new File(
+            [download.result.fileBlob],
+            download.result.name,
+            {
+                type: 'text/csv',
+            },
+        );
+
+        filePath = path + '/wiederkehrenderUmsatz.csv';
+        download = await dropbox.filesDownload({ path: filePath });
+        var wiederkehrenderUmsatz = new File(
+            [download.result.fileBlob],
+            download.result.name,
+            {
+                type: 'text/csv',
+            },
+        );
+
+        filePath = path + '/Umbuchung.csv';
+        download = await dropbox.filesDownload({ path: filePath });
+        var umbuchung = new File(
+            [download.result.fileBlob],
+            download.result.name,
+            {
+                type: 'text/csv',
+            },
+        );
+
+        filePath = path + '/Abschluss.csv';
+        download = await dropbox.filesDownload({ path: filePath });
+        var abschluss = new File(
+            [download.result.fileBlob],
+            download.result.name,
+            {
+                type: 'text/csv',
+            },
+        );
+
+        dispatch({
+            type: FILE_SUCCESS,
+            payload: {
+                uuid: path,
+                umsatz,
+                wiederkehrenderUmsatz,
+                kategorien,
+                umbuchung,
+                abschluss,
+            },
+        });
+        dispatch(initDataframe());
+    } catch (error) {
+        console.log(error.message);
+        dispatch({
+            type: FILE_ERROR,
+            payload: path,
+        });
+        dispatch({
+            type: DATAFRAME_INIT_PROGRESS,
+            payload: null,
+        });
+        dispatch(
+            alertErrorMessage(
+                <div>
+                    Stelle sicher, dass alle benötigten Dateien im gewählten
+                    Ordner vorhanden sind. Alternativ kannst du <br />
+                    <span
+                        style={{
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                        }}
+                        onClick={() => dispatch(uploadRaw(path))}
+                    >
+                        hier
+                    </span>{' '}
+                    die benötigten Dateien erstellen.
+                </div>,
+                'tree',
+            ),
+        );
+    }
+};
+
 const uploadRaw = (uuid) => (dispatch) => {
     dispatch({
         type: DATAFRAME_INIT_PROGRESS,
@@ -328,7 +434,7 @@ const uploadRaw = (uuid) => (dispatch) => {
         },
     });
     dispatch(initDataframe());
-    if (uuid) {
+    if (uuid !== undefined) {
         setTimeout(() => {
             dispatch(uploadFiles());
         }, 1000);
@@ -416,6 +522,9 @@ export const uploadFile = (fileName) => (dispatch, getState) => {
             case 'filen':
                 dispatch(uploadFileFilen(fileName, file));
                 break;
+            case 'dropbox':
+                dispatch(uploadFileDropbox(fileName, file));
+                break;
             default:
                 break;
         }
@@ -439,6 +548,32 @@ const uploadFileFilen = (fileName, file) => async (dispatch, getState) => {
                 type: 'text/csv',
             }),
         });
+    }
+};
+
+const uploadFileDropbox = (fileName, file) => async (dispatch, getState) => {
+    const state = getState();
+    const auth = getState().auth.token;
+    const dropbox = new Dropbox({
+        auth: auth,
+    });
+    if (file.size > 0) {
+        dropbox
+            .filesUpload({
+                path: `${state.file.uuid}/${fileName}.csv`,
+                contents: new File([file], `${fileName}.csv`, {
+                    type: 'text/csv',
+                }),
+                mode: 'overwrite',
+                autorename: false,
+                mute: true,
+            })
+            .catch((err) => {
+                if (err.status === 429) {
+                    // ensures that the updated file is uploaded
+                    dispatch(uploadFileDropbox(fileName, file));
+                }
+            });
     }
 };
 

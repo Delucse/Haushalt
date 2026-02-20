@@ -36,7 +36,7 @@ const Lokal = () => {
                 variant="contained"
                 fullWidth
             >
-                ZIP-Ordner uploaden
+                lokalen ZIP-Ordner uploaden
             </Button>
         </>
     ) : (

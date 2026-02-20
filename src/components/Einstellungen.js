@@ -78,7 +78,7 @@ const Dashboard = () => {
                 checked={settings.ausgabenKategorie}
                 onChange={(e) =>
                     dispatch(
-                        setDashboard('ausgabenKategorie', e.target.checked)
+                        setDashboard('ausgabenKategorie', e.target.checked),
                     )
                 }
             />
@@ -261,7 +261,7 @@ const Theme = () => {
                                 setColor({
                                     main: '#006400',
                                     light: '#7fb17f',
-                                })
+                                }),
                             )
                         }
                     >
@@ -320,7 +320,7 @@ const Theme = () => {
                                     startEnd
                                         ? (e) => {
                                               setColorType(
-                                                  i === 0 ? 'start' : 'end'
+                                                  i === 0 ? 'start' : 'end',
                                               );
                                               setAnchorEl(e.currentTarget);
                                           }
@@ -336,7 +336,7 @@ const Theme = () => {
                                 setColor({
                                     start: '#ff5722',
                                     end: '#ffcc80',
-                                })
+                                }),
                             )
                         }
                     >
@@ -365,14 +365,14 @@ const Theme = () => {
                                   setColor({
                                       main: color.hex,
                                       light: rgbToHex(
-                                          rgbaToRgb(color.rgb, 0.5)
+                                          rgbaToRgb(color.rgb, 0.5),
                                       ),
-                                  })
+                                  }),
                               )
                             : dispatch(
                                   setColor({
                                       [colorType]: color.hex,
-                                  })
+                                  }),
                               )
                     }
                 />
@@ -387,7 +387,7 @@ const Einstellungen = () => {
     const simpleSetting = useSelector((state) => state.settings.simple);
     const authType = useSelector((state) => state.auth.type);
     const isAuthenticated = useSelector(
-        (state) => state.auth.token || authType === 'locale'
+        (state) => state.auth.token || authType === 'lokal',
     );
 
     return (
@@ -419,7 +419,7 @@ const Einstellungen = () => {
                                 onChange={(e) =>
                                     dispatch(setAutoSave(e.target.value))
                                 }
-                                disabled={authType === 'locale'}
+                                disabled={authType === 'lokal'}
                                 row
                                 options={[
                                     { value: true, label: 'automatisch' },

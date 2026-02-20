@@ -9,9 +9,13 @@ import {
     FILTER_RESET,
 } from './types';
 
-import { FilenSDK } from '@filen/sdk';
 import { alertErrorMessage, snackbarMessage } from './messageActions';
+
 import moment from 'moment';
+
+import { FilenSDK } from '@filen/sdk';
+
+import { Dropbox, DropboxAuth } from 'dropbox';
 
 export const setAuthType = (type) => (dispatch) => {
     dispatch({
@@ -24,6 +28,9 @@ export const logout = () => (dispatch, getState) => {
     switch (getState().auth.type) {
         case 'filen':
             dispatch(logoutFilen());
+            break;
+        case 'dropbox':
+            dispatch(logoutDropbox());
             break;
         default:
             dispatch({
@@ -50,8 +57,25 @@ const logoutFilen = () => (dispatch, getState) => {
     dispatch(
         snackbarMessage(
             'Du hast dich erfolgreich von "Filen" abgemeldet.',
-            moment().valueOf()
-        )
+            moment().valueOf(),
+        ),
+    );
+};
+
+const logoutDropbox = () => (dispatch, getState) => {
+    const auth = getState().auth.token;
+    const dropbox = new Dropbox({
+        auth: auth,
+    });
+    dropbox.authTokenRevoke();
+    dispatch({
+        type: AUTH_LOGOUT,
+    });
+    dispatch(
+        snackbarMessage(
+            'Du hast erfolgreich die "Dropbox"-Verknüpfung widerrufen.',
+            moment().valueOf(),
+        ),
     );
 };
 
@@ -83,8 +107,43 @@ export const loginFilen = (mail, password) => async (dispatch) => {
         dispatch(
             alertErrorMessage(
                 'Benutzername oder Passwort ist fehlerhaft.',
-                'user'
-            )
+                'user',
+            ),
+        );
+    }
+};
+
+export const loginDropbox = (code) => async (dispatch) => {
+    dispatch({
+        type: AUTH_PROGRESS,
+        payload: true,
+    });
+    try {
+        const dbxAuth = new DropboxAuth({
+            clientId: process.env.REACT_APP_DROPBOX_APP_KEY,
+        });
+
+        dbxAuth.setCodeVerifier(window.sessionStorage.getItem('codeVerifier'));
+        window.sessionStorage.clear();
+        const response = await dbxAuth.getAccessTokenFromCode(
+            process.env.REACT_APP_DROPBOX_REDIRECT_URI,
+            code,
+        );
+        dbxAuth.setAccessToken(response.result.access_token);
+        dispatch({
+            type: AUTH_SUCCESS,
+            payload: dbxAuth,
+        });
+    } catch (error) {
+        console.log(error.message);
+        dispatch({
+            type: AUTH_ERROR,
+        });
+        dispatch(
+            alertErrorMessage(
+                'Fehler: Es konnte keine gültige Verbindung zu deinem Dropbox-Account hergestellt werden. Versuche es noch einmal.',
+                'dropbox-login',
+            ),
         );
     }
 };

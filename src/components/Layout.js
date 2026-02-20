@@ -37,7 +37,7 @@ const Nav = () => {
 
     const simple = useSelector((state) => state.settings.simple);
     const isAuthenticated = useSelector(
-        (state) => state.auth.token || state.auth.type === 'locale',
+        (state) => state.auth.token || state.auth.type === 'lokal',
     );
 
     const [umsatzOpen, setUmsatzOpen] = useState(false);
@@ -227,7 +227,7 @@ const Nav = () => {
 const Tab = ({ value }) => {
     const navigate = useNavigate();
     const isAuthenticated = useSelector(
-        (state) => state.auth.token || state.auth.type === 'locale',
+        (state) => state.auth.token || state.auth.type === 'lokal',
     );
 
     return (

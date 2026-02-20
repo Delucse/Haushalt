@@ -9,14 +9,24 @@ import { mdiFolderOpen, mdiArrowLeftThin, mdiPiggyBank } from '@mdi/js';
 
 import { ReactComponent as FilenLogo } from '../../media/Filen_Logo.svg';
 import { ReactComponent as FilenLogoName } from '../../media/Filen_Logo_Name.svg';
+import { ReactComponent as DropboxLogo } from '../../media/Dropbox_Logo.svg';
+import { ReactComponent as DropboxLogoName } from '../../media/Dropbox_Logo_Name.svg';
 
 import Lokal from './Lokal';
 import Filen from './Filen';
+import Dropbox from './Dropbox';
 
 const sources = {
+    dropbox: {
+        background: '#0061fe',
+        prevIcon: (
+            <DropboxLogoName style={{ height: '38.25px', width: 'auto' }} />
+        ),
+        icon: <DropboxLogo style={{ height: '47.26px', width: 'auto' }} />,
+        component: <Dropbox />,
+    },
     filen: {
         background: 'black',
-        color: 'white',
         prevIcon: <FilenLogoName style={{ height: '30px', width: 'auto' }} />,
         icon: <FilenLogo style={{ height: '30px', width: 'auto' }} />,
         component: <Filen />,
@@ -26,11 +36,11 @@ const sources = {
         color: '#800000',
         prevIcon: (
             <>
-                <Icon path={mdiFolderOpen} size={1.4} color="#F4A460" />
+                <Icon path={mdiFolderOpen} size={1.413} color="#F4A460" />
                 <span style={{ marginLeft: '5px' }}>Lokal</span>
             </>
         ),
-        icon: <Icon path={mdiFolderOpen} size={1.4} color="#F4A460" />,
+        icon: <Icon path={mdiFolderOpen} size={1.413} color="#F4A460" />,
         component: <Lokal />,
     },
 };

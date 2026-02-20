@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom';
 
 function PrivateRoute(props) {
     const isAuthenticated = useSelector(
-        (state) => state.auth.token || state.auth.type === 'locale'
+        (state) => state.auth.token || state.auth.type === 'lokal',
     );
 
     if (isAuthenticated) {
