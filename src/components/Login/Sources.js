@@ -1,4 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { logout, setAuthType } from '../../actions/authActions';
 
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -71,11 +74,18 @@ const Source = ({ active, preview, background, color, icon, set }) => {
 };
 
 const Sources = ({ preview }) => {
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const params = useParams();
 
+    const source = useSelector((state) => state.auth.type);
+    const token = useSelector((state) => state.auth.token);
     const sourceKeys = Object.keys(sources);
-    const [source, setSource] = useState(params.source);
+
+    useEffect(() => {
+        dispatch(setAuthType(params.source));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         if (source !== null && source !== params.source) {
@@ -85,7 +95,14 @@ const Sources = ({ preview }) => {
     }, [source]);
 
     useEffect(() => {
-        preview && setSource(null);
+        if (preview) {
+            if (token) {
+                dispatch(logout());
+            } else {
+                dispatch(setAuthType(null));
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [preview]);
 
     return (
@@ -105,7 +122,12 @@ const Sources = ({ preview }) => {
                             color: (theme) => theme.palette.primary.main,
                         },
                     }}
-                    onClick={() => !preview && navigate('/beta')}
+                    onClick={() => {
+                        if (!preview) {
+                            if (!!token) dispatch(logout);
+                            navigate('/beta');
+                        }
+                    }}
                 >
                     <Icon
                         path={preview ? mdiPiggyBank : mdiArrowLeftThin}
@@ -147,7 +169,10 @@ const Sources = ({ preview }) => {
                         key={s}
                         active={source === s}
                         preview={preview}
-                        set={() => setSource(s)}
+                        set={() => {
+                            if (!!token) dispatch(logout());
+                            dispatch(setAuthType(s));
+                        }}
                         background={sources[s].background}
                         color={sources[s].color}
                         icon={preview ? sources[s].prevIcon : sources[s].icon}
@@ -161,7 +186,7 @@ const Sources = ({ preview }) => {
                             gridRowEnd: sourceKeys.length + 1,
                         }}
                     >
-                        {sources[source].component}
+                        {sources[source]?.component}
                     </Box>
                 )}
             </Box>

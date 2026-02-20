@@ -6,7 +6,6 @@ import {
     DATAFRAME_INIT_PROGRESS,
 } from './types';
 
-import { setAuthType } from './authActions';
 import { initDataframe } from './dataframeActions/initActions';
 import {
     alertErrorMessage,
@@ -116,7 +115,6 @@ export const setFilesLocale = () => async (dispatch) => {
                         break;
                 }
             });
-            dispatch(setAuthType('lokal'));
             if (Object.keys(payload).length !== 5) {
                 throw new Error('Dataset is incomplete');
             }

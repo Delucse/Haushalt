@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { loginFilen, setAuthType } from '../../actions/authActions';
+import { loginFilen } from '../../actions/authActions';
 import { setFilesFilen } from '../../actions/fileActions';
 import { resetMessage } from '../../actions/messageActions';
 
@@ -87,7 +87,6 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(event) => {
                     if (event.key === 'Enter' && !progress) {
-                        dispatch(setAuthType('filen'));
                         dispatch(loginFilen(user, password));
                     }
                 }}
@@ -114,7 +113,6 @@ const Login = () => {
                     variant="contained"
                     sx={{ width: '100%' }}
                     onClick={() => {
-                        dispatch(setAuthType('filen'));
                         dispatch(loginFilen(user, password));
                     }}
                     disabled={progress}
