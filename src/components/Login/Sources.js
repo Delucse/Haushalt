@@ -106,7 +106,9 @@ const Sources = ({ preview }) => {
     }, [preview]);
 
     return (
-        <Box sx={{ padding: '20px' }}>
+        <Box
+            sx={{ padding: '20px', maxWidth: { sm: '600px' }, margin: 'auto' }}
+        >
             <Box sx={{ minHeight: '70px', display: 'flex' }}>
                 <Box
                     sx={{
