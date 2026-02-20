@@ -180,14 +180,18 @@ const FolderTree = ({ token }) => {
         return (
             <Box key={item.uuid}>
                 <ListItemButton
-                    onClick={() => dispatch(setFilesFilen(item.uuid))}
+                    onClick={() =>
+                        item.uuid && dispatch(setFilesFilen(item.uuid))
+                    }
                     sx={{
                         padding: '8px 12px',
                         marginLeft: `${level * 30}px`,
                         color: (theme) => theme.palette.text.secondary,
                         '&:hover': {
-                            color: (theme) => theme.palette.secondary.main,
+                            color: (theme) =>
+                                item.uuid && theme.palette.secondary.main,
                         },
+                        cursor: !item.uuid && 'default',
                     }}
                 >
                     <Icon
@@ -207,13 +211,13 @@ const FolderTree = ({ token }) => {
         );
     };
 
-    return (
-        tree && (
-            <>
-                <Alert type={'tree'} style={{ marginBottom: '20px' }} />
-                <List disablePadding>{renderTree(tree)}</List>
-            </>
-        )
+    return tree ? (
+        <>
+            <Alert type={'tree'} style={{ marginBottom: '20px' }} />
+            <List disablePadding>{renderTree(tree)}</List>
+        </>
+    ) : (
+        <List disablePadding>{renderTree([{ name: 'lädt ...' }])}</List>
     );
 };
 

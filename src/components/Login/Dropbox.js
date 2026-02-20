@@ -118,14 +118,18 @@ const FolderTree = ({ auth }) => {
         return items.map((item) => (
             <Box key={item.id}>
                 <ListItemButton
-                    onClick={() => dispatch(setFilesDropbox(item.path))}
+                    onClick={() =>
+                        item.path && dispatch(setFilesDropbox(item.path))
+                    }
                     sx={{
                         padding: '8px 12px',
                         marginLeft: `${level * 30}px`,
                         color: (theme) => theme.palette.text.secondary,
                         '&:hover': {
-                            color: (theme) => theme.palette.secondary.main,
+                            color: (theme) =>
+                                item.path && theme.palette.secondary.main,
                         },
+                        cursor: !item.path && 'default',
                     }}
                 >
                     <Icon
@@ -145,13 +149,13 @@ const FolderTree = ({ auth }) => {
         ));
     };
 
-    return (
-        tree && (
-            <>
-                <Alert type={'tree'} style={{ marginBottom: '20px' }} />
-                <List disablePadding>{renderTree(tree)}</List>
-            </>
-        )
+    return tree ? (
+        <>
+            <Alert type={'tree'} style={{ marginBottom: '20px' }} />
+            <List disablePadding>{renderTree(tree)}</List>
+        </>
+    ) : (
+        <List disablePadding>{renderTree([{ name: 'lädt ...' }])}</List>
     );
 };
 
