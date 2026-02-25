@@ -23,7 +23,7 @@ import WiederkehrenderUmsatz from './components/wiederkehrenderUmsatz';
 import AbschlussTable from './components/AbschlussTable';
 import UmbuchungTable from './components/UmbuchungTable';
 import Faq from './components/Faq';
-import Announcement from './components/Announcement';
+import NotFound from './components/NotFound';
 
 ChartJS.register(BarElement, TimeSeriesScale);
 moment.locale('de');
@@ -73,9 +73,8 @@ function App() {
         <ThemeProvider theme={muiTheme} noSsr>
             <Routes>
                 <Route path="/" element={<Layout />}>
-                    {/* Coming soon Page */}
-                    <Route index element={<Announcement />} />
-                    <Route path="/beta">
+                    <Route index element={<Sources preview />} />
+                    <Route path="/quelle">
                         <Route index element={<Sources preview />} />
                         <Route path=":source" element={<Sources />} />
                     </Route>
@@ -130,8 +129,8 @@ function App() {
                     />
                     <Route path="/faq" element={<Faq />} />
                 </Route>
+                <Route path="*" element={<NotFound />} />
             </Routes>
-            {/* <Loader /> */}
         </ThemeProvider>
     );
 }

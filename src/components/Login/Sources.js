@@ -89,7 +89,7 @@ const Sources = ({ preview }) => {
 
     useEffect(() => {
         if (source !== null && source !== params.source) {
-            navigate(`/beta/${source}`);
+            navigate(`/quelle/${source}`);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [source]);
@@ -127,7 +127,7 @@ const Sources = ({ preview }) => {
                     onClick={() => {
                         if (!preview) {
                             if (!!token) dispatch(logout);
-                            navigate('/beta');
+                            navigate('/quelle');
                         }
                     }}
                 >

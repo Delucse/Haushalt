@@ -217,7 +217,7 @@ const Nav = () => {
                 display: 'flex',
             }}
         >
-            <IconButton color="inherit" onClick={() => navigate('/beta')}>
+            <IconButton color="inherit" onClick={() => navigate('/')}>
                 <Icon path={mdiHomeImportOutline} size={1.4} />
             </IconButton>
         </Box>
@@ -320,7 +320,7 @@ const Layout = () => {
 
     return (
         <>
-            {pathname.startsWith('/beta') ? (
+            {pathname === '/' || pathname.startsWith('/quelle') ? (
                 <Outlet />
             ) : (
                 <>

@@ -119,7 +119,8 @@ const FolderTree = ({ auth }) => {
             <Box key={item.id}>
                 <ListItemButton
                     onClick={() =>
-                        item.path && dispatch(setFilesDropbox(item.path))
+                        item.path !== undefined &&
+                        dispatch(setFilesDropbox(item.path))
                     }
                     sx={{
                         padding: '8px 12px',
@@ -127,9 +128,10 @@ const FolderTree = ({ auth }) => {
                         color: (theme) => theme.palette.text.secondary,
                         '&:hover': {
                             color: (theme) =>
-                                item.path && theme.palette.secondary.main,
+                                item.path !== undefined &&
+                                theme.palette.secondary.main,
                         },
-                        cursor: !item.path && 'default',
+                        cursor: item.path === undefined && 'default',
                     }}
                 >
                     <Icon
