@@ -36,10 +36,7 @@ function AusgabenTreeMap() {
     const [duration, setDuration] = useState(1000);
 
     return umsatzAusgabeCollection ? (
-        umsatzAusgabeCollection.length > 0 &&
-        (umsatzAusgabeCollection[0].Kategorie !== 'nicht gelistet' ||
-            (umsatzAusgabeCollection[0].Betrag !== 0 &&
-                umsatzAusgabeCollection[0].Kategorie === 'nicht gelistet')) ? (
+        umsatzAusgabeCollection.length > 0 ? (
             <ReactChart
                 type="treemap"
                 data={{
