@@ -117,7 +117,7 @@ export const changeWiederkehrenderUmsatz =
             getState().dataframe.original;
         var newDate = false;
         wiederkehrenderUmsatz = wiederkehrenderUmsatz.setRow(id - 1, (row) => {
-            if (update.Tag !== old.Tag) {
+            if (Number(update.tag) !== Number(old.tag)) {
                 if (row.get('Datum') !== '') newDate = true;
                 row = row.set('Datum', '');
                 row = row.set('Zeitstempel', '');
