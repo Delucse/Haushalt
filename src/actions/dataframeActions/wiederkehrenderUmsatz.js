@@ -340,10 +340,12 @@ export const addMonatsposten = (jahr, monat) => (dispatch, getState) => {
             type: DATAFRAME_ORIGINAL_UMSATZ,
             payload: umsatz,
         });
+        dispatch(uploadFile('Umsatz'));
         dispatch({
             type: DATAFRAME_ORIGINAL_WIEDERKEHRENDERUMSATZ,
             payload: wiederkehrenderUmsatz,
         });
+        dispatch(uploadFile('wiederkehrenderUmsatz'));
         dispatch(
             updateNichtGelistet(
                 moment({ year: jahr, month: monat - 1, day: 1 }).valueOf(),
