@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    setFilter,
+    setPrevFilterArts,
+    setPrevFilterCategories,
+    setPrevFilterTags,
+    setPrevFilterTypes,
+    setPrevFilterWord,
+} from '../actions/filterActions';
 
 import { Typography, Box, Chip } from '@mui/material';
 
@@ -11,11 +19,15 @@ import AddUmsatz from './AddUmsatz';
 import Table from './Table';
 import IconButton from './IconButton';
 import Search from './Search';
+import ActiveFilter from './ActiveFilter';
 
 const UmsatzTable = () => {
     const [data, setData] = useState({});
 
-    const search = useSelector((state) => state.filter.word.toLowerCase());
+    const dispatch = useDispatch();
+    const { count, word, kategorieTyp } = useSelector((state) => state.filter);
+    const activeFilter = count > 0 && word.length > 0;
+    const search = word.toLowerCase();
     const isSearch = search.length > 0;
 
     const umsatzFiltered = useSelector(
@@ -98,14 +110,13 @@ const UmsatzTable = () => {
                         </Typography>
                     ) : null}
                 </Box>
+                <ActiveFilter except={['word']} />
             </Box>
             {umsatzFilteredCollection ? (
                 umsatzFilteredCollection.length > 0 ? (
                     <>
                         <Table
-                            height={
-                                'calc(100vh - 142px - 56px - 16px + 10px)' // - 34px
-                            }
+                            height={`calc(100vh - 142px - 56px - 16px + 10px${activeFilter > 0 ? ' - 34px' : ''})`}
                             type="umsatz"
                             orderBy={'Datum'}
                             head={[
@@ -142,6 +153,12 @@ const UmsatzTable = () => {
                                             //     row['Tags'],
                                         )
                                         .count() > 0;
+                                const betrag = row['Betrag']
+                                    .toLocaleString('de-DE', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    })
+                                    .replace('-', '- ');
                                 return [
                                     {
                                         value: (
@@ -188,6 +205,12 @@ const UmsatzTable = () => {
                                     {
                                         value: row['Datum'],
                                         sortValue: row['Zeitstempel'],
+                                        onDoubleClick: () => {
+                                            dispatch(
+                                                setPrevFilterWord(row['Datum']),
+                                            );
+                                            dispatch(setFilter());
+                                        },
                                         highlighted:
                                             isSearch &&
                                             row['Datum'].includes(search),
@@ -195,29 +218,25 @@ const UmsatzTable = () => {
                                         width: '72px',
                                     },
                                     {
-                                        value: row['Betrag']
-                                            .toLocaleString('de-DE', {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                                style: 'currency',
-                                                currency: 'EUR',
-                                            })
-                                            .replace('-', '- '),
+                                        value: `${betrag} €`,
                                         sortValue: row['Betrag'],
+                                        onDoubleClick: () => {
+                                            dispatch(setPrevFilterWord(betrag));
+                                            dispatch(setFilter());
+                                        },
                                         align: 'right',
                                         highlighted:
-                                            isSearch &&
-                                            row['Betrag']
-                                                .toLocaleString('de-DE', {
-                                                    minimumFractionDigits: 2,
-                                                    maximumFractionDigits: 2,
-                                                })
-                                                .replace('-', '- ')
-                                                .includes(search),
+                                            isSearch && betrag.includes(search),
                                         disabled: monatspostenNotActive,
                                     },
                                     {
                                         value: row['Art'],
+                                        onDoubleClick: () => {
+                                            dispatch(
+                                                setPrevFilterArts([row['Art']]),
+                                            );
+                                            dispatch(setFilter());
+                                        },
                                         highlighted:
                                             isSearch &&
                                             row['Art']
@@ -227,6 +246,14 @@ const UmsatzTable = () => {
                                     },
                                     {
                                         value: row['Kategorie'],
+                                        onDoubleClick: () => {
+                                            dispatch(
+                                                setPrevFilterCategories([
+                                                    row[kategorieTyp],
+                                                ]),
+                                            );
+                                            dispatch(setFilter());
+                                        },
                                         highlighted:
                                             isSearch &&
                                             row['Kategorie']
@@ -236,6 +263,14 @@ const UmsatzTable = () => {
                                     },
                                     {
                                         value: row['Typ'],
+                                        onDoubleClick: () => {
+                                            dispatch(
+                                                setPrevFilterTypes([
+                                                    row['Typ'],
+                                                ]),
+                                            );
+                                            dispatch(setFilter());
+                                        },
                                         highlighted:
                                             isSearch &&
                                             row['Typ']
@@ -245,6 +280,14 @@ const UmsatzTable = () => {
                                     },
                                     {
                                         value: row['Beschreibung'],
+                                        onDoubleClick: () => {
+                                            dispatch(
+                                                setPrevFilterWord(
+                                                    row['Beschreibung'],
+                                                ),
+                                            );
+                                            dispatch(setFilter());
+                                        },
                                         highlighted:
                                             isSearch &&
                                             row['Beschreibung']
@@ -254,6 +297,14 @@ const UmsatzTable = () => {
                                     },
                                     {
                                         value: row['Bemerkung'],
+                                        onDoubleClick: () => {
+                                            dispatch(
+                                                setPrevFilterWord(
+                                                    row['Bemerkung'],
+                                                ),
+                                            );
+                                            dispatch(setFilter());
+                                        },
                                         highlighted:
                                             isSearch &&
                                             row['Bemerkung']
@@ -264,6 +315,12 @@ const UmsatzTable = () => {
                                     {
                                         value: row['Tags'].map((v) => (
                                             <Chip
+                                                onDoubleClick={() => {
+                                                    dispatch(
+                                                        setPrevFilterTags([v]),
+                                                    );
+                                                    dispatch(setFilter());
+                                                }}
                                                 label={v}
                                                 color={
                                                     monatspostenNotActive

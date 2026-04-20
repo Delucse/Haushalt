@@ -27,7 +27,6 @@ const Search = ({ filter = false }) => {
                     dispatch(setFilter());
                 }
             }}
-            style={filter && { margin: '0 16px' }}
             labelStyle={{ marginLeft: '16px' }}
             start={<Icon path={mdiMagnify} size={1.1} />}
             end={

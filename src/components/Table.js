@@ -151,6 +151,7 @@ const Table = ({ height, head, body, orderBy, order, type }) => {
                                                   theme.palette.action.hover
                                             : 'inherit',
                                     }}
+                                    onDoubleClick={cell.onDoubleClick}
                                 >
                                     {cell.value}
                                 </TableCell>

@@ -1,5 +1,6 @@
 import {
     FILTER,
+    FILTER_COUNT,
     FILTER_PREV_WORD,
     FILTER_PREV_TAGS,
     FILTER_PREV_CATEGORIES,
@@ -9,6 +10,7 @@ import {
     FILTER_PREV_TIME_RANGE,
     FILTER_PREV_TIME_INTERVAL,
     FILTER_PREV_RESET,
+    FILTER_PARTIAL_RESET,
     FILTER_RESET,
 } from '../actions/types';
 
@@ -23,6 +25,7 @@ const initialState = {
         range: [],
         interval: 'Monat',
     },
+    count: 0,
     prev: {},
 };
 
@@ -34,6 +37,16 @@ const reducer = (state = initialState, action) => {
                 ...state.prev,
                 prev: {},
             };
+        case FILTER_COUNT:
+            return {
+                ...state,
+                count:
+                    state.kategorien.length +
+                    state.art.length +
+                    state.typ.length +
+                    state.tags.length +
+                    (state.word.length > 0 ? 1 : 0),
+            };
         case FILTER_PREV_WORD:
             return {
                 ...state,
@@ -42,7 +55,10 @@ const reducer = (state = initialState, action) => {
         case FILTER_PREV_TAGS:
             return {
                 ...state,
-                prev: { ...state.prev, tags: action.payload },
+                prev: {
+                    ...state.prev,
+                    tags: action.payload,
+                },
             };
         case FILTER_PREV_CATEGORIES:
             return {
@@ -105,6 +121,17 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 prev: {},
             };
+        case FILTER_PARTIAL_RESET:
+            return {
+                ...state,
+                kategorien: [],
+                art: [],
+                typ: [],
+                word: '',
+                tags: [],
+                count: 0,
+                prev: {},
+            };
         case FILTER_RESET:
             return {
                 ...state,
@@ -118,6 +145,7 @@ const reducer = (state = initialState, action) => {
                     range: [],
                     interval: 'Monat',
                 },
+                count: 0,
                 prev: {},
             };
         default:

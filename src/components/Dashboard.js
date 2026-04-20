@@ -22,7 +22,7 @@ import Icon from '@mdi/react';
 import Dialog from './Dialog';
 import { useState } from 'react';
 import IconButton from './IconButton';
-import Print from './Print';
+// import Print from './Print';
 import Loader from './Loader';
 
 const charts = {
@@ -88,10 +88,10 @@ const Dashboard = ({ print }) => {
             umsatzDf && (
                 <Box id="dashboard">
                     <Box sx={{ display: 'flex' }}>
-                        <Box sx={{ width: 'calc(100% - 50px)' }}>
+                        <Box sx={{ width: '100%' }}>
                             <Filter />
                         </Box>
-                        {!print && <Print />}
+                        {/* {!print && <Print />} */}
                     </Box>
                     <Grid container spacing={1.5} sx={{ marginTop: '0px' }}>
                         <Grid

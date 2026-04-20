@@ -2,6 +2,7 @@ import moment from 'moment';
 import {
     DATAFRAME_FILTER,
     FILTER,
+    FILTER_COUNT,
     FILTER_PREV_ART,
     FILTER_PREV_CATEGORIES,
     FILTER_PREV_CATEGORY_TYPE,
@@ -11,6 +12,7 @@ import {
     FILTER_PREV_RESET,
     FILTER_PREV_WORD,
     FILTER_PREV_TAGS,
+    FILTER_PARTIAL_RESET,
 } from './types';
 
 export const filterDataframe = () => (dispatch, getState) => {
@@ -114,6 +116,14 @@ export const setFilter =
     (update = true) =>
     (dispatch) => {
         dispatch({ type: FILTER });
+        dispatch({ type: FILTER_COUNT });
+        update && dispatch(filterDataframe());
+    };
+
+export const resetFilter =
+    (update = true) =>
+    (dispatch) => {
+        dispatch({ type: FILTER_PARTIAL_RESET });
         update && dispatch(filterDataframe());
     };
 

@@ -8,21 +8,16 @@ const Arten = () => {
     const filterArts = useSelector(
         (state) => state.filter.prev?.art || state.filter.art,
     );
-    const umsatz = useSelector((state) => state.dataframe.original.umsatz);
-    const arts =
-        umsatz?.count() > 0 ? umsatz.unique('Art').toDict().Art.sort() : [];
 
     return (
-        arts && (
-            <Autocomplete
-                value={filterArts}
-                options={arts}
-                placeholder={filterArts.length > 0 ? 'Art' : 'alle Arten'}
-                fullWidth
-                multiple
-                onChange={(value) => dispatch(setPrevFilterArts(value))}
-            />
-        )
+        <Autocomplete
+            value={filterArts}
+            options={['Einnahme', 'Ausgabe']}
+            placeholder={filterArts.length > 0 ? 'Art' : 'alle Arten'}
+            fullWidth
+            multiple
+            onChange={(value) => dispatch(setPrevFilterArts(value))}
+        />
     );
 };
 

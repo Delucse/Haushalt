@@ -18,6 +18,7 @@ import Zeitrange from './Zeitrange';
 import Dialog from './Dialog';
 import Button from './Button';
 import Search from './Search';
+import ActiveFilter from './ActiveFilter';
 
 const Zeitangabe = ({ margin }) => {
     const { range, interval } = useSelector((state) => state.filter.time);
@@ -74,14 +75,7 @@ const Filter = ({ icon }) => {
     const [open, setOpen] = useState(false);
 
     const dispatch = useDispatch();
-    const filterCount = useSelector(
-        (state) =>
-            state.filter.kategorien.length +
-            state.filter.typ.length +
-            state.filter.art.length +
-            state.filter.tags.length +
-            (state.filter.word.length > 0 ? 1 : 0),
-    );
+    const filterCount = useSelector((state) => state.filter.count);
 
     return (
         <>
@@ -93,6 +87,9 @@ const Filter = ({ icon }) => {
                     paddingTop: '16px',
                     background: (theme) => theme.palette.background.default,
                     zIndex: icon ? 'inherit' : 1,
+                    width: '100%',
+                    gap: { sm: 'unset', xs: '10px' },
+                    display: { sm: 'flex', xs: 'grid' },
                 }}
             >
                 <Box
@@ -141,6 +138,7 @@ const Filter = ({ icon }) => {
                         <Zeitangabe margin={filterCount > 0 && 15} />
                     )}
                 </Box>
+                {!open && !icon && <ActiveFilter />}
             </Box>
 
             <Dialog
