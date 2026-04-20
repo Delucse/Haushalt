@@ -11,6 +11,7 @@ import { mdiFilterVariant } from '@mdi/js';
 import moment from 'moment';
 
 import Arten from './Arten';
+import Tags from './Tags';
 import KategorienFilter from './KategorienFilter';
 import Typen from './Typen';
 import Zeitrange from './Zeitrange';
@@ -73,14 +74,13 @@ const Filter = ({ icon }) => {
     const [open, setOpen] = useState(false);
 
     const dispatch = useDispatch();
-    const filterCount = useSelector((state) =>
-        state.filter.kategorien.length +
+    const filterCount = useSelector(
+        (state) =>
+            state.filter.kategorien.length +
             state.filter.typ.length +
             state.filter.art.length +
-            state.filter.word.length >
-        0
-            ? 1
-            : 0,
+            state.filter.tags.length +
+            (state.filter.word.length > 0 ? 1 : 0),
     );
 
     return (
@@ -188,8 +188,11 @@ const Filter = ({ icon }) => {
                             }}
                         />
                         <Grid container spacing={1.5}>
-                            <Grid item xxs={12}>
+                            <Grid item xxs={12} sm={6}>
                                 <Search />
+                            </Grid>
+                            <Grid item xxs={12} sm={6}>
+                                <Tags />
                             </Grid>
                             <Grid item xxs={12} sm={3}>
                                 <Arten />

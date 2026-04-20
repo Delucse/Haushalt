@@ -384,7 +384,7 @@ const uploadRaw = (uuid) => (dispatch) => {
     });
     dispatch(resetMessage());
     var blob = new Blob(
-        ['Datum;Betrag;Art;Typ;Kategorie;Beschreibung;Bemerkung\n\r'],
+        ['Datum;Betrag;Art;Typ;Kategorie;Beschreibung;Bemerkung,Tags\n\r'],
         {
             type: 'text/csv',
         },
@@ -393,7 +393,7 @@ const uploadRaw = (uuid) => (dispatch) => {
         type: 'text/csv',
     });
     blob = new Blob(
-        ['Tag;Datum;Betrag;Art;Kategorie;Beschreibung;Bemerkung\n\r'],
+        ['Tag;Datum;Betrag;Art;Kategorie;Beschreibung;Bemerkung,Tags\n\r'],
         {
             type: 'text/csv',
         },
@@ -461,6 +461,7 @@ const getFile = (fileName) => (dispatch, getState) => {
             const umsatzDf = getState().dataframe.original.umsatz;
             fileContent = umsatzDf
                 .filter((row) => row.get('KategorieID') > 1)
+                .withColumn('Tags', (row) => row.get('Tags').join('|'))
                 .select(
                     'Datum',
                     'Betrag',
@@ -469,6 +470,7 @@ const getFile = (fileName) => (dispatch, getState) => {
                     'KategorieID',
                     'Beschreibung',
                     'Bemerkung',
+                    'Tags',
                 )
                 .rename('KategorieID', 'Kategorie')
                 .toText(';');
@@ -477,6 +479,7 @@ const getFile = (fileName) => (dispatch, getState) => {
             const wiederkehrenderUmsatzDf =
                 getState().dataframe.original.wiederkehrenderUmsatz;
             fileContent = wiederkehrenderUmsatzDf
+                .withColumn('Tags', (row) => row.get('Tags').join('|'))
                 .select(
                     'Tag',
                     'Datum',
@@ -485,6 +488,7 @@ const getFile = (fileName) => (dispatch, getState) => {
                     'KategorieID',
                     'Beschreibung',
                     'Bemerkung',
+                    'Tags',
                 )
                 .rename('KategorieID', 'Kategorie')
                 .toText(';');

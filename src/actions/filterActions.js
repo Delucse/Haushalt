@@ -10,11 +10,12 @@ import {
     FILTER_PREV_TIME_INTERVAL,
     FILTER_PREV_RESET,
     FILTER_PREV_WORD,
+    FILTER_PREV_TAGS,
 } from './types';
 
 export const filterDataframe = () => (dispatch, getState) => {
     const { dataframe, filter } = getState();
-    const { word, kategorien, kategorieTyp, art, typ, time } = filter;
+    const { word, tags, kategorien, kategorieTyp, art, typ, time } = filter;
     var { range } = time;
     var umsatzDfFiltered = dataframe.original.umsatz.slice();
     var umbuchungDfFiltered = dataframe.original.umbuchung.slice();
@@ -58,20 +59,28 @@ export const filterDataframe = () => (dispatch, getState) => {
             const lowerWord = word.toLowerCase();
             umsatzDfFiltered = umsatzDfFiltered.filter(
                 (row) =>
-                    row.get('Bemerkung').toLowerCase().includes(lowerWord) ||
                     row.get('Datum').includes(lowerWord) ||
                     row
                         .get('Betrag')
                         .toLocaleString('de-DE', {
                             minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
+                            maximumFractionDigits: 2,
                         })
                         .replace('-', '- ')
                         .includes(lowerWord) ||
                     row.get('Art').toLowerCase().includes(lowerWord) ||
                     row.get('Kategorie').toLowerCase().includes(lowerWord) ||
                     row.get('Typ').toLowerCase().includes(lowerWord) ||
-                    row.get('Beschreibung').toLowerCase().includes(lowerWord),
+                    row.get('Beschreibung').toLowerCase().includes(lowerWord) ||
+                    row.get('Bemerkung').toLowerCase().includes(lowerWord) ||
+                    row
+                        .get('Tags')
+                        .some((tag) => tag.toLowerCase().includes(lowerWord)),
+            );
+        }
+        if (tags && tags.length > 0) {
+            umsatzDfFiltered = umsatzDfFiltered.filter((row) =>
+                row.get('Tags').some((tag) => tags.includes(tag)),
             );
         }
         if (art && art.length > 0) {
@@ -110,6 +119,10 @@ export const setFilter =
 
 export const setPrevFilterWord = (word) => (dispatch) => {
     dispatch({ type: FILTER_PREV_WORD, payload: word });
+};
+
+export const setPrevFilterTags = (tags) => (dispatch) => {
+    dispatch({ type: FILTER_PREV_TAGS, payload: tags });
 };
 
 export const setPrevFilterCategoryType = (type) => (dispatch) => {

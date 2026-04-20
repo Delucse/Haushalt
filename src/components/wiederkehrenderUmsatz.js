@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 
 import { useSelector } from 'react-redux';
-import { Typography } from '@mui/material';
+
+import { Typography, Chip } from '@mui/material';
+
 import Icon from '@mdi/react';
 import { mdiPencil } from '@mdi/js';
+
 import Table from './Table';
 import AddWiederkehrenderUmsatz from './AddWiederkehrenderUmsatz';
 import Button from './Button';
@@ -40,6 +43,7 @@ const WiederkehrenderUmsatz = () => {
                 kategorie={data.kategorie}
                 beschreibung={data.beschreibung}
                 bemerkung={data.bemerkung}
+                tags={data.tags}
             />
             {wiederkehrenderUmsatz.length > 0 ? (
                 <Table
@@ -54,6 +58,7 @@ const WiederkehrenderUmsatz = () => {
                         { value: 'Kategorie', sort: true },
                         { value: 'Beschreibung', sort: true },
                         { value: 'Bemerkung', sort: true },
+                        { value: '', sort: false },
                     ]}
                     body={wiederkehrenderUmsatz.map((row) => [
                         {
@@ -69,6 +74,7 @@ const WiederkehrenderUmsatz = () => {
                                             kategorie: row['KategorieID'],
                                             beschreibung: row['Beschreibung'],
                                             bemerkung: row['Bemerkung'],
+                                            tags: row['Tags'],
                                         });
                                         setOpen(true);
                                     }}
@@ -109,6 +115,19 @@ const WiederkehrenderUmsatz = () => {
                         },
                         {
                             value: row['Bemerkung'],
+                        },
+                        {
+                            value: row['Tags'].map((v) => (
+                                <Chip
+                                    label={v}
+                                    color={'primary'}
+                                    size="small"
+                                    variant={'filled'}
+                                    sx={{
+                                        margin: '5px',
+                                    }}
+                                />
+                            )),
                         },
                     ])}
                 />

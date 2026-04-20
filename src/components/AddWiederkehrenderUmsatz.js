@@ -24,6 +24,7 @@ const AddWiederkehrenderUmsatz = ({
     kategorie,
     beschreibung,
     bemerkung,
+    tags,
     onClose,
 }) => {
     const errorType = useSelector((state) =>
@@ -42,6 +43,7 @@ const AddWiederkehrenderUmsatz = ({
     const [newKategorie, setNewKategorie] = useState(kategorie);
     const [newBeschreibung, setNewBeschreibung] = useState(beschreibung);
     const [newBemerkung, setNewBemerkung] = useState(bemerkung);
+    const [newTags, setNewTags] = useState(tags);
 
     const dispatch = useDispatch();
 
@@ -94,7 +96,8 @@ const AddWiederkehrenderUmsatz = ({
                     newBetrag !== betrag ||
                     newKategorie.KategorieID !== kategorie ||
                     newBeschreibung !== beschreibung ||
-                    newBemerkung !== bemerkung
+                    newBemerkung !== bemerkung ||
+                    newTags.toString() !== tags.toString()
                 ) {
                     dispatch(
                         changeWiederkehrenderUmsatz(
@@ -106,6 +109,7 @@ const AddWiederkehrenderUmsatz = ({
                                 kategorie: newKategorie.KategorieID,
                                 beschreibung: newBeschreibung,
                                 bemerkung: newBemerkung,
+                                tags: newTags,
                             },
                             {
                                 tag,
@@ -114,6 +118,7 @@ const AddWiederkehrenderUmsatz = ({
                                 kategorie,
                                 beschreibung,
                                 bemerkung,
+                                tags,
                             },
                         ),
                     );
@@ -127,6 +132,7 @@ const AddWiederkehrenderUmsatz = ({
                         newKategorie.KategorieID,
                         newBeschreibung,
                         newBemerkung,
+                        newTags,
                     ),
                 );
             }
@@ -147,6 +153,7 @@ const AddWiederkehrenderUmsatz = ({
         setNewKategorie('');
         setNewBeschreibung('');
         setNewBemerkung('');
+        setNewTags([]);
         setBetragError(false);
     };
 
@@ -160,6 +167,7 @@ const AddWiederkehrenderUmsatz = ({
         );
         setNewBeschreibung(beschreibung);
         setNewBemerkung(bemerkung);
+        setNewTags(tags);
         // eslint-disable-next-line
     }, [id]);
 
@@ -303,12 +311,24 @@ const AddWiederkehrenderUmsatz = ({
                                     }}
                                 />
                                 <Textfield
-                                    style={{ marginBottom: '4px' }}
+                                    style={{ marginBottom: '20px' }}
                                     placeholder={'Bemerkung'}
                                     value={newBemerkung}
                                     onChange={(e) => {
                                         setNewBemerkung(e.target.value);
                                     }}
+                                />
+                                <Autocomplete
+                                    value={newTags}
+                                    options={[]}
+                                    placeholder={'Tags'}
+                                    fullWidth
+                                    multiple
+                                    freeSolo
+                                    onChange={(value) => {
+                                        setNewTags(value);
+                                    }}
+                                    style={{ marginBottom: '4px' }}
                                 />
                             </div>
                         ) : (

@@ -144,7 +144,7 @@ function Autocomplete({ value = '', ...props }) {
             sx={{
                 '.MuiAutocomplete-inputRoot': {
                     borderRadius: '0px',
-                    height: '56px',
+                    minHeight: '56px',
                     background: props.error
                         ? 'rgba(253, 237, 237, 0.7)'
                         : 'inherit',
@@ -200,6 +200,7 @@ function Autocomplete({ value = '', ...props }) {
             slotProps={{
                 chip: {
                     color: 'primary',
+                    size: 'small',
                 },
             }}
             // renderTags={(values, getItemProps) =>

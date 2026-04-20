@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useSelector } from 'react-redux';
 
-import { Typography, Box } from '@mui/material';
+import { Typography, Box, Chip } from '@mui/material';
 
 import Icon from '@mdi/react';
 import { mdiPencil, mdiPencilLock } from '@mdi/js';
@@ -27,7 +27,8 @@ const UmsatzTable = () => {
     const wiederkehrenderUmsatz = useSelector(
         (state) => state.dataframe.original.wiederkehrenderUmsatz,
     );
-    const maxAbschluss = abschluss?.stat.max('Zeitstempel');
+    const maxAbschluss =
+        abschluss?.count() > 0 && abschluss.stat.max('Zeitstempel');
     const monatsposten = wiederkehrenderUmsatz?.filter(
         (row) => row.get('Zeitstempel') > maxAbschluss,
     );
@@ -116,6 +117,7 @@ const UmsatzTable = () => {
                                 { value: 'Typ', sort: true },
                                 { value: 'Beschreibung', sort: true },
                                 { value: 'Bemerkung', sort: true },
+                                { value: '', sort: false },
                             ]}
                             body={umsatzFilteredCollection.map((row) => {
                                 const monatspostenNotActive =
@@ -135,6 +137,9 @@ const UmsatzTable = () => {
                                                     row['Beschreibung'] &&
                                                 r.get('Bemerkung') ===
                                                     row['Bemerkung'],
+                                            // &&
+                                            // r.get('Tags') ===
+                                            //     row['Tags'],
                                         )
                                         .count() > 0;
                                 return [
@@ -156,6 +161,7 @@ const UmsatzTable = () => {
                                                             row['Beschreibung'],
                                                         bemerkung:
                                                             row['Bemerkung'],
+                                                        tags: row['Tags'],
                                                     })
                                                 }
                                                 sx={{
@@ -255,6 +261,44 @@ const UmsatzTable = () => {
                                                 .includes(search),
                                         disabled: monatspostenNotActive,
                                     },
+                                    {
+                                        value: row['Tags'].map((v) => (
+                                            <Chip
+                                                label={v}
+                                                color={
+                                                    monatspostenNotActive
+                                                        ? 'default'
+                                                        : 'primary'
+                                                }
+                                                size="small"
+                                                variant={
+                                                    monatspostenNotActive
+                                                        ? 'outlined'
+                                                        : 'filled'
+                                                }
+                                                sx={{
+                                                    margin: '5px',
+                                                    borderColor: (theme) =>
+                                                        theme.palette.text
+                                                            .disabled,
+                                                    color: monatspostenNotActive
+                                                        ? (theme) =>
+                                                              theme.palette.text
+                                                                  .disabled
+                                                        : (theme) =>
+                                                              theme.palette
+                                                                  .text,
+                                                }}
+                                            />
+                                        )),
+                                        highlighted:
+                                            isSearch &&
+                                            row['Tags'].some((tag) =>
+                                                tag
+                                                    .toLowerCase()
+                                                    .includes(search),
+                                            ),
+                                    },
                                 ];
                             })}
                         />
@@ -269,6 +313,7 @@ const UmsatzTable = () => {
                             kategorie={data.kategorie}
                             beschreibung={data.beschreibung}
                             bemerkung={data.bemerkung}
+                            tags={data.tags}
                         />
                     </>
                 ) : (

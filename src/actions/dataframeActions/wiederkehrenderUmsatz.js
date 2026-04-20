@@ -22,7 +22,8 @@ export const initWiederkehrenderUmsatz = async (file, kategorien) => {
             row.get('Art') !== undefined &&
             row.get('Kategorie') !== undefined &&
             row.get('Beschreibung') !== undefined &&
-            row.get('Bemerkung') !== undefined,
+            row.get('Bemerkung') !== undefined &&
+            row.get('Tags') !== undefined,
     );
     wiederkehrenderUmsatz = wiederkehrenderUmsatz.rename(
         'Kategorie',
@@ -48,6 +49,9 @@ export const initWiederkehrenderUmsatz = async (file, kategorien) => {
             }
         },
     );
+    wiederkehrenderUmsatz = wiederkehrenderUmsatz.withColumn('Tags', (row) =>
+        row.get('Tags').length > 0 ? row.get('Tags').split('|') : [],
+    );
     wiederkehrenderUmsatz = wiederkehrenderUmsatz.join(
         kategorien,
         'KategorieID',
@@ -71,12 +75,13 @@ export const initWiederkehrenderUmsatz = async (file, kategorien) => {
         'Unterkategorie',
         'Beschreibung',
         'Bemerkung',
+        'Tags',
     ]);
     return wiederkehrenderUmsatz;
 };
 
 export const addWiederkehrenderUmsatz =
-    (tag, art, betrag, kategorie, beschreibung, bemerkung) =>
+    (tag, art, betrag, kategorie, beschreibung, bemerkung, tags) =>
     (dispatch, getState) => {
         var { wiederkehrenderUmsatz, kategorien } =
             getState().dataframe.original;
@@ -97,6 +102,7 @@ export const addWiederkehrenderUmsatz =
             kategorie.get('Unterkategorie'),
             beschreibung,
             bemerkung,
+            tags,
         ]);
 
         dispatch({
@@ -132,6 +138,7 @@ export const changeWiederkehrenderUmsatz =
             row = row.set('KategorieID', update.kategorie);
             row = row.set('Beschreibung', update.beschreibung);
             row = row.set('Bemerkung', update.bemerkung);
+            row = row.set('Tags', update.tags);
 
             if (update.kategorie !== old.kategorie) {
                 var kategorie = kategorien.find(
@@ -333,6 +340,7 @@ export const addMonatsposten = (jahr, monat) => (dispatch, getState) => {
                 row.get('Unterkategorie'),
                 row.get('Beschreibung'),
                 row.get('Bemerkung'),
+                row.get('Tags'),
             ]);
             index++;
         }

@@ -27,6 +27,7 @@ const AddUmsatz = ({
     kategorie,
     beschreibung,
     bemerkung,
+    tags,
     onClose,
 }) => {
     const kategorien = useSelector(
@@ -43,6 +44,7 @@ const AddUmsatz = ({
     const [newKategorie, setNewKategorie] = useState(kategorie);
     const [newBeschreibung, setNewBeschreibung] = useState(beschreibung);
     const [newBemerkung, setNewBemerkung] = useState(bemerkung);
+    const [newTags, setNewTags] = useState(tags);
     const dispatch = useDispatch();
 
     const submit = () => {
@@ -86,7 +88,8 @@ const AddUmsatz = ({
                     newTyp !== typ ||
                     newKategorie.KategorieID !== kategorie ||
                     newBeschreibung !== beschreibung ||
-                    newBemerkung !== bemerkung
+                    newBemerkung !== bemerkung ||
+                    newTags.toString() !== tags.toString()
                 ) {
                     dispatch(
                         changeUmsatz(
@@ -99,6 +102,7 @@ const AddUmsatz = ({
                                 kategorie: newKategorie.KategorieID,
                                 beschreibung: newBeschreibung,
                                 bemerkung: newBemerkung,
+                                tags: newTags,
                             },
                             {
                                 timestamp,
@@ -108,6 +112,7 @@ const AddUmsatz = ({
                                 kategorie,
                                 beschreibung,
                                 bemerkung,
+                                tags,
                             },
                         ),
                     );
@@ -122,6 +127,7 @@ const AddUmsatz = ({
                         newKategorie.KategorieID,
                         newBeschreibung,
                         newBemerkung,
+                        newTags,
                     ),
                 );
             }
@@ -143,6 +149,7 @@ const AddUmsatz = ({
         setNewKategorie('');
         setNewBeschreibung('');
         setNewBemerkung('');
+        setNewTags([]);
         setBetragError(false);
     };
 
@@ -157,6 +164,7 @@ const AddUmsatz = ({
         );
         setNewBeschreibung(beschreibung);
         setNewBemerkung(bemerkung);
+        setNewTags(tags);
         // eslint-disable-next-line
     }, [id]);
 
@@ -273,12 +281,24 @@ const AddUmsatz = ({
                                     }}
                                 />
                                 <Textfield
-                                    style={{ marginBottom: '4px' }}
+                                    style={{ marginBottom: '20px' }}
                                     placeholder={'Bemerkung'}
                                     value={newBemerkung}
                                     onChange={(e) => {
                                         setNewBemerkung(e.target.value);
                                     }}
+                                />
+                                <Autocomplete
+                                    value={newTags}
+                                    options={[]}
+                                    placeholder={'Tags'}
+                                    fullWidth
+                                    multiple
+                                    freeSolo
+                                    onChange={(value) => {
+                                        setNewTags(value);
+                                    }}
+                                    style={{ marginBottom: '4px' }}
                                 />
                             </div>
                         ) : (

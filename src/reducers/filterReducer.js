@@ -1,6 +1,7 @@
 import {
     FILTER,
     FILTER_PREV_WORD,
+    FILTER_PREV_TAGS,
     FILTER_PREV_CATEGORIES,
     FILTER_PREV_CATEGORY_TYPE,
     FILTER_PREV_TYPE,
@@ -17,6 +18,7 @@ const initialState = {
     art: [],
     typ: [],
     word: '',
+    tags: [],
     time: {
         range: [],
         interval: 'Monat',
@@ -36,6 +38,11 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 prev: { ...state.prev, word: action.payload },
+            };
+        case FILTER_PREV_TAGS:
+            return {
+                ...state,
+                prev: { ...state.prev, tags: action.payload },
             };
         case FILTER_PREV_CATEGORIES:
             return {
@@ -106,6 +113,7 @@ const reducer = (state = initialState, action) => {
                 art: [],
                 typ: [],
                 word: '',
+                tags: [],
                 time: {
                     range: [],
                     interval: 'Monat',

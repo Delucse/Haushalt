@@ -18,7 +18,8 @@ export const initUmsatz = async (file, abschluss, umbuchung, kategorien) => {
             row.get('Typ') !== undefined &&
             row.get('Kategorie') !== undefined &&
             row.get('Beschreibung') !== undefined &&
-            row.get('Bemerkung') !== undefined,
+            row.get('Bemerkung') !== undefined &&
+            row.get('Tags') !== undefined,
     );
     umsatz = umsatz.rename('Kategorie', 'KategorieID');
     umsatz = umsatz.cast('Betrag', (val) => Number(val));
@@ -33,6 +34,9 @@ export const initUmsatz = async (file, abschluss, umbuchung, kategorien) => {
         }
     });
     umsatz = calcNichtGelistet(umsatz, abschluss, umbuchung);
+    umsatz = umsatz.withColumn('Tags', (row) =>
+        row.get('Tags').length > 0 ? row.get('Tags').split('|') : [],
+    );
     umsatz = umsatz.join(kategorien, 'KategorieID', 'left');
     umsatz = setUmsatzOhneKategorie(umsatz);
     umsatz = umsatz.withColumn(
@@ -63,6 +67,7 @@ export const initUmsatz = async (file, abschluss, umbuchung, kategorien) => {
         'Unterkategorie',
         'Beschreibung',
         'Bemerkung',
+        'Tags',
     ]);
     return umsatz;
 };
@@ -98,6 +103,7 @@ const calcNichtGelistet = (umsatz, abschluss, umbuchung) => {
             'KategorieID',
             'Beschreibung',
             'Bemerkung',
+            'Tags',
         ]);
         while (startDate <= endDate) {
             const { datum, betrag } = nichtGelistet(
@@ -116,6 +122,7 @@ const calcNichtGelistet = (umsatz, abschluss, umbuchung) => {
                 '1',
                 '',
                 '',
+                '',
             ]);
             startDate = moment(startDate).startOf('month').add(1, 'month');
         }
@@ -124,7 +131,7 @@ const calcNichtGelistet = (umsatz, abschluss, umbuchung) => {
 };
 
 export const addUmsatz =
-    (timestamp, betrag, art, typ, kategorie, beschreibung, bemerkung) =>
+    (timestamp, betrag, art, typ, kategorie, beschreibung, bemerkung, tags) =>
     (dispatch, getState) => {
         var { umsatz, kategorien } = getState().dataframe.original;
         kategorie = kategorien.find(
@@ -148,6 +155,7 @@ export const addUmsatz =
             kategorie.get('Unterkategorie'),
             beschreibung,
             bemerkung,
+            tags,
         ]);
         dispatch({
             type: DATAFRAME_ORIGINAL_UMSATZ,
@@ -174,6 +182,7 @@ export const changeUmsatz = (id, update, old) => (dispatch, getState) => {
         row = row.set('KategorieID', update.kategorie);
         row = row.set('Beschreibung', update.beschreibung);
         row = row.set('Bemerkung', update.bemerkung);
+        row = row.set('Tags', update.tags);
 
         if (update.kategorie !== old.kategorie) {
             var kategorie = kategorien.find(
@@ -348,6 +357,7 @@ export const updateNichtGelistet =
                 'nicht gelistet',
                 '',
                 '',
+                [],
             ]);
             dispatch({
                 type: DATAFRAME_ORIGINAL_UMSATZ,
