@@ -41,23 +41,20 @@ const UmsatzTable = () => {
         <>
             <Box
                 sx={{
-                    ml: -2,
-                    pb: 2,
-                    mt: -2,
-                    pt: 2,
-                    position: 'fixed',
-                    width: '100%',
-                    zIndex: 1,
+                    ml: '-16px',
+                    pb: '16px',
+                    pl: '16px',
                     background: (theme) => theme.palette.background.default,
+                    gap: '10px',
+                    display: 'grid',
                 }}
             >
                 <Typography
                     component="div"
                     variant="body1"
                     sx={{
-                        marginLeft: 2,
                         fontWeight: 'bold',
-                        marginBottom: '20px',
+                        marginBottom: '10px',
                         color: (theme) => theme.palette.text.primary,
                     }}
                 >
@@ -74,15 +71,19 @@ const UmsatzTable = () => {
                         <Typography
                             component="div"
                             sx={{
-                                mr: 2,
+                                display: 'flex',
+                                ml: '16px',
                                 mt: 'auto',
                                 mb: 'auto',
-                                width: '100px',
+                                flex: 0,
                                 textAlign: 'right',
                                 color: (theme) => theme.palette.text.primary,
+                                textWrap: 'nowrap',
                             }}
                         >
-                            {umsatzFilteredCollection.length} Posten
+                            {`${umsatzFilteredCollection.length.toLocaleString(
+                                'de-DE',
+                            )} Posten`}
                             <br />
                             {umsatzFilteredWithoutNichtGelistet.stat
                                 .sum('Umsatz')
@@ -98,247 +99,188 @@ const UmsatzTable = () => {
                 </Box>
             </Box>
             {umsatzFilteredCollection ? (
-                <>
-                    <Box sx={{ mt: 'calc(2 * 16px + 56px + 24px)' }}>
-                        {umsatzFilteredCollection.length > 0 ? (
-                            <>
-                                <Table
-                                    type="umsatz"
-                                    orderBy={'Datum'}
-                                    head={[
-                                        { value: '' },
-                                        { value: 'Datum', sort: true },
-                                        { value: 'Betrag', sort: true },
-                                        { value: 'Art', sort: true },
-                                        { value: 'Kategorie', sort: true },
-                                        { value: 'Typ', sort: true },
-                                        { value: 'Beschreibung', sort: true },
-                                        { value: 'Bemerkung', sort: true },
-                                    ]}
-                                    body={umsatzFilteredCollection.map(
-                                        (row) => {
-                                            const monatspostenNotActive =
-                                                monatsposten
-                                                    .filter(
-                                                        (r) =>
-                                                            r.get(
-                                                                'Zeitstempel',
-                                                            ) ===
-                                                                row[
-                                                                    'Zeitstempel'
-                                                                ] &&
-                                                            r.get('Art') ===
-                                                                row['Art'] &&
-                                                            r.get('Betrag') ===
-                                                                row['Betrag'] &&
-                                                            'fix' ===
-                                                                row['Typ'] &&
-                                                            r.get(
-                                                                'KategorieID',
-                                                            ) ===
-                                                                row[
-                                                                    'KategorieID'
-                                                                ] &&
-                                                            r.get(
-                                                                'Beschreibung',
-                                                            ) ===
-                                                                row[
-                                                                    'Beschreibung'
-                                                                ] &&
-                                                            r.get(
-                                                                'Bemerkung',
-                                                            ) ===
-                                                                row[
-                                                                    'Bemerkung'
-                                                                ],
-                                                    )
-                                                    .count() > 0;
-                                            return [
-                                                {
-                                                    value: (
-                                                        <IconButton
-                                                            color="inherit"
-                                                            onClick={() =>
-                                                                setData({
-                                                                    id: row[
-                                                                        'ID'
-                                                                    ],
-                                                                    timestamp:
-                                                                        row[
-                                                                            'Zeitstempel'
-                                                                        ],
-                                                                    art: row[
-                                                                        'Art'
-                                                                    ],
-                                                                    betrag: row[
-                                                                        'Betrag'
-                                                                    ],
-                                                                    typ: row[
-                                                                        'Typ'
-                                                                    ],
-                                                                    kategorie:
-                                                                        row[
-                                                                            'KategorieID'
-                                                                        ],
-                                                                    beschreibung:
-                                                                        row[
-                                                                            'Beschreibung'
-                                                                        ],
-                                                                    bemerkung:
-                                                                        row[
-                                                                            'Bemerkung'
-                                                                        ],
-                                                                })
-                                                            }
-                                                            sx={{
-                                                                color: (
-                                                                    theme,
-                                                                ) =>
-                                                                    monatspostenNotActive
-                                                                        ? theme
-                                                                              .palette
-                                                                              .text
-                                                                              .disabled
-                                                                        : theme
-                                                                              .palette
-                                                                              .text
-                                                                              .secondary,
-                                                            }}
-                                                        >
-                                                            <Icon
-                                                                path={
-                                                                    monatspostenNotActive
-                                                                        ? mdiPencilLock
-                                                                        : mdiPencil
-                                                                }
-                                                                size={0.8}
-                                                            />
-                                                        </IconButton>
-                                                    ),
-                                                    width: '36px',
-                                                },
-                                                {
-                                                    value: row['Datum'],
-                                                    sortValue:
-                                                        row['Zeitstempel'],
-                                                    highlighted:
-                                                        isSearch &&
-                                                        row['Datum'].includes(
-                                                            search,
-                                                        ),
-                                                    disabled:
-                                                        monatspostenNotActive,
-                                                    width: '72px',
-                                                },
-                                                {
-                                                    value: row['Betrag']
-                                                        .toLocaleString(
-                                                            'de-DE',
-                                                            {
-                                                                minimumFractionDigits: 2,
-                                                                maximumFractionDigits: 2,
-                                                                style: 'currency',
-                                                                currency: 'EUR',
-                                                            },
-                                                        )
-                                                        .replace('-', '- '),
-                                                    sortValue: row['Betrag'],
-                                                    align: 'right',
-                                                    highlighted:
-                                                        isSearch &&
-                                                        row['Betrag']
-                                                            .toLocaleString(
-                                                                'de-DE',
-                                                                {
-                                                                    minimumFractionDigits: 2,
-                                                                    maximumFractionDigits: 2,
-                                                                },
-                                                            )
-                                                            .replace('-', '- ')
-                                                            .includes(search),
-                                                    disabled:
-                                                        monatspostenNotActive,
-                                                },
-                                                {
-                                                    value: row['Art'],
-                                                    highlighted:
-                                                        isSearch &&
-                                                        row['Art']
-                                                            .toLowerCase()
-                                                            .includes(search),
-                                                    disabled:
-                                                        monatspostenNotActive,
-                                                },
-                                                {
-                                                    value: row['Kategorie'],
-                                                    highlighted:
-                                                        isSearch &&
-                                                        row['Kategorie']
-                                                            .toLowerCase()
-                                                            .includes(search),
-                                                    disabled:
-                                                        monatspostenNotActive,
-                                                },
-                                                {
-                                                    value: row['Typ'],
-                                                    highlighted:
-                                                        isSearch &&
-                                                        row['Typ']
-                                                            .toLowerCase()
-                                                            .includes(search),
-                                                    disabled:
-                                                        monatspostenNotActive,
-                                                },
-                                                {
-                                                    value: row['Beschreibung'],
-                                                    highlighted:
-                                                        isSearch &&
-                                                        row['Beschreibung']
-                                                            .toLowerCase()
-                                                            .includes(search),
-                                                    disabled:
-                                                        monatspostenNotActive,
-                                                },
-                                                {
-                                                    value: row['Bemerkung'],
-                                                    highlighted:
-                                                        isSearch &&
-                                                        row['Bemerkung']
-                                                            .toLowerCase()
-                                                            .includes(search),
-                                                    disabled:
-                                                        monatspostenNotActive,
-                                                },
-                                            ];
-                                        },
-                                    )}
-                                />
-                                <AddUmsatz
-                                    open={data.id}
-                                    onClose={() => setData({})}
-                                    id={data.id}
-                                    timestamp={data.timestamp}
-                                    art={data.art}
-                                    betrag={data.betrag}
-                                    typ={data.typ}
-                                    kategorie={data.kategorie}
-                                    beschreibung={data.beschreibung}
-                                    bemerkung={data.bemerkung}
-                                />
-                            </>
-                        ) : (
-                            <Typography
-                                component="div"
-                                sx={{
-                                    color: (theme) =>
-                                        theme.palette.text.primary,
-                                }}
-                            >
-                                keine Einträge gefunden
-                            </Typography>
-                        )}
-                    </Box>
-                </>
+                umsatzFilteredCollection.length > 0 ? (
+                    <>
+                        <Table
+                            height={
+                                'calc(100vh - 142px - 56px - 16px + 10px)' // - 34px
+                            }
+                            type="umsatz"
+                            orderBy={'Datum'}
+                            head={[
+                                { value: '' },
+                                { value: 'Datum', sort: true },
+                                { value: 'Betrag', sort: true },
+                                { value: 'Art', sort: true },
+                                { value: 'Kategorie', sort: true },
+                                { value: 'Typ', sort: true },
+                                { value: 'Beschreibung', sort: true },
+                                { value: 'Bemerkung', sort: true },
+                            ]}
+                            body={umsatzFilteredCollection.map((row) => {
+                                const monatspostenNotActive =
+                                    row['Typ'] === 'fix' &&
+                                    row['Zeitstempel'] > maxAbschluss &&
+                                    monatsposten
+                                        .filter(
+                                            (r) =>
+                                                r.get('Zeitstempel') ===
+                                                    row['Zeitstempel'] &&
+                                                r.get('Art') === row['Art'] &&
+                                                r.get('Betrag') ===
+                                                    row['Betrag'] &&
+                                                r.get('KategorieID') ===
+                                                    row['KategorieID'] &&
+                                                r.get('Beschreibung') ===
+                                                    row['Beschreibung'] &&
+                                                r.get('Bemerkung') ===
+                                                    row['Bemerkung'],
+                                        )
+                                        .count() > 0;
+                                return [
+                                    {
+                                        value: (
+                                            <IconButton
+                                                color="inherit"
+                                                onClick={() =>
+                                                    setData({
+                                                        id: row['ID'],
+                                                        timestamp:
+                                                            row['Zeitstempel'],
+                                                        art: row['Art'],
+                                                        betrag: row['Betrag'],
+                                                        typ: row['Typ'],
+                                                        kategorie:
+                                                            row['KategorieID'],
+                                                        beschreibung:
+                                                            row['Beschreibung'],
+                                                        bemerkung:
+                                                            row['Bemerkung'],
+                                                    })
+                                                }
+                                                sx={{
+                                                    color: (theme) =>
+                                                        monatspostenNotActive
+                                                            ? theme.palette.text
+                                                                  .disabled
+                                                            : theme.palette.text
+                                                                  .secondary,
+                                                }}
+                                            >
+                                                <Icon
+                                                    path={
+                                                        monatspostenNotActive
+                                                            ? mdiPencilLock
+                                                            : mdiPencil
+                                                    }
+                                                    size={0.8}
+                                                />
+                                            </IconButton>
+                                        ),
+                                        width: '36px',
+                                    },
+                                    {
+                                        value: row['Datum'],
+                                        sortValue: row['Zeitstempel'],
+                                        highlighted:
+                                            isSearch &&
+                                            row['Datum'].includes(search),
+                                        disabled: monatspostenNotActive,
+                                        width: '72px',
+                                    },
+                                    {
+                                        value: row['Betrag']
+                                            .toLocaleString('de-DE', {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2,
+                                                style: 'currency',
+                                                currency: 'EUR',
+                                            })
+                                            .replace('-', '- '),
+                                        sortValue: row['Betrag'],
+                                        align: 'right',
+                                        highlighted:
+                                            isSearch &&
+                                            row['Betrag']
+                                                .toLocaleString('de-DE', {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                })
+                                                .replace('-', '- ')
+                                                .includes(search),
+                                        disabled: monatspostenNotActive,
+                                    },
+                                    {
+                                        value: row['Art'],
+                                        highlighted:
+                                            isSearch &&
+                                            row['Art']
+                                                .toLowerCase()
+                                                .includes(search),
+                                        disabled: monatspostenNotActive,
+                                    },
+                                    {
+                                        value: row['Kategorie'],
+                                        highlighted:
+                                            isSearch &&
+                                            row['Kategorie']
+                                                .toLowerCase()
+                                                .includes(search),
+                                        disabled: monatspostenNotActive,
+                                    },
+                                    {
+                                        value: row['Typ'],
+                                        highlighted:
+                                            isSearch &&
+                                            row['Typ']
+                                                .toLowerCase()
+                                                .includes(search),
+                                        disabled: monatspostenNotActive,
+                                    },
+                                    {
+                                        value: row['Beschreibung'],
+                                        highlighted:
+                                            isSearch &&
+                                            row['Beschreibung']
+                                                .toLowerCase()
+                                                .includes(search),
+                                        disabled: monatspostenNotActive,
+                                    },
+                                    {
+                                        value: row['Bemerkung'],
+                                        highlighted:
+                                            isSearch &&
+                                            row['Bemerkung']
+                                                .toLowerCase()
+                                                .includes(search),
+                                        disabled: monatspostenNotActive,
+                                    },
+                                ];
+                            })}
+                        />
+                        <AddUmsatz
+                            open={data.id}
+                            onClose={() => setData({})}
+                            id={data.id}
+                            timestamp={data.timestamp}
+                            art={data.art}
+                            betrag={data.betrag}
+                            typ={data.typ}
+                            kategorie={data.kategorie}
+                            beschreibung={data.beschreibung}
+                            bemerkung={data.bemerkung}
+                        />
+                    </>
+                ) : (
+                    <Typography
+                        component="div"
+                        sx={{
+                            color: (theme) => theme.palette.text.primary,
+                        }}
+                    >
+                        keine Einträge gefunden
+                    </Typography>
+                )
             ) : null}
         </>
     );

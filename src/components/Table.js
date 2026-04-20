@@ -8,9 +8,10 @@ import {
     TableSortLabel,
     Paper,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-const Table = ({ head, body, orderBy, order, type }) => {
+const Table = ({ height, head, body, orderBy, order, type }) => {
+    const ref = useRef();
     const [orderTableBy, setOrderBy] = useState(orderBy || '');
     const [orderTable, setOrder] = useState(order || 'desc');
     const [bodyTable, setBody] = useState(body || []);
@@ -68,9 +69,12 @@ const Table = ({ head, body, orderBy, order, type }) => {
             sx={{
                 background: (theme) => theme.palette.background.default,
                 boxShadow: 'none',
+                maxHeight: height || '100%',
+                scrollbarWidth: 'none',
             }}
+            ref={ref}
         >
-            <MuiTable>
+            <MuiTable stickyHeader>
                 <TableHead>
                     <TableRow>
                         {head.map((cell, index) => (
@@ -103,6 +107,7 @@ const Table = ({ head, body, orderBy, order, type }) => {
                                                         : 'asc',
                                                 );
                                             }
+                                            ref.current.scrollTop = 0;
                                         }}
                                     >
                                         {cell.value}

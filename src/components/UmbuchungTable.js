@@ -30,6 +30,7 @@ function UmbuchungTable() {
                 umbuchungFilteredCollection.length > 0 ? (
                     <>
                         <Table
+                            height={'calc(100vh - 60px - 56px - 16px)'}
                             type="umbuchung"
                             orderBy={'Datum'}
                             head={[

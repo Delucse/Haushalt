@@ -361,14 +361,9 @@ const Layout = () => {
                     <Box
                         sx={{
                             p: 2,
-                            minHeight: {
-                                xxs: `calc(100vh - 56px${
-                                    isTab ? ' - 48px' : ''
-                                } - 2 * 16px - 0px)`,
-                                sm: `calc(100vh - 56px${
-                                    isTab ? ' - 59px' : ''
-                                } - 2 * 16px)`,
-                            },
+                            minHeight: `calc(100vh - 56px${
+                                isTab ? ' - 59px' : ''
+                            } - 2 * 16px - 0px)`,
                             background: (theme) =>
                                 theme.palette.background.default,
                         }}

@@ -40,6 +40,7 @@ const Kategorien = () => {
             />
             {kategorien.length > 0 ? (
                 <Table
+                    height={'calc(100vh - 123px - 56px - 16px)'}
                     type="kategorie"
                     orderBy={'Kategorie'}
                     head={[{ value: '' }, { value: 'Kategorie', sort: true }]}

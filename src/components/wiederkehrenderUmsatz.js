@@ -43,6 +43,7 @@ const WiederkehrenderUmsatz = () => {
             />
             {wiederkehrenderUmsatz.length > 0 ? (
                 <Table
+                    height={'calc(100vh - 123px - 56px - 16px)'}
                     type="wiederkehrendenUmsatz"
                     orderBy={'Tag'}
                     head={[
