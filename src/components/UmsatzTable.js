@@ -120,7 +120,14 @@ const UmsatzTable = () => {
                             type="umsatz"
                             orderBy={'Datum'}
                             head={[
-                                { value: '' },
+                                {
+                                    value: '',
+                                    style: {
+                                        position: 'sticky',
+                                        left: 0,
+                                        zIndex: 3,
+                                    },
+                                },
                                 { value: 'Datum', sort: true },
                                 { value: 'Betrag', sort: true },
                                 { value: 'Art', sort: true },
@@ -200,7 +207,11 @@ const UmsatzTable = () => {
                                                 />
                                             </IconButton>
                                         ),
-                                        width: '36px',
+                                        style: {
+                                            position: 'sticky',
+                                            left: 0,
+                                            width: '36px',
+                                        },
                                     },
                                     {
                                         value: row['Datum'],
@@ -215,7 +226,7 @@ const UmsatzTable = () => {
                                             isSearch &&
                                             row['Datum'].includes(search),
                                         disabled: monatspostenNotActive,
-                                        width: '72px',
+                                        style: { width: '72px' },
                                     },
                                     {
                                         value: `${betrag} €`,

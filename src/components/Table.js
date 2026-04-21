@@ -87,6 +87,7 @@ const Table = ({ height, head, body, orderBy, order, type }) => {
                                         index === head.length - 1 ? 0 : 1,
                                     paddingTop: 1,
                                     paddingBottom: 1,
+                                    ...cell.style,
                                 }}
                             >
                                 {cell.sort ? (
@@ -136,7 +137,7 @@ const Table = ({ height, head, body, orderBy, order, type }) => {
                                     scope="row"
                                     align={cell.align || 'left'}
                                     sx={{
-                                        width: cell.width || 'inherit',
+                                        width: cell.style?.width || 'inherit',
                                         paddingLeft: i === 0 ? 0 : 1,
                                         paddingRight:
                                             i === head.length - 1 ? 0 : 1,
@@ -149,7 +150,10 @@ const Table = ({ height, head, body, orderBy, order, type }) => {
                                         background: cell.highlighted
                                             ? (theme) =>
                                                   theme.palette.action.hover
-                                            : 'inherit',
+                                            : (theme) =>
+                                                  theme.palette.background
+                                                      .default,
+                                        ...cell.style,
                                     }}
                                     onDoubleClick={cell.onDoubleClick}
                                 >

@@ -34,7 +34,14 @@ function UmbuchungTable() {
                             type="umbuchung"
                             orderBy={'Datum'}
                             head={[
-                                { value: '' },
+                                {
+                                    value: '',
+                                    style: {
+                                        position: 'sticky',
+                                        left: 0,
+                                        zIndex: 3,
+                                    },
+                                },
                                 { value: 'Datum', sort: true },
                                 { value: 'Betrag', sort: true },
                                 { value: 'Bemerkung', sort: true },
@@ -62,12 +69,16 @@ function UmbuchungTable() {
                                             <Icon path={mdiPencil} size={0.8} />
                                         </IconButton>
                                     ),
-                                    width: '36px',
+                                    style: {
+                                        position: 'sticky',
+                                        left: 0,
+                                        width: '36px',
+                                    },
                                 },
                                 {
                                     value: row['Datum'],
                                     sortValue: row['Zeitstempel'],
-                                    width: '72px',
+                                    style: { width: '72px' },
                                 },
                                 {
                                     value: row['Betrag']
@@ -80,7 +91,7 @@ function UmbuchungTable() {
                                         .replace('-', '- '),
                                     sortValue: row['Betrag'],
                                     align: 'right',
-                                    width: '100px',
+                                    style: { width: '100px' },
                                 },
                                 {
                                     value: row['Bemerkung'],

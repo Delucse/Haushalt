@@ -34,7 +34,14 @@ function AbschlussTable() {
                             type="abschluss"
                             orderBy={'Datum'}
                             head={[
-                                { value: '' },
+                                {
+                                    value: '',
+                                    style: {
+                                        position: 'sticky',
+                                        left: 0,
+                                        zIndex: 3,
+                                    },
+                                },
                                 { value: 'Datum', sort: true },
                                 { value: 'Konto', sort: true },
                                 { value: 'Bargeld', sort: true },
@@ -63,12 +70,16 @@ function AbschlussTable() {
                                             <Icon path={mdiPencil} size={0.8} />
                                         </IconButton>
                                     ),
-                                    width: '36px',
+                                    style: {
+                                        position: 'sticky',
+                                        left: 0,
+                                        width: '36px',
+                                    },
                                 },
                                 {
                                     value: row['Datum'],
                                     sortValue: row['Zeitstempel'],
-                                    width: '72px',
+                                    style: { width: '72px' },
                                 },
                                 {
                                     value: row['Konto']
@@ -81,7 +92,7 @@ function AbschlussTable() {
                                         .replace('-', '- '),
                                     sortValue: row['Konto'],
                                     align: 'right',
-                                    width: '100px',
+                                    style: { width: '100px' },
                                 },
                                 {
                                     value: row['Bargeld']
@@ -94,7 +105,7 @@ function AbschlussTable() {
                                         .replace('-', '- '),
                                     sortValue: row['Bargeld'],
                                     align: 'right',
-                                    width: '100px',
+                                    style: { width: '100px' },
                                 },
                                 {
                                     value: '',

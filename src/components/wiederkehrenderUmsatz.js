@@ -51,7 +51,14 @@ const WiederkehrenderUmsatz = () => {
                     type="wiederkehrendenUmsatz"
                     orderBy={'Tag'}
                     head={[
-                        { value: '' },
+                        {
+                            value: '',
+                            style: {
+                                position: 'sticky',
+                                left: 0,
+                                zIndex: 3,
+                            },
+                        },
                         { value: 'Tag', sort: true },
                         { value: 'Betrag', sort: true },
                         { value: 'Art', sort: true },
@@ -86,7 +93,11 @@ const WiederkehrenderUmsatz = () => {
                                     <Icon path={mdiPencil} size={0.8} />
                                 </IconButton>
                             ),
-                            width: '35px',
+                            style: {
+                                position: 'sticky',
+                                left: 0,
+                                width: '36px',
+                            },
                         },
                         {
                             value: row['Tag'],

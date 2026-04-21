@@ -43,7 +43,17 @@ const Kategorien = () => {
                     height={'calc(100vh - 123px - 56px - 16px)'}
                     type="kategorie"
                     orderBy={'Kategorie'}
-                    head={[{ value: '' }, { value: 'Kategorie', sort: true }]}
+                    head={[
+                        {
+                            value: '',
+                            style: {
+                                position: 'sticky',
+                                left: 0,
+                                zIndex: 3,
+                            },
+                        },
+                        { value: 'Kategorie', sort: true },
+                    ]}
                     body={kategorien.map((row) => {
                         var unterkategorie = row['Kategorie'].startsWith(
                             `${row['Oberkategorie']} | `,
@@ -72,7 +82,11 @@ const Kategorien = () => {
                                         <Icon path={mdiPencil} size={0.8} />
                                     </IconButton>
                                 ),
-                                width: '35px',
+                                style: {
+                                    position: 'sticky',
+                                    left: 0,
+                                    width: '36px',
+                                },
                             },
                             {
                                 value: row['Kategorie'],
