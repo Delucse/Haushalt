@@ -16,8 +16,8 @@ export const setAutoSave =
             dispatch(
                 snackbarMessage(
                     `Das Speicherverhalten wurde erfolgreich in den Einstellungen übernommen.`,
-                    `settings.autoSave=${auto}`
-                )
+                    `settings.autoSave=${auto}`,
+                ),
             );
     };
 
@@ -34,8 +34,8 @@ export const setDashboard =
             dispatch(
                 snackbarMessage(
                     `Die Dashboard-Anzeige wurde erfolgreich in den Einstellungen übernommen.`,
-                    `settings.dashboard.${element}=${setting}`
-                )
+                    `settings.dashboard.${element}=${setting}`,
+                ),
             );
     };
 
@@ -47,8 +47,8 @@ export const setSimple =
             dispatch(
                 snackbarMessage(
                     `Der Umfang der Anwendung wurde erfolgreich in den Einstellungen übernommen.`,
-                    `settings.simple=${simple}`
-                )
+                    `settings.simple=${simple}`,
+                ),
             );
     };
 
@@ -63,8 +63,8 @@ export const setMode =
             dispatch(
                 snackbarMessage(
                     `Der neue Modus wurde erfolgreich in den Einstellungen übernommen.`,
-                    `settings.theme.mode=${mode}`
-                )
+                    `settings.theme.mode=${mode}`,
+                ),
             );
     };
 
@@ -79,13 +79,13 @@ export const setColor =
             dispatch(
                 snackbarMessage(
                     `Das neue Farbschema wurde erfolgreich in den Einstellungen übernommen.`,
-                    `settings.theme.color=${JSON.stringify(color)}`
-                )
+                    `settings.theme.color=${JSON.stringify(color)}`,
+                ),
             );
     };
 
 export const reset = () => (dispatch, getState) => {
-    if (getState().auth.type !== 'locale') {
+    if (getState().auth.type !== 'lokal') {
         dispatch(setAutoSave('true', false));
     }
     dispatch(setSimple('false', false));
@@ -98,8 +98,8 @@ export const reset = () => (dispatch, getState) => {
                 start: '#ff5722',
                 end: '#ffcc80',
             },
-            false
-        )
+            false,
+        ),
     );
     dispatch({
         type: SETTING_DASHBOARD,
@@ -115,7 +115,7 @@ export const reset = () => (dispatch, getState) => {
     dispatch(
         snackbarMessage(
             `Die Einstellungen wurden erfolgreich zurückgesetzt.`,
-            `resetSettings`
-        )
+            `resetSettings`,
+        ),
     );
 };

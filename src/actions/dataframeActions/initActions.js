@@ -22,7 +22,7 @@ export const initDataframe = () => async (dispatch, getState) => {
         const type = state.auth.type;
         const file = state.file;
 
-        if (type === 'locale') {
+        if (type === 'lokal') {
             dispatch({ type: SETTING_AUTOSAVE_MANUAL, payload: false });
         } else {
             const autosave = getCookieDefaultBoolean('autoSave', true);

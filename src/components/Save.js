@@ -11,7 +11,7 @@ import { mdiContentSave } from '@mdi/js';
 const Save = () => {
     const dispatch = useDispatch();
     const changedFile = useSelector((state) => state.file.changed);
-    const isCloud = useSelector((state) => state.auth.type !== 'locale');
+    const isCloud = useSelector((state) => state.auth.type !== 'lokal');
 
     return (
         changedFile && (
