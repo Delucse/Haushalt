@@ -1,17 +1,24 @@
+import { useEffect, useState } from 'react';
+
 import { useDispatch, useSelector } from 'react-redux';
-import Button from './Button';
-import Dialog from './Dialog';
 import {
     addKategorie,
     changeKategorie,
     deleteKategorie,
 } from '../actions/dataframeActions/kategorienActions';
-import { useEffect, useState } from 'react';
-import Textfield from './Textfield';
-import Alert from './Alert';
 import { alertErrorMessage, resetMessage } from '../actions/messageActions';
 
+import { useDialogs } from '@toolpad/core/useDialogs';
+
+import Button from './Button';
+import Textfield from './Textfield';
+import Alert from './Alert';
+import Dialog from './Dialog';
+import ConfirmDialog from './ConfirmDialog';
+
 const AddKategorie = ({ open, id, oberkategorie, unterkategorie, onClose }) => {
+    const dialogs = useDialogs();
+
     const dispatch = useDispatch();
     const error = useSelector((state) => state.message.error);
     const kategorien = useSelector(
@@ -20,7 +27,6 @@ const AddKategorie = ({ open, id, oberkategorie, unterkategorie, onClose }) => {
         ?.filter((row) => row.get('ID') !== id)
         .toDict()['Kategorie'];
 
-    const [deleteOpen, setDeleteOpen] = useState(false);
     const [newOberkategorie, setNewOberkategorie] = useState('');
     const [newUnterkategorie, setNewUnterkategorie] = useState('');
 
@@ -90,90 +96,68 @@ const AddKategorie = ({ open, id, oberkategorie, unterkategorie, onClose }) => {
     }, [newOberkategorie]);
 
     return (
-        <>
-            <Dialog
-                open={open}
-                onClose={close}
-                closeIcon={true}
-                title={id ? 'Kategorie verändern' : 'Kategorie hinzufügen'}
-                fullWidth
-                content={
-                    <div>
-                        <Alert
-                            type={['kategorie']}
-                            style={{ marginBottom: '20px' }}
-                        />
+        <Dialog
+            open={open}
+            onClose={close}
+            closeIcon={true}
+            title={id ? 'Kategorie verändern' : 'Kategorie hinzufügen'}
+            fullWidth
+            content={
+                <div>
+                    <Alert
+                        type={['kategorie']}
+                        style={{ marginBottom: '20px' }}
+                    />
 
-                        <Textfield
-                            autoFocus
-                            placeholder={'Oberkategorie'}
-                            style={{ marginBottom: '20px' }}
-                            value={newOberkategorie}
-                            onChange={(e) => {
-                                setNewOberkategorie(e.target.value);
-                            }}
-                        />
-                        <Textfield
-                            placeholder={'Unterkategorie'}
-                            value={newUnterkategorie}
-                            onChange={(e) => {
-                                setNewUnterkategorie(e.target.value);
-                            }}
-                        />
-                    </div>
-                }
-                actions={
-                    <div>
-                        {id && (
-                            <Button
-                                onClick={() => setDeleteOpen(true)}
-                                variant="outlined"
-                                sx={{ mr: 1 }}
-                            >
-                                Löschen
-                            </Button>
-                        )}
+                    <Textfield
+                        autoFocus
+                        placeholder={'Oberkategorie'}
+                        style={{ marginBottom: '20px' }}
+                        value={newOberkategorie}
+                        onChange={(e) => {
+                            setNewOberkategorie(e.target.value);
+                        }}
+                    />
+                    <Textfield
+                        placeholder={'Unterkategorie'}
+                        value={newUnterkategorie}
+                        onChange={(e) => {
+                            setNewUnterkategorie(e.target.value);
+                        }}
+                    />
+                </div>
+            }
+            actions={
+                <>
+                    {id && (
                         <Button
-                            // disabled={error}
-                            onClick={submit}
-                            variant="contained"
-                        >
-                            Bestätigen
-                        </Button>
-                    </div>
-                }
-            />
-            {id && (
-                <Dialog
-                    open={deleteOpen}
-                    title={'Kategorie löschen'}
-                    content={
-                        'Möchtest du wirklich die Kategorie löschen? All deine verknüpften Umsätze werden auf "nicht zugeordnet" gesetzt.'
-                    }
-                    actions={
-                        <div>
-                            <Button
-                                onClick={() => setDeleteOpen(false)}
-                                variant="outlined"
-                                sx={{ mr: 1 }}
-                            >
-                                Abbrechen
-                            </Button>
-                            <Button
-                                onClick={() => {
+                            onClick={async () => {
+                                const confirmed = await dialogs.open(
+                                    ConfirmDialog,
+                                    {
+                                        title: 'Kategorie löschen',
+                                        message:
+                                            'Möchtest du wirklich die Kategorie löschen? All deine verknüpften Umsätze werden auf "nicht zugeordnet" gesetzt.',
+                                        yes: 'Bestätigen',
+                                        no: 'Abbrechen',
+                                    },
+                                );
+                                if (confirmed) {
                                     dispatch(deleteKategorie(id));
                                     onClose();
-                                    setDeleteOpen(false);
-                                }}
-                                variant="contained"
-                            >
-                                Bestätigen
-                            </Button>
-                        </div>
-                    }
-                />
-            )}
-        </>
+                                }
+                            }}
+                            variant="outlined"
+                        >
+                            Löschen
+                        </Button>
+                    )}
+                    <Button onClick={submit} variant="contained">
+                        Bestätigen
+                    </Button>
+                </>
+            }
+        />
     );
 };
 

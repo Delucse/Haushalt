@@ -1,21 +1,28 @@
+import { useEffect, useState } from 'react';
+
 import { useDispatch, useSelector } from 'react-redux';
-import Button from './Button';
-import Dialog from './Dialog';
 import {
     addUmsatz,
     changeUmsatz,
     deleteUmsatz,
 } from '../actions/dataframeActions/umsatzActions';
-import { useEffect, useState } from 'react';
+import { alertErrorMessage, resetMessage } from '../actions/messageActions';
+
+import { Link } from 'react-router-dom';
+
+import moment from 'moment';
+
+import { useDialogs } from '@toolpad/core/useDialogs';
+import { Stack } from '@mui/material';
+
+import Button from './Button';
 import Textfield from './Textfield';
 import Numberfield from './Numberfield';
-import Alert from './Alert';
 import Datefield from './Datefield';
-import { Stack } from '@mui/material';
-import { alertErrorMessage, resetMessage } from '../actions/messageActions';
 import Autocomplete from './Autocomplete';
-import { Link } from 'react-router-dom';
-import moment from 'moment';
+import Alert from './Alert';
+import Dialog from './Dialog';
+import ConfirmDialog from './ConfirmDialog';
 
 const AddUmsatz = ({
     open,
@@ -30,12 +37,15 @@ const AddUmsatz = ({
     tags,
     onClose,
 }) => {
+    const dialogs = useDialogs();
+
+    const dispatch = useDispatch();
     const kategorien = useSelector(
         (state) => state.dataframe.original.kategorien,
     )
         ?.filter((row) => row.get('KategorieID') > 2)
         .toCollection();
-    const [deleteOpen, setDeleteOpen] = useState(false);
+
     const [newTimestamp, setNewTimestamp] = useState(timestamp);
     const [newArt, setNewArt] = useState(art);
     const [newBetrag, setNewBetrag] = useState(betrag);
@@ -45,7 +55,6 @@ const AddUmsatz = ({
     const [newBeschreibung, setNewBeschreibung] = useState(beschreibung);
     const [newBemerkung, setNewBemerkung] = useState(bemerkung);
     const [newTags, setNewTags] = useState(tags);
-    const dispatch = useDispatch();
 
     const submit = () => {
         if (newBetrag === undefined || newBetrag === '') {
@@ -170,211 +179,191 @@ const AddUmsatz = ({
 
     return (
         kategorien && (
-            <>
-                <Dialog
-                    open={open}
-                    onClose={closeDialog}
-                    closeIcon={true}
-                    title={id ? 'Umsatz verändern' : 'Umsatz hinzufügen'}
-                    fullWidth
-                    content={
-                        kategorien.length > 0 ? (
-                            <div>
-                                <Alert
-                                    type={['umsatzBetrag', 'umsatzKategorie']}
-                                    style={{ marginBottom: '20px' }}
-                                />
-                                <Stack
-                                    direction={'row'}
-                                    spacing={'20px'}
-                                    sx={{
-                                        display: 'flex',
-                                    }}
-                                >
-                                    <Autocomplete
-                                        select
-                                        value={newArt}
-                                        placeholder={'Art'}
-                                        options={['Einnahme', 'Ausgabe']}
-                                        fullWidth
-                                        onChange={(value) => {
-                                            setNewArt(value);
-                                        }}
-                                    />
-                                </Stack>
-                                <Stack
-                                    direction={'row'}
-                                    spacing={'20px'}
-                                    sx={{
-                                        display: 'flex',
-                                        marginTop: '20px',
-                                    }}
-                                >
-                                    <Datefield
-                                        value={newTimestamp}
-                                        onChange={(newValue) =>
-                                            setNewTimestamp(
-                                                newValue
-                                                    .startOf('day')
-                                                    .valueOf(),
-                                            )
-                                        }
-                                        toolbarFormat={'DD. MMMM'}
-                                        style={{
-                                            width: '100%',
-                                        }}
-                                    />
-                                    <Numberfield
-                                        margin
-                                        autoFocus
-                                        placeholder={'Betrag'}
-                                        value={newBetrag}
-                                        onChange={(val) => {
-                                            setNewBetrag(val);
-                                            dispatch(resetMessage());
-                                        }}
-                                        onError={(val) => setBetragError(val)}
-                                        end="€"
-                                    />
-                                </Stack>
-                                <Stack
-                                    direction={{ xs: 'column', sm: 'row' }}
-                                    spacing={'20px'}
-                                    sx={{
-                                        display: 'flex',
-                                        marginBottom: '20px',
-                                    }}
-                                >
-                                    <Autocomplete
-                                        select
-                                        value={newTyp}
-                                        placeholder={'Typ'}
-                                        options={['fix', 'variabel']}
-                                        fullWidth
-                                        onChange={(value) => {
-                                            setNewTyp(value);
-                                        }}
-                                        style={{
-                                            width: {
-                                                xs: '100%',
-                                                sm: '40%',
-                                            },
-                                        }}
-                                    />
-                                    <Autocomplete
-                                        value={newKategorie}
-                                        placeholder={'Kategorie'}
-                                        options={kategorien}
-                                        optionLabel={'Kategorie'}
-                                        fullWidth
-                                        onChange={(value) => {
-                                            setNewKategorie(value);
-                                        }}
-                                    />
-                                </Stack>
-                                <Textfield
-                                    style={{ marginBottom: '20px' }}
-                                    placeholder={'Beschreibung'}
-                                    value={newBeschreibung}
-                                    onChange={(e) => {
-                                        setNewBeschreibung(e.target.value);
+            <Dialog
+                open={open}
+                onClose={closeDialog}
+                closeIcon={true}
+                title={id ? 'Umsatz verändern' : 'Umsatz hinzufügen'}
+                fullWidth
+                content={
+                    kategorien.length > 0 ? (
+                        <div>
+                            <Alert
+                                type={['umsatzBetrag', 'umsatzKategorie']}
+                                style={{ marginBottom: '20px' }}
+                            />
+                            <Stack
+                                direction={'row'}
+                                spacing={'20px'}
+                                sx={{
+                                    display: 'flex',
+                                }}
+                            >
+                                <Autocomplete
+                                    select
+                                    value={newArt}
+                                    placeholder={'Art'}
+                                    options={['Einnahme', 'Ausgabe']}
+                                    fullWidth
+                                    onChange={(value) => {
+                                        setNewArt(value);
                                     }}
                                 />
-                                <Textfield
-                                    style={{ marginBottom: '20px' }}
-                                    placeholder={'Bemerkung'}
-                                    value={newBemerkung}
-                                    onChange={(e) => {
-                                        setNewBemerkung(e.target.value);
+                            </Stack>
+                            <Stack
+                                direction={'row'}
+                                spacing={'20px'}
+                                sx={{
+                                    display: 'flex',
+                                    marginTop: '20px',
+                                }}
+                            >
+                                <Datefield
+                                    value={newTimestamp}
+                                    onChange={(newValue) =>
+                                        setNewTimestamp(
+                                            newValue.startOf('day').valueOf(),
+                                        )
+                                    }
+                                    toolbarFormat={'DD. MMMM'}
+                                    style={{
+                                        width: '100%',
+                                    }}
+                                />
+                                <Numberfield
+                                    margin
+                                    autoFocus
+                                    placeholder={'Betrag'}
+                                    value={newBetrag}
+                                    onChange={(val) => {
+                                        setNewBetrag(val);
+                                        dispatch(resetMessage());
+                                    }}
+                                    onError={(val) => setBetragError(val)}
+                                    end="€"
+                                />
+                            </Stack>
+                            <Stack
+                                direction={{ xs: 'column', sm: 'row' }}
+                                spacing={'20px'}
+                                sx={{
+                                    display: 'flex',
+                                    marginBottom: '20px',
+                                }}
+                            >
+                                <Autocomplete
+                                    select
+                                    value={newTyp}
+                                    placeholder={'Typ'}
+                                    options={['fix', 'variabel']}
+                                    fullWidth
+                                    onChange={(value) => {
+                                        setNewTyp(value);
+                                    }}
+                                    style={{
+                                        width: {
+                                            xs: '100%',
+                                            sm: '40%',
+                                        },
                                     }}
                                 />
                                 <Autocomplete
-                                    value={newTags}
-                                    options={[]}
-                                    placeholder={'Tags'}
+                                    value={newKategorie}
+                                    placeholder={'Kategorie'}
+                                    options={kategorien}
+                                    optionLabel={'Kategorie'}
                                     fullWidth
-                                    multiple
-                                    freeSolo
                                     onChange={(value) => {
-                                        setNewTags(value);
+                                        setNewKategorie(value);
                                     }}
-                                    style={{ marginBottom: '4px' }}
                                 />
-                            </div>
-                        ) : (
-                            <Alert
-                                message={
-                                    <div>
-                                        Ein Umsatz muss immer mit einer
-                                        Kategorie verknüpft sein. Bevor also ein
-                                        Umsatz hinzugefügt werden kann, muss
-                                        zunächst mind. eine Kategorie{' '}
-                                        <Link
-                                            to="/kategorien"
-                                            style={{ color: 'inherit' }}
-                                            onClick={onClose}
-                                        >
-                                            hier
-                                        </Link>{' '}
-                                        erstellt werden.
-                                    </div>
-                                }
-                                severity="info"
+                            </Stack>
+                            <Textfield
+                                style={{ marginBottom: '20px' }}
+                                placeholder={'Beschreibung'}
+                                value={newBeschreibung}
+                                onChange={(e) => {
+                                    setNewBeschreibung(e.target.value);
+                                }}
                             />
-                        )
-                    }
-                    actions={
-                        kategorien.length > 0 && (
-                            <div>
-                                {id && (
-                                    <Button
-                                        onClick={() => setDeleteOpen(true)}
-                                        variant="outlined"
-                                        sx={{ mr: 1 }}
+                            <Textfield
+                                style={{ marginBottom: '20px' }}
+                                placeholder={'Bemerkung'}
+                                value={newBemerkung}
+                                onChange={(e) => {
+                                    setNewBemerkung(e.target.value);
+                                }}
+                            />
+                            <Autocomplete
+                                value={newTags}
+                                options={[]}
+                                placeholder={'Tags'}
+                                fullWidth
+                                multiple
+                                freeSolo
+                                onChange={(value) => {
+                                    setNewTags(value);
+                                }}
+                                style={{ marginBottom: '4px' }}
+                            />
+                        </div>
+                    ) : (
+                        <Alert
+                            message={
+                                <div>
+                                    Ein Umsatz muss immer mit einer Kategorie
+                                    verknüpft sein. Bevor also ein Umsatz
+                                    hinzugefügt werden kann, muss zunächst mind.
+                                    eine Kategorie{' '}
+                                    <Link
+                                        to="/kategorien"
+                                        style={{ color: 'inherit' }}
+                                        onClick={onClose}
                                     >
-                                        Löschen
-                                    </Button>
-                                )}
+                                        hier
+                                    </Link>{' '}
+                                    erstellt werden.
+                                </div>
+                            }
+                            severity="info"
+                        />
+                    )
+                }
+                actions={
+                    kategorien.length > 0 && (
+                        <>
+                            {id && (
                                 <Button
-                                    // disabled={error}
-                                    onClick={submit}
-                                    variant="contained"
-                                >
-                                    Bestätigen
-                                </Button>
-                            </div>
-                        )
-                    }
-                />
-                {id && (
-                    <Dialog
-                        open={deleteOpen}
-                        title={'Umsatz löschen'}
-                        content={'Möchtest du wirklich deinen Umsatz löschen?'}
-                        actions={
-                            <div>
-                                <Button
-                                    onClick={() => setDeleteOpen(false)}
-                                    variant="outlined"
-                                    sx={{ mr: 1 }}
-                                >
-                                    Abbrechen
-                                </Button>
-                                <Button
-                                    onClick={() => {
-                                        dispatch(deleteUmsatz(id, timestamp));
-                                        onClose();
-                                        setDeleteOpen(false);
+                                    onClick={async () => {
+                                        const confirmed = await dialogs.open(
+                                            ConfirmDialog,
+                                            {
+                                                title: 'Umsatz löschen',
+                                                message:
+                                                    'Möchtest du wirklich deinen Umsatz löschen?',
+                                                yes: 'Bestätigen',
+                                                no: 'Abbrechen',
+                                            },
+                                        );
+                                        if (confirmed) {
+                                            dispatch(
+                                                deleteUmsatz(id, timestamp),
+                                            );
+                                            onClose();
+                                        }
                                     }}
-                                    variant="contained"
+                                    variant="outlined"
                                 >
-                                    Bestätigen
+                                    Löschen
                                 </Button>
-                            </div>
-                        }
-                    />
-                )}
-            </>
+                            )}
+                            <Button onClick={submit} variant="contained">
+                                Bestätigen
+                            </Button>
+                        </>
+                    )
+                }
+            />
         )
     );
 };

@@ -1,7 +1,3 @@
-import React from 'react';
-
-import IconButton from './IconButton';
-
 import MuiDialog from '@mui/material/Dialog';
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -9,6 +5,8 @@ import DialogActions from '@mui/material/DialogActions';
 
 import Icon from '@mdi/react';
 import { mdiArrowLeft, mdiClose } from '@mdi/js';
+
+import IconButton from './IconButton';
 
 const DialogTitle = (props) => {
     return (
@@ -77,6 +75,7 @@ function Dialog(props) {
                         : props.fullScreen
                           ? 0
                           : '32px',
+                    ...props.sx,
                 },
             }}
             fullScreen={props.fullScreen}
@@ -110,6 +109,8 @@ function Dialog(props) {
                         margin: 0,
                         padding: props.fullScreen ? 0 : 2,
                         ...props.sxContent,
+                        paddingBottom:
+                            props.actions || props.fullScreen ? 0 : 2,
                     }}
                 >
                     {props.content}
@@ -120,7 +121,6 @@ function Dialog(props) {
                     sx={{
                         margin: 0,
                         padding: 2,
-                        paddingTop: 0,
                         ...props.sxActions,
                     }}
                 >

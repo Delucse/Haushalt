@@ -316,10 +316,6 @@ const Dashboard = ({ print }) => {
                                         enableColorOnDark
                                         sx={{
                                             position: 'relative',
-                                            // background: (theme) =>
-                                            //     theme.palette.mode === 'light'
-                                            //         ? theme.palette.primary.main
-                                            //         : theme.palette.primary.light,
                                             background: (theme) =>
                                                 theme.palette.background
                                                     .default,
@@ -328,19 +324,11 @@ const Dashboard = ({ print }) => {
                                             borderBottom: (theme) =>
                                                 `1px solid ${theme.palette.primary.main}`,
                                             boxShadow: 'none',
-                                            // color: (theme) =>
-                                            //     theme.palette.mode === 'light'
-                                            //         ? theme.palette.getContrastText(
-                                            //               theme.palette.primary.main
-                                            //           )
-                                            //         : theme.palette.getContrastText(
-                                            //               theme.palette.primary.light
-                                            //           ),
                                         }}
                                     >
                                         <Toolbar
                                             sx={{
-                                                minHeight: '56px !important',
+                                                minHeight: '55.2px !important',
                                             }}
                                         >
                                             <Box sx={{ flexGrow: 1 }}>

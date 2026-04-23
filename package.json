@@ -11,6 +11,7 @@
         "@mui/material": "^6.4.5",
         "@mui/x-date-pickers": "^8.23.0",
         "@mui/x-tree-view": "^7.28.1",
+        "@toolpad/core": "^0.16.0",
         "axios": "^1.7.9",
         "chart.js": "^4.4.7",
         "chartjs-adapter-moment": "^1.0.1",

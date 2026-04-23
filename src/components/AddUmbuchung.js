@@ -1,28 +1,35 @@
+import { useEffect, useState } from 'react';
+
 import { useDispatch } from 'react-redux';
-import Button from './Button';
-import Dialog from './Dialog';
 import {
     addUmbuchung,
     changeUmbuchung,
     deleteUmbuchung,
 } from '../actions/dataframeActions/umbuchungActions';
-import { useEffect, useState } from 'react';
-import Textfield from './Textfield';
-import Numberfield from './Numberfield';
-import Alert from './Alert';
-import Datefield from './Datefield';
-import { Stack } from '@mui/material';
 import { alertErrorMessage, resetMessage } from '../actions/messageActions';
+
 import moment from 'moment';
 
+import { useDialogs } from '@toolpad/core/useDialogs';
+import { Stack } from '@mui/material';
+
+import Button from './Button';
+import Textfield from './Textfield';
+import Numberfield from './Numberfield';
+import Datefield from './Datefield';
+import Alert from './Alert';
+import Dialog from './Dialog';
+import ConfirmDialog from './ConfirmDialog';
+
 const AddUmbuchung = ({ open, id, timestamp, betrag, bemerkung, onClose }) => {
-    const [deleteOpen, setDeleteOpen] = useState(false);
+    const dialogs = useDialogs();
+
+    const dispatch = useDispatch();
+
     const [newTimestamp, setNewTimestamp] = useState(timestamp);
     const [newBetrag, setNewBetrag] = useState(betrag);
     const [betragError, setBetragError] = useState(false);
     const [newBemerkung, setNewBemerkung] = useState(bemerkung);
-
-    const dispatch = useDispatch();
 
     const submit = () => {
         if (newBetrag !== undefined && newBetrag !== '') {
@@ -103,113 +110,93 @@ const AddUmbuchung = ({ open, id, timestamp, betrag, bemerkung, onClose }) => {
     }, [id]);
 
     return (
-        <>
-            <Dialog
-                open={open}
-                onClose={closeDialog}
-                closeIcon={true}
-                title={id ? 'Umbuchung verändern' : 'Umbuchung hinzufügen'}
-                fullWidth
-                content={
-                    <div>
-                        <Alert
-                            type={['umbuchungBetrag']}
-                            style={{ marginBottom: '20px' }}
-                        />
+        <Dialog
+            open={open}
+            onClose={closeDialog}
+            closeIcon={true}
+            title={id ? 'Umbuchung verändern' : 'Umbuchung hinzufügen'}
+            fullWidth
+            content={
+                <div>
+                    <Alert
+                        type={['umbuchungBetrag']}
+                        style={{ marginBottom: '20px' }}
+                    />
 
-                        <Stack
-                            direction={'row'}
-                            spacing={'20px'}
-                            sx={{
-                                display: 'flex',
-                                marginTop: '10px',
-                            }}
-                        >
-                            <Datefield
-                                value={newTimestamp}
-                                onChange={(newValue) =>
-                                    setNewTimestamp(
-                                        newValue.startOf('day').valueOf(),
-                                    )
-                                }
-                                toolbarFormat={'DD. MMMM'}
-                                style={{
-                                    width: '100%',
-                                }}
-                            />
-                            <Numberfield
-                                margin
-                                autoFocus
-                                placeholder={'Betrag'}
-                                value={newBetrag}
-                                onChange={(val) => {
-                                    setNewBetrag(val);
-                                    dispatch(resetMessage());
-                                }}
-                                onError={(val) => setBetragError(val)}
-                                end="€"
-                            />
-                        </Stack>
-                        <Textfield
-                            style={{ marginBottom: '4px' }}
-                            placeholder={'Bemerkung'}
-                            value={newBemerkung}
-                            onChange={(e) => {
-                                setNewBemerkung(e.target.value);
+                    <Stack
+                        direction={'row'}
+                        spacing={'20px'}
+                        sx={{
+                            display: 'flex',
+                            marginTop: '10px',
+                        }}
+                    >
+                        <Datefield
+                            value={newTimestamp}
+                            onChange={(newValue) =>
+                                setNewTimestamp(
+                                    newValue.startOf('day').valueOf(),
+                                )
+                            }
+                            toolbarFormat={'DD. MMMM'}
+                            style={{
+                                width: '100%',
                             }}
                         />
-                    </div>
-                }
-                actions={
-                    <div>
-                        {id && (
-                            <Button
-                                onClick={() => setDeleteOpen(true)}
-                                variant="outlined"
-                                sx={{ mr: 1 }}
-                            >
-                                Löschen
-                            </Button>
-                        )}
+                        <Numberfield
+                            margin
+                            autoFocus
+                            placeholder={'Betrag'}
+                            value={newBetrag}
+                            onChange={(val) => {
+                                setNewBetrag(val);
+                                dispatch(resetMessage());
+                            }}
+                            onError={(val) => setBetragError(val)}
+                            end="€"
+                        />
+                    </Stack>
+                    <Textfield
+                        style={{ marginBottom: '4px' }}
+                        placeholder={'Bemerkung'}
+                        value={newBemerkung}
+                        onChange={(e) => {
+                            setNewBemerkung(e.target.value);
+                        }}
+                    />
+                </div>
+            }
+            actions={
+                <>
+                    {id && (
                         <Button
-                            // disabled={error}
-                            onClick={submit}
-                            variant="contained"
-                        >
-                            Bestätigen
-                        </Button>
-                    </div>
-                }
-            />
-            {id && (
-                <Dialog
-                    open={deleteOpen}
-                    title={'Umbuchung löschen'}
-                    content={'Möchtest du wirklich deine Umbuchung löschen?'}
-                    actions={
-                        <div>
-                            <Button
-                                onClick={() => setDeleteOpen(false)}
-                                variant="outlined"
-                                sx={{ mr: 1 }}
-                            >
-                                Abbrechen
-                            </Button>
-                            <Button
-                                onClick={() => {
+                            onClick={async () => {
+                                const confirmed = await dialogs.open(
+                                    ConfirmDialog,
+                                    {
+                                        title: 'Umbuchung löschen',
+                                        message:
+                                            'Möchtest du wirklich deine Umbuchung löschen?',
+                                        yes: 'Bestätigen',
+                                        no: 'Abbrechen',
+                                    },
+                                );
+                                if (confirmed) {
                                     dispatch(deleteUmbuchung(id, timestamp));
                                     onClose();
-                                    setDeleteOpen(false);
-                                }}
-                                variant="contained"
-                            >
-                                Bestätigen
-                            </Button>
-                        </div>
-                    }
-                />
-            )}
-        </>
+                                }
+                            }}
+                            variant="outlined"
+                        >
+                            Löschen
+                        </Button>
+                    )}
+                    <Button onClick={submit} variant="contained">
+                        Bestätigen
+                    </Button>
+                </>
+            }
+        />
     );
 };
 

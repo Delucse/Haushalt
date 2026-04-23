@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
 
 import { createTheme, ThemeProvider, useMediaQuery } from '@mui/material';
+import { DialogsProvider } from '@toolpad/core/useDialogs';
 
 import moment from 'moment';
 import 'moment/locale/de';
@@ -71,66 +72,71 @@ function App() {
 
     return (
         <ThemeProvider theme={muiTheme} noSsr>
-            <Routes>
-                <Route path="/" element={<Layout />}>
-                    <Route index element={<Sources preview />} />
-                    <Route path="/quelle">
+            <DialogsProvider>
+                <Routes>
+                    <Route path="/" element={<Layout />}>
                         <Route index element={<Sources preview />} />
-                        <Route path=":source" element={<Sources />} />
+                        <Route path="/quelle">
+                            <Route index element={<Sources preview />} />
+                            <Route path=":source" element={<Sources />} />
+                        </Route>
+                        <Route
+                            path="/dashboard"
+                            element={
+                                <PrivateRoute>
+                                    <Dashboard />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/umsatz"
+                            element={
+                                <PrivateRoute>
+                                    <UmsatzTable />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/abschluss"
+                            element={
+                                <PrivateRoute>
+                                    <AbschlussTable />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/umbuchung"
+                            element={
+                                <PrivateRoute>
+                                    <UmbuchungTable />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/einstellungen"
+                            element={<Einstellungen />}
+                        />
+                        <Route
+                            path="/kategorien"
+                            element={
+                                <PrivateRoute>
+                                    <Kategorien />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/umsatz/wiederkehrend"
+                            element={
+                                <PrivateRoute>
+                                    <WiederkehrenderUmsatz />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route path="/faq" element={<Faq />} />
                     </Route>
-                    <Route
-                        path="/dashboard"
-                        element={
-                            <PrivateRoute>
-                                <Dashboard />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/umsatz"
-                        element={
-                            <PrivateRoute>
-                                <UmsatzTable />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/abschluss"
-                        element={
-                            <PrivateRoute>
-                                <AbschlussTable />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/umbuchung"
-                        element={
-                            <PrivateRoute>
-                                <UmbuchungTable />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route path="/einstellungen" element={<Einstellungen />} />
-                    <Route
-                        path="/kategorien"
-                        element={
-                            <PrivateRoute>
-                                <Kategorien />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/umsatz/wiederkehrend"
-                        element={
-                            <PrivateRoute>
-                                <WiederkehrenderUmsatz />
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route path="/faq" element={<Faq />} />
-                </Route>
-                <Route path="*" element={<NotFound />} />
-            </Routes>
+                    <Route path="*" element={<NotFound />} />
+                </Routes>
+            </DialogsProvider>
         </ThemeProvider>
     );
 }
