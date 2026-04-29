@@ -109,17 +109,20 @@ export const deleteAbschluss = (id, timestamp) => (dispatch, getState) => {
 };
 
 export const calcMonatsposten = (abschluss, umsatz) => {
-    var maxAbschluss = abschluss.stat.max('Zeitstempel');
-    abschluss = abschluss.withColumn('Monatsposten', (row) => {
-        if (row.get('Zeitstempel') === maxAbschluss) {
-            return umsatz
-                .filter(
-                    (row) =>
-                        row.get('WID') && row.get('Zeitstempel') > maxAbschluss,
-                )
-                .stat.sum('Umsatz');
-        }
-        return 0;
-    });
+    if (abschluss.count() > 0) {
+        var maxAbschluss = abschluss.stat.max('Zeitstempel');
+        abschluss = abschluss.withColumn('Monatsposten', (row) => {
+            if (row.get('Zeitstempel') === maxAbschluss) {
+                return umsatz
+                    .filter(
+                        (row) =>
+                            row.get('WID') &&
+                            row.get('Zeitstempel') > maxAbschluss,
+                    )
+                    .stat.sum('Umsatz');
+            }
+            return 0;
+        });
+    }
     return abschluss;
 };

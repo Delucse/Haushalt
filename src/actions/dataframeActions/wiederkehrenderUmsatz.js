@@ -93,15 +93,19 @@ export const addWiederkehrenderUmsatz =
         kategorie = kategorien.find(
             (row) => row.get('KategorieID') === `${kategorie}`,
         );
-        var id = wiederkehrenderUmsatz.stat.max('ID') + 1,
-            index = wiederkehrenderUmsatz.count() + 1,
+        var count = wiederkehrenderUmsatz.count(),
+            index = count + 1,
+            id = count > 0 ? wiederkehrenderUmsatz.stat.max('ID') + 1 : 1,
             wid,
             addUmsatz = Boolean(zeitstempel);
         if (addUmsatz) {
-            var maxUmsatz = Math.max(
-                zeitstempel,
-                umsatz.stat.max('Zeitstempel'),
-            );
+            var maxUmsatz = zeitstempel;
+            if (umsatz.count() > 0) {
+                maxUmsatz = Math.max(
+                    zeitstempel,
+                    umsatz.stat.max('Zeitstempel'),
+                );
+            }
             if (moment(zeitstempel).isSame(maxUmsatz, 'month')) {
                 wid = id;
             }
