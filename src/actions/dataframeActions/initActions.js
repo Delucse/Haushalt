@@ -49,6 +49,7 @@ export const initDataframe = () => async (dispatch, getState) => {
             abschluss,
             umbuchung,
             kategorien,
+            wiederkehrenderUmsatz,
         );
 
         dispatch({
@@ -80,12 +81,10 @@ export const initDataframe = () => async (dispatch, getState) => {
             ]),
         );
         dispatch(setFilter());
-        setTimeout(() => {
-            dispatch({
-                type: DATAFRAME_INIT_PROGRESS,
-                payload: false,
-            });
-        }, 1500);
+        dispatch({
+            type: DATAFRAME_INIT_PROGRESS,
+            payload: false,
+        });
     } catch (error) {
         console.log(error.message);
         dispatch({

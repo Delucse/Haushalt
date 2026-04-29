@@ -107,27 +107,15 @@ const AddWiederkehrenderUmsatz = ({
                     newTags.toString() !== tags.toString()
                 ) {
                     dispatch(
-                        changeWiederkehrenderUmsatz(
-                            id,
-                            {
-                                tag: newTag,
-                                art: newArt,
-                                betrag: newBetrag,
-                                kategorie: newKategorie.KategorieID,
-                                beschreibung: newBeschreibung,
-                                bemerkung: newBemerkung,
-                                tags: newTags,
-                            },
-                            {
-                                tag,
-                                art,
-                                betrag,
-                                kategorie,
-                                beschreibung,
-                                bemerkung,
-                                tags,
-                            },
-                        ),
+                        changeWiederkehrenderUmsatz(id, {
+                            tag: newTag,
+                            art: newArt,
+                            betrag: newBetrag,
+                            kategorie: newKategorie.KategorieID,
+                            beschreibung: newBeschreibung,
+                            bemerkung: newBemerkung,
+                            tags: newTags,
+                        }),
                     );
                 }
             } else {

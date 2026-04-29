@@ -43,7 +43,7 @@ const WiederkehrenderUmsatz = () => {
                 kategorie={data.kategorie}
                 beschreibung={data.beschreibung}
                 bemerkung={data.bemerkung}
-                tags={data.tags}
+                tags={data.tags || []}
             />
             {wiederkehrenderUmsatz.length > 0 ? (
                 <Table

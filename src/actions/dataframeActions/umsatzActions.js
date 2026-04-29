@@ -8,7 +8,13 @@ import { addMonatsposten } from './wiederkehrenderUmsatz';
 
 import { DATAFRAME_ORIGINAL_UMSATZ } from '../types';
 
-export const initUmsatz = async (file, abschluss, umbuchung, kategorien) => {
+export const initUmsatz = async (
+    file,
+    abschluss,
+    umbuchung,
+    kategorien,
+    wiederkehrenderUmsatz,
+) => {
     var umsatz = await DataFrame.fromText(file, ';');
     umsatz = umsatz.filter(
         (row) =>
@@ -49,6 +55,32 @@ export const initUmsatz = async (file, abschluss, umbuchung, kategorien) => {
     umsatz = umsatz.withColumn('Jahr', (row) =>
         moment(row.get('Zeitstempel')).year(),
     );
+    // wiederkehrende ID
+    if (umsatz.count() > 0) {
+        const maxUmsatz = moment(umsatz.stat.max('Zeitstempel'));
+        umsatz = umsatz.withColumn('WID', (row) => {
+            if (
+                row.get('Typ') === 'fix' &&
+                maxUmsatz.isSame(row.get('Zeitstempel'), 'month')
+            ) {
+                const wUmsatz = wiederkehrenderUmsatz.find(
+                    (r) =>
+                        r.get('Zeitstempel') === row.get('Zeitstempel') &&
+                        r.get('Betrag') === row.get('Betrag') &&
+                        r.get('Art') === row.get('Art') &&
+                        r.get('KategorieID') === row.get('KategorieID') &&
+                        r.get('Beschreibung') === row.get('Beschreibung') &&
+                        r.get('Bemerkung') === row.get('Bemerkung') &&
+                        r.get('Tags').toString() === row.get('Tags').toString(),
+                );
+                if (wUmsatz) {
+                    return wUmsatz.get('ID');
+                }
+                return null;
+            }
+            return null;
+        });
+    }
     umsatz = umsatz.withColumn('ID', (row, index) => index + 1);
     umsatz = umsatz.restructure([
         'ID',
@@ -68,6 +100,7 @@ export const initUmsatz = async (file, abschluss, umbuchung, kategorien) => {
         'Beschreibung',
         'Bemerkung',
         'Tags',
+        'WID',
     ]);
     return umsatz;
 };
@@ -131,17 +164,27 @@ const calcNichtGelistet = (umsatz, abschluss, umbuchung) => {
 };
 
 export const addUmsatz =
-    (timestamp, betrag, art, typ, kategorie, beschreibung, bemerkung, tags) =>
+    (
+        zeitstempel,
+        betrag,
+        art,
+        typ,
+        kategorie,
+        beschreibung,
+        bemerkung,
+        tags,
+        wid = null,
+    ) =>
     (dispatch, getState) => {
         var { umsatz, kategorien } = getState().dataframe.original;
         kategorie = kategorien.find(
             (row) => row.get('KategorieID') === `${kategorie}`,
         );
-        var date = moment(timestamp);
+        var date = moment(zeitstempel);
         umsatz = umsatz.push([
             umsatz.count() + 1,
             date.format('DD.MM.YYYY'),
-            timestamp,
+            zeitstempel,
             date.month() + 1,
             date.quarter(),
             date.year(),
@@ -156,21 +199,21 @@ export const addUmsatz =
             beschreibung,
             bemerkung,
             tags,
+            wid,
         ]);
         dispatch({
             type: DATAFRAME_ORIGINAL_UMSATZ,
             payload: umsatz,
         });
         dispatch(uploadFile('Umsatz'));
-        dispatch(updateNichtGelistet(timestamp, true));
+        dispatch(updateNichtGelistet(zeitstempel, true));
         dispatch(filterDataframe());
         dispatch(snackbarMessage(`Die ${art} wurde erfolgreich hinzugefügt.`));
     };
 
-export const changeUmsatz = (id, update, old) => (dispatch, getState) => {
+export const changeUmsatz = (id, update) => (dispatch, getState) => {
     var { umsatz, kategorien } = getState().dataframe.original;
-    var isNewTimestamp = update.timestamp !== old.timestamp;
-    var newDate = moment(update.timestamp);
+    var newDate = moment(update.zeitstempel);
     umsatz = umsatz.setRow(id - 1, (row) => {
         row = row.set('Betrag', update.betrag);
         row = row.set('Art', update.art);
@@ -179,12 +222,13 @@ export const changeUmsatz = (id, update, old) => (dispatch, getState) => {
             update.art !== 'Einnahme' ? update.betrag * -1 : update.betrag,
         );
         row = row.set('Typ', update.typ);
-        row = row.set('KategorieID', update.kategorie);
         row = row.set('Beschreibung', update.beschreibung);
         row = row.set('Bemerkung', update.bemerkung);
         row = row.set('Tags', update.tags);
+        row = row.set('WID', update.wid);
 
-        if (update.kategorie !== old.kategorie) {
+        if (update.kategorie !== row.get('KategorieID')) {
+            row = row.set('KategorieID', update.kategorie);
             var kategorie = kategorien.find(
                 (row) => row.get('KategorieID') === `${update.kategorie}`,
             );
@@ -192,9 +236,9 @@ export const changeUmsatz = (id, update, old) => (dispatch, getState) => {
             row = row.set('Oberkategorie', kategorie.get('Oberkategorie'));
             row = row.set('Unterkategorie', kategorie.get('Unterkategorie'));
         }
-        if (isNewTimestamp) {
+        if (update.zeitstempel !== row.get('Zeitstempel')) {
             row = row.set('Datum', newDate.format('DD.MM.YYYY'));
-            row = row.set('Zeitstempel', update.timestamp);
+            row = row.set('Zeitstempel', update.zeitstempel);
             row = row.set('Monat', newDate.month() + 1);
             row = row.set('Quartal', newDate.quarter());
             row = row.set('Jahr', newDate.year());
@@ -207,14 +251,13 @@ export const changeUmsatz = (id, update, old) => (dispatch, getState) => {
         payload: umsatz,
     });
     dispatch(uploadFile('Umsatz'));
-    var timestamp = isNewTimestamp ? update.timestamp : old.timestamp;
-    dispatch(updateNichtGelistet(timestamp));
+    dispatch(updateNichtGelistet(update.zeitstempel));
     dispatch(updateNichtGelistet(newDate.clone().add(1, 'month').valueOf()));
     dispatch(filterDataframe());
     dispatch(snackbarMessage(`Die ${update.art} wurde erfolgreich geändert.`));
 };
 
-export const deleteUmsatz = (id, timestamp) => (dispatch, getState) => {
+export const deleteUmsatz = (id, zeitstempel) => (dispatch, getState) => {
     var umsatz = getState().dataframe.original.umsatz;
     umsatz = umsatz.filter((row) => row.get('ID') !== id);
     umsatz = umsatz.withColumn('ID', (row, index) => index + 1);
@@ -223,13 +266,13 @@ export const deleteUmsatz = (id, timestamp) => (dispatch, getState) => {
         payload: umsatz,
     });
     dispatch(uploadFile('Umsatz'));
-    dispatch(updateNichtGelistet(timestamp));
+    dispatch(updateNichtGelistet(zeitstempel));
     dispatch(filterDataframe());
     dispatch(snackbarMessage(`Der Umsatz-Eintrag wurde erfolgreich entfernt.`));
 };
 
-export const nichtGelistet = (timestamp, abschluss, umbuchung, umsatz) => {
-    var date = moment(timestamp);
+export const nichtGelistet = (zeitstempel, abschluss, umbuchung, umsatz) => {
+    var date = moment(zeitstempel);
     var letzterMonatsTag = date.clone().endOf('month');
     var monatDateRaw = date.clone().startOf('month');
     var monatDate = monatDateRaw.valueOf();
@@ -306,10 +349,10 @@ export const nichtGelistet = (timestamp, abschluss, umbuchung, umsatz) => {
 };
 
 export const updateNichtGelistet =
-    (timestamp, add = false) =>
+    (zeitstempel, add = false) =>
     (dispatch, getState) => {
         var { abschluss, umbuchung, umsatz } = getState().dataframe.original;
-        var date = moment(timestamp);
+        var date = moment(zeitstempel);
         var letzterMonatsTag = date.clone().endOf('month'); //new Date(jahr, monat + 1, 0);
         var row = umsatz.find(
             (r) =>
@@ -318,7 +361,7 @@ export const updateNichtGelistet =
         );
         if (row) {
             const { betrag } = nichtGelistet(
-                timestamp,
+                zeitstempel,
                 abschluss,
                 umbuchung,
                 umsatz.filter((r) => r.get('KategorieID') !== '1'),
@@ -335,7 +378,7 @@ export const updateNichtGelistet =
             });
         } else if (add) {
             const { betrag } = nichtGelistet(
-                timestamp,
+                zeitstempel,
                 abschluss,
                 umbuchung,
                 umsatz.filter((row) => row.get('KategorieID') !== '1'),
@@ -358,6 +401,7 @@ export const updateNichtGelistet =
                 '',
                 '',
                 [],
+                null,
             ]);
             dispatch({
                 type: DATAFRAME_ORIGINAL_UMSATZ,

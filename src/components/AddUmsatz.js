@@ -23,6 +23,11 @@ import Autocomplete from './Autocomplete';
 import Alert from './Alert';
 import Dialog from './Dialog';
 import ConfirmDialog from './ConfirmDialog';
+import {
+    addWiederkehrenderUmsatz,
+    changeWiederkehrenderUmsatz,
+    deleteWiederkehrenderUmsatz,
+} from '../actions/dataframeActions/wiederkehrenderUmsatz';
 
 const AddUmsatz = ({
     open,
@@ -35,6 +40,7 @@ const AddUmsatz = ({
     beschreibung,
     bemerkung,
     tags,
+    wid = null,
     onClose,
 }) => {
     const dialogs = useDialogs();
@@ -56,7 +62,7 @@ const AddUmsatz = ({
     const [newBemerkung, setNewBemerkung] = useState(bemerkung);
     const [newTags, setNewTags] = useState(tags);
 
-    const submit = () => {
+    const submit = async () => {
         if (newBetrag === undefined || newBetrag === '') {
             dispatch(
                 alertErrorMessage(
@@ -100,33 +106,104 @@ const AddUmsatz = ({
                     newBemerkung !== bemerkung ||
                     newTags.toString() !== tags.toString()
                 ) {
+                    if (newTyp === 'fix' && newTyp !== typ) {
+                        const confirmed = await dialogs.open(ConfirmDialog, {
+                            title: 'wiederkehrenden Umsatz hinzufügen',
+                            message:
+                                'Soll ein entsprechender wiederkehrender Umsatz hinzugefügt werden?',
+                        });
+                        if (confirmed) {
+                            wid = dispatch(
+                                addWiederkehrenderUmsatz(
+                                    moment(calcTimestamp).date(),
+                                    newArt,
+                                    newBetrag,
+                                    newKategorie.KategorieID,
+                                    newBeschreibung,
+                                    newBemerkung,
+                                    newTags,
+                                    calcTimestamp,
+                                ),
+                            );
+                        }
+                    } else if (typ === 'fix' && wid) {
+                        if (newTyp !== 'fix') {
+                            wid = null;
+                            const confirmed = await dialogs.open(
+                                ConfirmDialog,
+                                {
+                                    title: 'wiederkehrenden Umsatz löschen',
+                                    message:
+                                        'Soll der aktuell verknüpfte wiederkehrende Umsatz gelöscht werden?',
+                                },
+                            );
+                            if (confirmed) {
+                                dispatch(
+                                    deleteWiederkehrenderUmsatz(wid, false),
+                                );
+                            }
+                        } else {
+                            const confirmed = await dialogs.open(
+                                ConfirmDialog,
+                                {
+                                    title: 'wiederkehrenden Umsatz anpassen',
+                                    message:
+                                        'Soll der aktuell verknüpfte wiederkehrende Umsatz angepasst werden?',
+                                },
+                            );
+                            if (confirmed) {
+                                dispatch(
+                                    changeWiederkehrenderUmsatz(wid, {
+                                        zeitstempel: calcTimestamp,
+                                        art: newArt,
+                                        betrag: newBetrag,
+                                        kategorie: newKategorie.KategorieID,
+                                        beschreibung: newBeschreibung,
+                                        bemerkung: newBemerkung,
+                                        tags: newTags,
+                                    }),
+                                );
+                            } else {
+                                wid = null;
+                            }
+                        }
+                    }
                     dispatch(
-                        changeUmsatz(
-                            id,
-                            {
-                                timestamp: calcTimestamp,
-                                art: newArt,
-                                betrag: newBetrag,
-                                typ: newTyp,
-                                kategorie: newKategorie.KategorieID,
-                                beschreibung: newBeschreibung,
-                                bemerkung: newBemerkung,
-                                tags: newTags,
-                            },
-                            {
-                                timestamp,
-                                art,
-                                betrag,
-                                typ,
-                                kategorie,
-                                beschreibung,
-                                bemerkung,
-                                tags,
-                            },
-                        ),
+                        changeUmsatz(id, {
+                            zeitstempel: calcTimestamp,
+                            art: newArt,
+                            betrag: newBetrag,
+                            typ: newTyp,
+                            kategorie: newKategorie.KategorieID,
+                            beschreibung: newBeschreibung,
+                            bemerkung: newBemerkung,
+                            tags: newTags,
+                            wid,
+                        }),
                     );
                 }
             } else {
+                if (newTyp === 'fix') {
+                    const confirmed = await dialogs.open(ConfirmDialog, {
+                        title: 'wiederkehrenden Umsatz hinzufügen',
+                        message:
+                            'Soll ein entsprechender wiederkehrender Umsatz hinzugefügt werden?',
+                    });
+                    if (confirmed) {
+                        wid = dispatch(
+                            addWiederkehrenderUmsatz(
+                                moment(calcTimestamp).date(),
+                                newArt,
+                                newBetrag,
+                                newKategorie.KategorieID,
+                                newBeschreibung,
+                                newBemerkung,
+                                newTags,
+                                calcTimestamp,
+                            ),
+                        );
+                    }
+                }
                 dispatch(
                     addUmsatz(
                         calcTimestamp,
@@ -137,6 +214,7 @@ const AddUmsatz = ({
                         newBeschreibung,
                         newBemerkung,
                         newTags,
+                        wid,
                     ),
                 );
             }
@@ -346,6 +424,25 @@ const AddUmsatz = ({
                                             },
                                         );
                                         if (confirmed) {
+                                            if (typ === 'fix' && wid) {
+                                                const confirmedWiederkehrend =
+                                                    await dialogs.open(
+                                                        ConfirmDialog,
+                                                        {
+                                                            title: 'wiederkehrenden Umsatz löschen',
+                                                            message:
+                                                                'Soll auch der entsprechend verknüpfte wiederkehrende Umsatz gelöscht werden?',
+                                                        },
+                                                    );
+                                                if (confirmedWiederkehrend) {
+                                                    dispatch(
+                                                        deleteWiederkehrenderUmsatz(
+                                                            wid,
+                                                            false,
+                                                        ),
+                                                    );
+                                                }
+                                            }
                                             dispatch(
                                                 deleteUmsatz(id, timestamp),
                                             );

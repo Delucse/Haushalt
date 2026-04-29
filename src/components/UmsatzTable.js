@@ -36,14 +36,8 @@ const UmsatzTable = () => {
     const abschluss = useSelector(
         (state) => state.dataframe.original.abschluss,
     );
-    const wiederkehrenderUmsatz = useSelector(
-        (state) => state.dataframe.original.wiederkehrenderUmsatz,
-    );
     const maxAbschluss =
         abschluss?.count() > 0 && abschluss.stat.max('Zeitstempel');
-    const monatsposten = wiederkehrenderUmsatz?.filter(
-        (row) => row.get('Zeitstempel') > maxAbschluss,
-    );
     const umsatzFilteredWithoutNichtGelistet = umsatzFiltered?.filter(
         (row) => row.get('KategorieID') > 1,
     );
@@ -139,27 +133,8 @@ const UmsatzTable = () => {
                             ]}
                             body={umsatzFilteredCollection.map((row) => {
                                 const monatspostenNotActive =
-                                    row['Typ'] === 'fix' &&
-                                    row['Zeitstempel'] > maxAbschluss &&
-                                    monatsposten
-                                        .filter(
-                                            (r) =>
-                                                r.get('Zeitstempel') ===
-                                                    row['Zeitstempel'] &&
-                                                r.get('Art') === row['Art'] &&
-                                                r.get('Betrag') ===
-                                                    row['Betrag'] &&
-                                                r.get('KategorieID') ===
-                                                    row['KategorieID'] &&
-                                                r.get('Beschreibung') ===
-                                                    row['Beschreibung'] &&
-                                                r.get('Bemerkung') ===
-                                                    row['Bemerkung'],
-                                            // &&
-                                            // r.get('Tags') ===
-                                            //     row['Tags'],
-                                        )
-                                        .count() > 0;
+                                    row['WID'] &&
+                                    row['Zeitstempel'] > maxAbschluss;
                                 const betrag = row['Betrag']
                                     .toLocaleString('de-DE', {
                                         minimumFractionDigits: 2,
@@ -186,6 +161,7 @@ const UmsatzTable = () => {
                                                         bemerkung:
                                                             row['Bemerkung'],
                                                         tags: row['Tags'],
+                                                        wid: row['WID'],
                                                     })
                                                 }
                                                 sx={{
@@ -382,6 +358,7 @@ const UmsatzTable = () => {
                             beschreibung={data.beschreibung}
                             bemerkung={data.bemerkung}
                             tags={data.tags}
+                            wid={data.wid}
                         />
                     </>
                 ) : (
