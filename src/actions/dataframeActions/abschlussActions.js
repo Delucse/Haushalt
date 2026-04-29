@@ -8,7 +8,7 @@ import { updateNichtGelistet } from './umsatzActions';
 
 import { DATAFRAME_ORIGINAL_ABSCHLUSS } from '../types';
 
-export const initAbschluss = async (file, wiederkehrenderUmsatz) => {
+export const initAbschluss = async (file, umsatz) => {
     var abschluss = await DataFrame.fromText(file, ';');
     abschluss = abschluss.filter(
         (row) =>
@@ -22,7 +22,7 @@ export const initAbschluss = async (file, wiederkehrenderUmsatz) => {
         moment(row.get('Datum'), 'DD.MM.YYYY', true).valueOf(),
     );
     if (abschluss.count() > 0) {
-        abschluss = calcMonatsposten(abschluss, wiederkehrenderUmsatz);
+        abschluss = calcMonatsposten(abschluss, umsatz);
     } else {
         abschluss = abschluss.withColumn('Monatsposten', (row) => 0);
     }
@@ -40,8 +40,7 @@ export const initAbschluss = async (file, wiederkehrenderUmsatz) => {
 
 export const addAbschluss =
     (timestamp, konto, bargeld) => (dispatch, getState) => {
-        var { abschluss, wiederkehrenderUmsatz } =
-            getState().dataframe.original;
+        var { abschluss, umsatz } = getState().dataframe.original;
         var newDate = moment(timestamp);
         abschluss = abschluss.push([
             abschluss.count() + 1,
@@ -51,7 +50,7 @@ export const addAbschluss =
             bargeld,
             0,
         ]);
-        abschluss = calcMonatsposten(abschluss, wiederkehrenderUmsatz);
+        abschluss = calcMonatsposten(abschluss, umsatz);
         dispatch({
             type: DATAFRAME_ORIGINAL_ABSCHLUSS,
             payload: abschluss,
@@ -68,7 +67,7 @@ export const addAbschluss =
     };
 
 export const changeAbschluss = (id, update, old) => (dispatch, getState) => {
-    var { abschluss, wiederkehrenderUmsatz } = getState().dataframe.original;
+    var { abschluss, umsatz } = getState().dataframe.original;
     var newDate = moment(update.timestamp);
     abschluss = abschluss.setRow(id - 1, (row) => {
         row = row.set('Datum', newDate.format('DD.MM.YYYY'));
@@ -79,7 +78,7 @@ export const changeAbschluss = (id, update, old) => (dispatch, getState) => {
     });
     var isNewTimestamp = update.timestamp !== old.timestamp;
     if (isNewTimestamp) {
-        abschluss = calcMonatsposten(abschluss, wiederkehrenderUmsatz);
+        abschluss = calcMonatsposten(abschluss, umsatz);
     }
     dispatch({
         type: DATAFRAME_ORIGINAL_ABSCHLUSS,
@@ -94,10 +93,10 @@ export const changeAbschluss = (id, update, old) => (dispatch, getState) => {
 };
 
 export const deleteAbschluss = (id, timestamp) => (dispatch, getState) => {
-    var { abschluss, wiederkehrenderUmsatz } = getState().dataframe.original;
+    var { abschluss, umsatz } = getState().dataframe.original;
     abschluss = abschluss.filter((row) => row.get('ID') !== id);
     abschluss = abschluss.withColumn('ID', (row, index) => index + 1);
-    abschluss = calcMonatsposten(abschluss, wiederkehrenderUmsatz);
+    abschluss = calcMonatsposten(abschluss, umsatz);
     dispatch({
         type: DATAFRAME_ORIGINAL_ABSCHLUSS,
         payload: abschluss,
@@ -109,12 +108,15 @@ export const deleteAbschluss = (id, timestamp) => (dispatch, getState) => {
     dispatch(snackbarMessage(`Der Abschluss wurde erfolgreich entfernt.`));
 };
 
-const calcMonatsposten = (abschluss, wiederkehrenderUmsatz) => {
+export const calcMonatsposten = (abschluss, umsatz) => {
     var maxAbschluss = abschluss.stat.max('Zeitstempel');
     abschluss = abschluss.withColumn('Monatsposten', (row) => {
         if (row.get('Zeitstempel') === maxAbschluss) {
-            return wiederkehrenderUmsatz
-                .filter((row) => row.get('Zeitstempel') > maxAbschluss)
+            return umsatz
+                .filter(
+                    (row) =>
+                        row.get('WID') && row.get('Zeitstempel') > maxAbschluss,
+                )
                 .stat.sum('Umsatz');
         }
         return 0;

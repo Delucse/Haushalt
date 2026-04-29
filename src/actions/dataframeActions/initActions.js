@@ -1,6 +1,6 @@
 import moment from 'moment/moment';
 
-import { initUmsatz } from './umsatzActions';
+import { calcNichtGelistet, initUmsatz } from './umsatzActions';
 import { initKategorien } from './kategorienActions';
 import { initWiederkehrenderUmsatz } from './wiederkehrenderUmsatz';
 import { initAbschluss } from './abschlussActions';
@@ -36,21 +36,17 @@ export const initDataframe = () => async (dispatch, getState) => {
             file.wiederkehrenderUmsatz,
             kategorien,
         );
-        // Umbuchung
-        var umbuchung = await initUmbuchung(file.umbuchung);
-        // Abschluss
-        var abschluss = await initAbschluss(
-            file.abschluss,
-            wiederkehrenderUmsatz,
-        );
         // Umsatz
         var umsatz = await initUmsatz(
             file.umsatz,
-            abschluss,
-            umbuchung,
             kategorien,
             wiederkehrenderUmsatz,
         );
+        // Umbuchung
+        var umbuchung = await initUmbuchung(file.umbuchung);
+        // Abschluss
+        var abschluss = await initAbschluss(file.abschluss, umsatz);
+        umsatz = calcNichtGelistet(umsatz, abschluss, umbuchung);
 
         dispatch({
             type: DATAFRAME_INIT,

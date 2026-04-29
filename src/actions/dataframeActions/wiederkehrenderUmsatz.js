@@ -1,23 +1,21 @@
 import moment from 'moment/moment';
 import DataFrame from 'dataframe-js';
 
+import { updateNichtGelistet } from './umsatzActions';
+import { filterDataframe } from '../filterActions';
 import { uploadFile } from '../fileActions';
 import { snackbarMessage } from '../messageActions';
 
 import {
     DATAFRAME_ORIGINAL_WIEDERKEHRENDERUMSATZ,
     DATAFRAME_ORIGINAL_UMSATZ,
-    DATAFRAME_ORIGINAL_ABSCHLUSS,
 } from '../types';
-import { updateNichtGelistet } from './umsatzActions';
-import { filterDataframe } from '../filterActions';
 
 export const initWiederkehrenderUmsatz = async (file, kategorien) => {
     var wiederkehrenderUmsatz = await DataFrame.fromText(file, ';');
     wiederkehrenderUmsatz = wiederkehrenderUmsatz.filter(
         (row) =>
             row.get('Tag') !== undefined &&
-            row.get('Datum') !== undefined &&
             row.get('Betrag') !== undefined &&
             row.get('Art') !== undefined &&
             row.get('Kategorie') !== undefined &&
@@ -34,10 +32,6 @@ export const initWiederkehrenderUmsatz = async (file, kategorien) => {
     );
     wiederkehrenderUmsatz = wiederkehrenderUmsatz.cast('Betrag', (val) =>
         Number(val),
-    );
-    wiederkehrenderUmsatz = wiederkehrenderUmsatz.withColumn(
-        'Zeitstempel',
-        (row) => moment(row.get('Datum'), 'DD.MM.YYYY', true).valueOf(),
     );
     wiederkehrenderUmsatz = wiederkehrenderUmsatz.withColumn(
         'Umsatz',
@@ -67,8 +61,6 @@ export const initWiederkehrenderUmsatz = async (file, kategorien) => {
     wiederkehrenderUmsatz = wiederkehrenderUmsatz.restructure([
         'Index',
         'ID',
-        'Datum',
-        'Zeitstempel',
         'Tag',
         'Betrag',
         'Art',
@@ -104,8 +96,6 @@ export const addWiederkehrenderUmsatz =
         var id = wiederkehrenderUmsatz.stat.max('ID') + 1,
             index = wiederkehrenderUmsatz.count() + 1,
             wid,
-            datum = '',
-            milliseconds = '',
             addUmsatz = Boolean(zeitstempel);
         if (addUmsatz) {
             var maxUmsatz = Math.max(
@@ -113,16 +103,12 @@ export const addWiederkehrenderUmsatz =
                 umsatz.stat.max('Zeitstempel'),
             );
             if (moment(zeitstempel).isSame(maxUmsatz, 'month')) {
-                datum = moment(zeitstempel).format('DD.MM.YYYY');
-                milliseconds = zeitstempel;
                 wid = id;
             }
         }
         wiederkehrenderUmsatz = wiederkehrenderUmsatz.push([
             index,
             id,
-            datum,
-            milliseconds,
             tag,
             betrag,
             art,
@@ -140,40 +126,30 @@ export const addWiederkehrenderUmsatz =
             payload: wiederkehrenderUmsatz,
         });
         dispatch(uploadFile('wiederkehrenderUmsatz'));
-        dispatch(
-            snackbarMessage(
-                `Die wiederkehrende ${art} wurde erfolgreich hinzugefügt${addUmsatz ? ' und wird beim nächsten Monat wirksam' : ''}.`,
-            ),
+        setTimeout(
+            () => {
+                dispatch(
+                    snackbarMessage(
+                        `Die ${addUmsatz ? 'zugehörige ' : ''}wiederkehrende ${art} wurde erfolgreich hinzugefügt.`,
+                    ),
+                );
+            },
+            addUmsatz ? 500 : 0,
         );
         return wid;
     };
 
 export const changeWiederkehrenderUmsatz =
-    (id, update) => (dispatch, getState) => {
-        var { wiederkehrenderUmsatz, kategorien, abschluss } =
+    (id, update, wid = true) =>
+    (dispatch, getState) => {
+        var { wiederkehrenderUmsatz, kategorien } =
             getState().dataframe.original;
-        var newDate = false;
-        const index = wiederkehrenderUmsatz.find({ ID: id }).get('Index');
+        const index = wiederkehrenderUmsatz.find({ ID: id }).get('Index'),
+            changeUmsatz = !('tag' in update);
         wiederkehrenderUmsatz = wiederkehrenderUmsatz.setRow(
             index - 1,
             (row) => {
-                if (
-                    update.zeitstempel &&
-                    row.get('Zeitstempel') !== update.zeitstempel
-                ) {
-                    newDate = true;
-                    row = row.set(
-                        'Datum',
-                        moment(update.zeitstempel).format('DD.MM.YYYY'),
-                    );
-                    row = row.set('Zeitstempel', update.zeitstempel);
-                } else if (
-                    update.tag &&
-                    Number(update.tag) !== Number(row.get('Tag'))
-                ) {
-                    if (row.get('Datum') !== '') newDate = true;
-                    row = row.set('Datum', '');
-                    row = row.set('Zeitstempel', '');
+                if (!changeUmsatz) {
                     row = row.set('Tag', update.tag);
                 }
                 row = row.set('Betrag', update.betrag);
@@ -212,35 +188,25 @@ export const changeWiederkehrenderUmsatz =
             payload: wiederkehrenderUmsatz,
         });
         dispatch(uploadFile('wiederkehrenderUmsatz'));
-        if (newDate) {
-            var maxAbschluss = abschluss.stat.max('Zeitstempel');
-            abschluss = abschluss.withColumn('Monatsposten', () => 0);
-            id = abschluss
-                .find((row) => row.get('Zeitstempel') === maxAbschluss)
-                .get('ID');
-            var monatsposten = wiederkehrenderUmsatz
-                .filter((row) => row.get('Zeitstempel') > maxAbschluss)
-                .stat.sum('Umsatz');
-            abschluss = abschluss.setRow(id - 1, (row) =>
-                row.set('Monatsposten', monatsposten),
-            );
-            dispatch({
-                type: DATAFRAME_ORIGINAL_ABSCHLUSS,
-                payload: abschluss,
-            });
+        if (wid) {
+            dispatch(removeWid(id));
         }
-
-        dispatch(
-            snackbarMessage(
-                `Die wiederkehrende ${update.art} wurde erfolgreich aktualisiert. Die Änderungen werden erst beim nächsten Monat wirksam.`,
-            ),
+        setTimeout(
+            () => {
+                dispatch(
+                    snackbarMessage(
+                        `Die ${changeUmsatz ? 'zugehörige ' : ''}wiederkehrende ${update.art} wurde erfolgreich aktualisiert.`,
+                    ),
+                );
+            },
+            changeUmsatz ? 500 : 0,
         );
     };
 
 export const deleteWiederkehrenderUmsatz =
     (id, wid = true) =>
     (dispatch, getState) => {
-        var { wiederkehrenderUmsatz, umsatz } = getState().dataframe.original;
+        var { wiederkehrenderUmsatz } = getState().dataframe.original;
         wiederkehrenderUmsatz = wiederkehrenderUmsatz.filter(
             (row) => row.get('ID') !== id,
         );
@@ -254,25 +220,35 @@ export const deleteWiederkehrenderUmsatz =
         });
         dispatch(uploadFile('wiederkehrenderUmsatz'));
         if (wid) {
-            const uid = umsatz.find({ WID: id })?.get('ID');
-            if (uid) {
-                umsatz = umsatz.setRow(uid - 1, (row) => {
-                    row = row.set('WID', null);
-                    return row;
-                });
-                dispatch({
-                    type: DATAFRAME_ORIGINAL_UMSATZ,
-                    payload: umsatz,
-                });
-                dispatch(filterDataframe());
-            }
+            dispatch(removeWid(id));
         }
-        dispatch(
-            snackbarMessage(
-                `Der wiederkehrende Umsatz wurde erfolgreich entfernt und wird beim nächsten Monat nicht mehr berücksichtigt.`,
-            ),
+        setTimeout(
+            () => {
+                dispatch(
+                    snackbarMessage(
+                        `Der ${wid ? '' : 'zugehörige '}wiederkehrende Umsatz wurde erfolgreich entfernt.`,
+                    ),
+                );
+            },
+            wid ? 0 : 500,
         );
     };
+
+const removeWid = (id) => (dispatch, getState) => {
+    var { umsatz } = getState().dataframe.original;
+    const uid = umsatz.find({ WID: id })?.get('ID');
+    if (uid) {
+        umsatz = umsatz.setRow(uid - 1, (row) => {
+            row = row.set('WID', null);
+            return row;
+        });
+        dispatch({
+            type: DATAFRAME_ORIGINAL_UMSATZ,
+            payload: umsatz,
+        });
+        dispatch(filterDataframe());
+    }
+};
 
 export const calcFeiertage = (jahr, monat) => {
     var feiertage = [];
@@ -383,14 +359,6 @@ export const addMonatsposten = (jahr, monat) => (dispatch, getState) => {
         while (index < count) {
             const row = wiederkehrenderUmsatz.getRow(index);
             const datum = calcDate(jahr, monat, row.get('Tag'), feiertage);
-            wiederkehrenderUmsatz = wiederkehrenderUmsatz.setRow(
-                index,
-                (row) => {
-                    row = row.set('Datum', datum.format('DD.MM.YYYY'));
-                    row = row.set('Zeitstempel', datum.valueOf());
-                    return row;
-                },
-            );
             umsatz = umsatz.push([
                 umsatz.count() + 1,
                 datum.format('DD.MM.YYYY'),

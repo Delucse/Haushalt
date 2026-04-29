@@ -393,7 +393,7 @@ const uploadRaw = (uuid) => (dispatch) => {
         type: 'text/csv',
     });
     blob = new Blob(
-        ['Tag;Datum;Betrag;Art;Kategorie;Beschreibung;Bemerkung,Tags\n\r'],
+        ['Tag;Betrag;Art;Kategorie;Beschreibung;Bemerkung,Tags\n\r'],
         {
             type: 'text/csv',
         },
@@ -482,7 +482,6 @@ const getFile = (fileName) => (dispatch, getState) => {
                 .withColumn('Tags', (row) => row.get('Tags').join('|'))
                 .select(
                     'Tag',
-                    'Datum',
                     'Betrag',
                     'Art',
                     'KategorieID',
@@ -511,7 +510,6 @@ const getFile = (fileName) => (dispatch, getState) => {
     if (!fileContent.includes('\n')) {
         fileContent += '\n\r';
     }
-    console.log(fileContent);
     return new Blob([fileContent], { type: 'text/csv' });
 };
 

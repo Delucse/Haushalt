@@ -299,6 +299,7 @@ const Migration = () => {
             case 'Umsatz':
                 fileContent = dataframe
                     .filter((row) => row.get('KategorieID') > 1)
+                    .withColumn('Tags', () => '')
                     .select(
                         'Datum',
                         'Betrag',
@@ -307,20 +308,22 @@ const Migration = () => {
                         'KategorieID',
                         'Beschreibung',
                         'Bemerkung',
+                        'Tags',
                     )
                     .rename('KategorieID', 'Kategorie')
                     .toText(';');
                 break;
             case 'wiederkehrenderUmsatz':
                 fileContent = dataframe
+                    .withColumn('Tags', () => '')
                     .select(
                         'Tag',
-                        'Datum',
                         'Betrag',
                         'Art',
                         'KategorieID',
                         'Beschreibung',
                         'Bemerkung',
+                        'Tags',
                     )
                     .rename('KategorieID', 'Kategorie')
                     .toText(';');

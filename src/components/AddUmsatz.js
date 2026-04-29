@@ -154,7 +154,6 @@ const AddUmsatz = ({
                             if (confirmed) {
                                 dispatch(
                                     changeWiederkehrenderUmsatz(wid, {
-                                        zeitstempel: calcTimestamp,
                                         art: newArt,
                                         betrag: newBetrag,
                                         kategorie: newKategorie.KategorieID,
@@ -444,7 +443,11 @@ const AddUmsatz = ({
                                                 }
                                             }
                                             dispatch(
-                                                deleteUmsatz(id, timestamp),
+                                                deleteUmsatz(
+                                                    id,
+                                                    wid,
+                                                    timestamp,
+                                                ),
                                             );
                                             onClose();
                                         }
