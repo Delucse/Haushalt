@@ -1,19 +1,17 @@
-import { mdiCartVariant, mdiCashMultiple, mdiPiggyBank } from '@mdi/js';
-import Icon from '@mdi/react';
-import { Box, Divider, Stack } from '@mui/material';
 import { useSelector } from 'react-redux';
-// import moment from 'moment';
 
-const Stat = ({ betrag, percent, icon, prevBetrag, avgBetrag }) => {
+import { Box, Divider, Stack } from '@mui/material';
+
+import Icon from '@mdi/react';
+import { mdiCartVariant, mdiCashMultiple, mdiPiggyBank } from '@mdi/js';
+
+const Stat = ({ betrag, percent, icon }) => {
     return (
         <Stack
             direction="row"
             sx={{
-                // justifyContent: 'center',
-                // alignItems: 'center',
                 display: 'flex',
                 height: 'calc((100% / 3) - 12px)',
-                // border: (theme) => `1px solid ${theme.palette.secondary.main}`,
                 padding: '12px 0',
                 color: (theme) => theme.palette.text.primary,
             }}
@@ -38,11 +36,21 @@ const Stat = ({ betrag, percent, icon, prevBetrag, avgBetrag }) => {
                 >
                     <Box
                         sx={{
-                            width: 'calc(60% - 8px)',
+                            width: {
+                                xxs: '100%',
+                                xs: 'calc(60% - 8px)',
+                                md: '100%',
+                                lg: 'calc(60% - 8px)',
+                            },
                             justifyContent: 'end',
                             alignItems: 'center',
                             display: 'flex',
-                            marginRight: '8px',
+                            marginRight: {
+                                xxs: '0px',
+                                xs: '8px',
+                                md: '0px',
+                                lg: '8px',
+                            },
                             fontWeight: 'bold',
                             fontSize: '20px',
                         }}
@@ -56,13 +64,18 @@ const Stat = ({ betrag, percent, icon, prevBetrag, avgBetrag }) => {
                             })
                             .replace('-', '- ')}
                     </Box>
-                    {percent && (
+                    {percent !== undefined && (
                         <Box
                             sx={{
                                 width: '40%',
                                 justifyContent: 'end',
                                 alignItems: 'center',
-                                display: 'flex',
+                                display: {
+                                    xxs: 'none',
+                                    xs: 'flex',
+                                    md: 'none',
+                                    lg: 'flex',
+                                },
                             }}
                         >
                             {percent
@@ -75,57 +88,6 @@ const Stat = ({ betrag, percent, icon, prevBetrag, avgBetrag }) => {
                         </Box>
                     )}
                 </Stack>
-                {/* <Divider
-                    flexItem
-                    orientation="horizontal"
-                    sx={{ borderColor: (theme) => theme.palette.primary.main }}
-                />
-                <Stack
-                    direction="row"
-                    sx={{
-                        height: '50%',
-                        alignItems: 'center',
-                        display: 'flex',
-                    }}
-                >
-                    <Box
-                        style={{
-                            width: 'calc(50% - 12px)',
-                            textAlign: 'right',
-                            marginRight: '12px',
-                        }}
-                    >
-                        {prevBetrag &&
-                            (betrag - prevBetrag).toLocaleString('de-DE', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                                style: 'currency',
-                                currency: 'EUR',
-                            })
-                            .replace('-', '- ')}
-                    </Box>
-                    <Divider
-                        flexItem
-                        orientation="vertical"
-                        sx={{ borderColor: (theme) => theme.palette.primary.main }}
-                    />
-                    <Box
-                        style={{
-                            width: 'calc(50% - 12px)',
-                            textAlign: 'right',
-                            marginLeft: '12px',
-                        }}
-                    >
-                        {false &&
-                            avgBetrag.toLocaleString('de-DE', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                                style: 'currency',
-                                currency: 'EUR',
-                            })
-                            .replace('-', '- ')}
-                    </Box>
-                </Stack> */}
             </Stack>
         </Stack>
     );
