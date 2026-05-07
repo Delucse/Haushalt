@@ -20,7 +20,7 @@ import Button from './Button';
 import Search from './Search';
 import ActiveFilter from './ActiveFilter';
 
-const Zeitangabe = ({ margin }) => {
+const Zeitangabe = ({ margin, print }) => {
     const { range, interval } = useSelector((state) => state.filter.time);
     const dateRange = [moment(range[0]), moment(range[1])];
     const createZeitangabe = (range, interval) => {
@@ -63,7 +63,7 @@ const Zeitangabe = ({ margin }) => {
         <Typography
             sx={{
                 margin: `auto 12px auto ${margin ? margin : 5}px`,
-                color: (theme) => theme.palette.text.primary,
+                color: !print ? (theme) => theme.palette.text.primary : '#000',
             }}
         >
             {createZeitangabe(dateRange, interval)}
@@ -71,7 +71,7 @@ const Zeitangabe = ({ margin }) => {
     );
 };
 
-const Filter = ({ icon }) => {
+const Filter = ({ icon, print }) => {
     const [open, setOpen] = useState(false);
 
     const dispatch = useDispatch();
@@ -85,7 +85,9 @@ const Filter = ({ icon }) => {
                     top: { xxs: 0, sm: '56px' },
                     marginTop: '-16px',
                     paddingTop: '16px',
-                    background: (theme) => theme.palette.background.default,
+                    background: !print
+                        ? (theme) => theme.palette.background.default
+                        : '#fff',
                     zIndex: icon ? 'inherit' : 1,
                     width: '100%',
                     gap: { sm: 'unset', xs: '10px' },
@@ -107,7 +109,10 @@ const Filter = ({ icon }) => {
                         sx={{
                             color: icon
                                 ? 'inherit'
-                                : (theme) => theme.palette.primary.main,
+                                : (theme) =>
+                                      print === 'dark'
+                                          ? theme.palette.primary.light
+                                          : theme.palette.primary.main,
                             '&:hover': {
                                 color: (theme) => theme.palette.primary.main,
                             },
@@ -135,7 +140,10 @@ const Filter = ({ icon }) => {
                         <Icon path={mdiFilterVariant} size={icon ? 1.2 : 1.4} />
                     </Badge>
                     {!open && !icon && (
-                        <Zeitangabe margin={filterCount > 0 && 15} />
+                        <Zeitangabe
+                            margin={filterCount > 0 && 15}
+                            print={print}
+                        />
                     )}
                 </Box>
                 {!open && !icon && <ActiveFilter />}

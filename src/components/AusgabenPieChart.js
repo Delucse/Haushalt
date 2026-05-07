@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import generateColor from '../utils/color';
 import { useTheme } from '@mui/material';
 
-function AusgabenPieChart() {
+function AusgabenPieChart({ print }) {
     const umsatzAusgabe = useSelector(
         (state) => state.dataframe.filtered.umsatz,
     )?.filter({ Art: 'Ausgabe' });
@@ -41,13 +41,18 @@ function AusgabenPieChart() {
                         {
                             data: aggregatedCollection.map((c) => c.Betrag),
                             backgroundColor: colors,
-                            borderColor: theme.palette.background.default,
+                            borderColor: !print
+                                ? theme.palette.background.default
+                                : '#fff',
                         },
                     ],
                 }}
                 options={{
+                    rotation: -90,
+                    circumference: 180,
                     maintainAspectRatio: false,
                     responsive: true,
+                    animation: !print,
                     plugins: {
                         legend: {
                             position: 'top',

@@ -6,7 +6,7 @@ import { useTheme } from '@mui/material';
 
 import moment from 'moment';
 
-function TimeSeriesBarChart({ datasets, scales = {}, tooltip = {} }) {
+function TimeSeriesBarChart({ datasets, scales = {}, tooltip = {}, print }) {
     const { y, ...otherScales } = scales;
     const { callbacks, otherTooltip } = tooltip;
     const timeRange = useSelector((state) => state.filter.time.range);
@@ -67,7 +67,9 @@ function TimeSeriesBarChart({ datasets, scales = {}, tooltip = {} }) {
                                 drawTicks: true,
                             },
                             ticks: {
-                                color: theme.palette.text.primary,
+                                color: !print
+                                    ? theme.palette.text.primary
+                                    : '#000',
                                 callback: (tickValue, index, ticks) => {
                                     const date = moment(tickValue);
                                     switch (interval) {
@@ -137,7 +139,9 @@ function TimeSeriesBarChart({ datasets, scales = {}, tooltip = {} }) {
                                             currency: 'EUR',
                                         })
                                         .replace('-', '- '),
-                                color: theme.palette.text.primary,
+                                color: !print
+                                    ? theme.palette.text.primary
+                                    : '#000',
                             },
                             grid: {
                                 drawTicks: true,
@@ -148,6 +152,7 @@ function TimeSeriesBarChart({ datasets, scales = {}, tooltip = {} }) {
                         },
                         ...otherScales,
                     },
+                    animation: !print,
                     maintainAspectRatio: false,
                     responsive: true,
                     plugins: {

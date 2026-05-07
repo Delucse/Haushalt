@@ -1,11 +1,11 @@
 import { useSelector } from 'react-redux';
 
-import { Box, Divider, Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 
 import Icon from '@mdi/react';
 import { mdiCartVariant, mdiCashMultiple, mdiPiggyBank } from '@mdi/js';
 
-const Stat = ({ betrag, percent, icon }) => {
+const Stat = ({ betrag, percent, icon, print }) => {
     return (
         <Stack
             direction="row"
@@ -13,7 +13,7 @@ const Stat = ({ betrag, percent, icon }) => {
                 display: 'flex',
                 height: 'calc((100% / 3) - 12px)',
                 padding: '12px 0',
-                color: (theme) => theme.palette.text.primary,
+                color: !print ? (theme) => theme.palette.text.primary : '#000',
             }}
         >
             <Box
@@ -36,21 +36,25 @@ const Stat = ({ betrag, percent, icon }) => {
                 >
                     <Box
                         sx={{
-                            width: {
-                                xxs: '100%',
-                                xs: 'calc(60% - 8px)',
-                                md: '100%',
-                                lg: 'calc(60% - 8px)',
-                            },
+                            width: !print
+                                ? {
+                                      xxs: '100%',
+                                      xs: 'calc(60% - 8px)',
+                                      md: '100%',
+                                      lg: 'calc(60% - 8px)',
+                                  }
+                                : 'calc(60% - 8px)',
                             justifyContent: 'end',
                             alignItems: 'center',
                             display: 'flex',
-                            marginRight: {
-                                xxs: '0px',
-                                xs: '8px',
-                                md: '0px',
-                                lg: '8px',
-                            },
+                            marginRight: !print
+                                ? {
+                                      xxs: '0px',
+                                      xs: '8px',
+                                      md: '0px',
+                                      lg: '8px',
+                                  }
+                                : '8px',
                             fontWeight: 'bold',
                             fontSize: '20px',
                         }}
@@ -70,12 +74,14 @@ const Stat = ({ betrag, percent, icon }) => {
                                 width: '40%',
                                 justifyContent: 'end',
                                 alignItems: 'center',
-                                display: {
-                                    xxs: 'none',
-                                    xs: 'flex',
-                                    md: 'none',
-                                    lg: 'flex',
-                                },
+                                display: !print
+                                    ? {
+                                          xxs: 'none',
+                                          xs: 'flex',
+                                          md: 'none',
+                                          lg: 'flex',
+                                      }
+                                    : 'flex',
                             }}
                         >
                             {percent
@@ -93,7 +99,7 @@ const Stat = ({ betrag, percent, icon }) => {
     );
 };
 
-const Stats = () => {
+const Stats = ({ print }) => {
     const umsatzFilteredDf = useSelector(
         (state) => state.dataframe.filtered.umsatz,
     );
@@ -108,10 +114,14 @@ const Stats = () => {
 
     return umsatzDf ? (
         <Stack direction="column" sx={{ height: '100%' }}>
-            <Stat betrag={einnahmen} icon={mdiCashMultiple} />
-            <Divider
+            <Stat betrag={einnahmen} icon={mdiCashMultiple} print={print} />
+            <Box
                 sx={{
-                    borderColor: (theme) => theme.palette.primary.main,
+                    borderBottom: '1px solid',
+                    borderColor: (theme) =>
+                        print === 'dark'
+                            ? theme.palette.primary.light
+                            : theme.palette.primary.main,
                     padding: '0 12px',
                 }}
             />
@@ -119,10 +129,15 @@ const Stats = () => {
                 betrag={ausgaben}
                 icon={mdiCartVariant}
                 percent={einnahmen !== 0 && ausgaben / einnahmen}
+                print={print}
             />
-            <Divider
+            <Box
                 sx={{
-                    borderColor: (theme) => theme.palette.primary.main,
+                    borderBottom: '1px solid',
+                    borderColor: (theme) =>
+                        print === 'dark'
+                            ? theme.palette.primary.light
+                            : theme.palette.primary.main,
                     padding: '0 12px',
                 }}
             />
@@ -130,6 +145,7 @@ const Stats = () => {
                 betrag={umsatz}
                 icon={mdiPiggyBank}
                 percent={einnahmen !== 0 && umsatz / einnahmen}
+                print={print}
             />
         </Stack>
     ) : null;

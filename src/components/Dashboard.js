@@ -20,7 +20,7 @@ import IconButton from './IconButton';
 import Alert from './Alert';
 import Dialog from './Dialog';
 
-// import Print from './Print';
+import Print from './Print';
 import Loader from './Loader';
 import Filter from './Filter';
 import EinnahmenBarChart from './EinnahmenBarChart';
@@ -29,6 +29,7 @@ import UmsatzBarChart from './UmsatzBarChart';
 import AusgabenPieChart from './AusgabenPieChart';
 import AusgabenTreeMap from './AusgabenTreeMap';
 import Stats from './Stats';
+import Qr from './QR';
 
 const charts = {
     Gesamt: <UmsatzBarChart />,
@@ -54,7 +55,9 @@ const Title = ({ name, onClick, print }) => {
                 variant="body1"
                 sx={{
                     fontWeight: 'bold',
-                    color: (theme) => theme.palette.text.primary,
+                    color: !print
+                        ? (theme) => theme.palette.text.primary
+                        : '#000',
                     flexGrow: 1,
                 }}
             >
@@ -93,24 +96,36 @@ const Item = ({ col, row, sx, order, display, print, children }) => {
     return (
         <Box
             sx={{
-                gridColumn: {
-                    xxs: `span ${cols}`,
-                    md: `span ${cols * col}`,
-                },
-                gridRow: {
-                    xxs: 'unset',
-                    md: `span ${rows * row}`,
-                },
-                height: {
-                    xxs: `calc(${boxHeight} * ${row} - 2 * 0.8px - 12px * ${row < 1 ? '2 / 3' : row > 1 ? '1 / 3' : '1 / 2'})`,
-                    md: 'inherit',
-                },
+                gridColumn: !print
+                    ? {
+                          xxs: `span ${cols}`,
+                          md: `span ${cols * col}`,
+                      }
+                    : `span ${cols * col}`,
+                gridRow: !print
+                    ? {
+                          xxs: 'unset',
+                          md: `span ${rows * row}`,
+                      }
+                    : `span ${rows * row}`,
+                height: !print
+                    ? {
+                          xxs: `calc(${boxHeight} * ${row} - 2 * 0.8px - 12px * ${row < 1 ? '2 / 3' : row > 1 ? '1 / 3' : '1 / 2'})`,
+                          md: 'inherit',
+                      }
+                    : 'inherit',
                 order: order,
-                display: {
-                    xxs: display ? 'initial' : 'none',
-                    md: 'initial',
-                },
-                border: (theme) => `1px solid ${theme.palette.primary.main}`,
+                display: !print
+                    ? {
+                          xxs: display ? 'initial' : 'none',
+                          md: 'initial',
+                      }
+                    : 'initial',
+                border: (theme) => '1px solid',
+                borderColor: (theme) =>
+                    print === 'dark'
+                        ? theme.palette.primary.light
+                        : theme.palette.primary.main,
                 ...sx,
             }}
         >
@@ -132,30 +147,33 @@ const Dashboard = ({ print }) => {
     return init ? (
         !(downMedium && !Object.values(settings).includes(true)) ? (
             umsatzDf && (
-                <Box id="dashboard">
+                <Box id={`dashboard${print ? '-print' : ''}`}>
                     <Box
                         sx={{
                             display: 'flex',
-                            position: 'sticky',
+                            position: !print ? 'sticky' : 'relative',
                             zIndex: 1,
-                            top: { xxs: '16px', sm: '72px' },
+                            top: !print ? { xxs: '16px', sm: '72px' } : 0,
                             paddingBottom: '12px',
-                            background: (theme) =>
-                                theme.palette.background.default,
+                            background: !print
+                                ? (theme) => theme.palette.background.default
+                                : '#fff',
                         }}
                     >
                         <Box sx={{ width: '100%' }}>
-                            <Filter />
+                            <Filter print={print} />
                         </Box>
                     </Box>
                     <Box
                         sx={{
                             display: 'grid',
                             gridTemplateColumns: `repeat(${cols}, calc(100% / ${cols} - 12px / ${cols} * ${cols - 1}))`,
-                            gridTemplateRows: {
-                                xxs: 'unset',
-                                md: `repeat(${rows * 2}, calc(${boxHeight} / ${rows} - 12px / ${rows * 2} * ${rows * 2 - 1}))`,
-                            },
+                            gridTemplateRows: !print
+                                ? {
+                                      xxs: 'unset',
+                                      md: `repeat(${rows * 2}, calc(${boxHeight} / ${rows} - 12px / ${rows * 2} * ${rows * 2 - 1}))`,
+                                  }
+                                : `repeat(${rows * 2}, calc(calc((793.71px - 2 * 16px - (33.6px + 12px)) / 2) / ${rows} - 12px / ${rows * 2} * ${rows * 2 - 1}))`,
                             gap: '12px',
                         }}
                     >
@@ -164,11 +182,13 @@ const Dashboard = ({ print }) => {
                             row={1}
                             order={1}
                             display={settings.einnahmen}
+                            print={print}
                         >
                             <Chart
+                                print={print}
                                 title="Einnahmen"
                                 onClick={() => setFullscreen('Einnahmen')}
-                                chart={<EinnahmenBarChart />}
+                                chart={<EinnahmenBarChart print={print} />}
                                 sx={{ height: 'calc(100% - 12px - 15px)' }}
                             />
                         </Item>
@@ -178,35 +198,40 @@ const Dashboard = ({ print }) => {
                             order={2}
                             display={settings.stats}
                             sx={{ padding: '0 12px' }}
+                            print={print}
                         >
-                            <Stats />
+                            <Stats print={print} />
                         </Item>
                         <Item
                             col={0.375}
                             row={1}
                             order={3}
                             display={settings.gesamt}
+                            print={print}
                         >
                             <Chart
+                                print={print}
                                 title="Gesamt"
                                 onClick={() => setFullscreen('Gesamt')}
-                                chart={<UmsatzBarChart />}
+                                chart={<UmsatzBarChart print={print} />}
                                 sx={{ height: 'calc(100% - 12px - 15px)' }}
                             />
                         </Item>
 
                         <Item
                             col={0.125}
-                            row={2 / 3}
+                            row={!print ? 2 / 3 : 0.5}
                             order={4}
                             display={settings.ausgabenTyp}
+                            print={print}
                         >
                             <Chart
+                                print={print}
                                 title="Ausgaben nach Typ"
                                 onClick={() =>
                                     setFullscreen('Ausgaben nach Typ')
                                 }
-                                chart={<AusgabenPieChart />}
+                                chart={<AusgabenPieChart print={print} />}
                                 sx={{ height: 'calc(100% - 12px - 20px)' }}
                             />
                         </Item>
@@ -216,11 +241,13 @@ const Dashboard = ({ print }) => {
                             row={1}
                             order={5}
                             display={settings.ausgaben}
+                            print={print}
                         >
                             <Chart
+                                print={print}
                                 title="Ausgaben"
                                 onClick={() => setFullscreen('Ausgaben')}
-                                chart={<AusgabenBarChart />}
+                                chart={<AusgabenBarChart print={print} />}
                                 sx={{ height: 'calc(100% - 12px - 15px)' }}
                             />
                         </Item>
@@ -229,13 +256,15 @@ const Dashboard = ({ print }) => {
                             row={1}
                             order={6}
                             display={settings.ausgabenKategorie}
+                            print={print}
                         >
                             <Chart
+                                print={print}
                                 title="Ausgaben je Kategorie"
                                 onClick={() =>
                                     setFullscreen('Ausgaben je Kategorie')
                                 }
-                                chart={<AusgabenTreeMap />}
+                                chart={<AusgabenTreeMap print={print} />}
                                 sx={{ height: 'calc(100% - 12px - 21px)' }}
                             />
                         </Item>
@@ -246,28 +275,45 @@ const Dashboard = ({ print }) => {
                             display={false}
                             sx={{
                                 background: (theme) =>
-                                    theme.palette.primary.main,
+                                    print === 'dark'
+                                        ? theme.palette.primary.light
+                                        : theme.palette.primary.main,
                             }}
+                            print={print}
                         ></Item>
                         <Item
                             col={0.125}
-                            row={1 / 3}
-                            order={9}
+                            row={!print ? 1 / 3 : 0.5}
+                            order={!print ? 9 : 8}
                             display={true}
                             sx={{
-                                background: (theme) =>
-                                    theme.palette.primary.light,
+                                background: !print
+                                    ? (theme) => theme.palette.primary.light
+                                    : 'unset',
                                 borderColor: (theme) =>
-                                    theme.palette.primary.light,
+                                    theme.palette.primary.main,
+                                border: print && 'unset',
                             }}
+                            print={print}
                         >
-                            {/* {!print && <Print />} */}
+                            {!print ? (
+                                <Print />
+                            ) : (
+                                <Qr
+                                    color={
+                                        print === 'dark'
+                                            ? theme.palette.primary.light
+                                            : theme.palette.primary.main
+                                    }
+                                />
+                            )}
                         </Item>
                         <Item
                             col={0.125}
                             row={1 / 2}
                             order={!print ? 8 : 9}
                             display={settings.ausgabenTyp}
+                            print={print}
                         >
                             nicht gelistet
                         </Item>

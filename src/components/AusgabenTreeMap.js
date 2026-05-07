@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 Chart.register(TreemapController, TreemapElement);
 
-function AusgabenTreeMap() {
+function AusgabenTreeMap({ print }) {
     const filterCategoryType = useSelector(
         (state) => state.filter.kategorieTyp,
     );
@@ -67,19 +67,23 @@ function AusgabenTreeMap() {
                             captions: {
                                 display: false,
                             },
-                            borderColor: theme.palette.background.default,
+                            borderColor: !print
+                                ? theme.palette.background.default
+                                : '#fff',
                         },
                     ],
                 }}
                 options={{
                     maintainAspectRatio: false,
                     responsive: true,
-                    animation: {
-                        duration: duration,
-                        onComplete: (context) => {
-                            if (context.initial) setDuration(0);
-                        },
-                    },
+                    animation: !print
+                        ? {
+                              duration: duration,
+                              onComplete: (context) => {
+                                  if (context.initial) setDuration(0);
+                              },
+                          }
+                        : false,
                     plugins: {
                         title: {
                             display: false,

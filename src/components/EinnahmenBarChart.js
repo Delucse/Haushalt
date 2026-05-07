@@ -6,7 +6,7 @@ import TimeSeriesBarChart from './TimeSeriesBarChart';
 
 import generateColor from '../utils/color';
 
-function EinnahmenBarChart() {
+function EinnahmenBarChart({ print }) {
     const filterCategoryType = useSelector(
         (state) => state.filter.kategorieTyp,
     );
@@ -52,6 +52,7 @@ function EinnahmenBarChart() {
                     borderColor: theme.palette.background.default,
                 };
             })}
+            print={print}
         />
     );
 }

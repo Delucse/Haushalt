@@ -6,7 +6,7 @@ import TimeSeriesBarChart from './TimeSeriesBarChart';
 
 import generateColor from '../utils/color';
 
-function UmsatzBarChart() {
+function UmsatzBarChart({ print }) {
     const interval = useSelector((state) => state.filter.time.interval);
     const groups = ['Jahr'];
     interval !== 'Jahr' && groups.push(interval);
@@ -89,7 +89,7 @@ function UmsatzBarChart() {
                                 currency: 'EUR',
                             })
                             .replace('-', '- '),
-                    color: theme.palette.text.primary,
+                    color: !print ? theme.palette.text.primary : '#000',
                 },
             };
         }
@@ -104,6 +104,7 @@ function UmsatzBarChart() {
                 position: 'nearest',
                 callbacks: { footer: () => [] },
             }}
+            print={print}
         />
     );
 }
