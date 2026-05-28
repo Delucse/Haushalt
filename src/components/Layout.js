@@ -322,7 +322,14 @@ const Layout = () => {
     return (
         <>
             {pathname === '/' || pathname.startsWith('/quelle') ? (
-                <Outlet />
+                <Box
+                    sx={{
+                        minHeight: '100vh',
+                        background: (theme) => theme.palette.background.default,
+                    }}
+                >
+                    <Outlet />
+                </Box>
             ) : (
                 <>
                     <AppBar

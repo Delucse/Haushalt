@@ -5,13 +5,15 @@ import { logout, setAuthType } from '../../actions/authActions';
 
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { Box, Divider, Typography } from '@mui/material';
+import { Box, Divider, Typography, useMediaQuery } from '@mui/material';
 
 import Icon from '@mdi/react';
 import { mdiFolderOpen, mdiArrowLeftThin, mdiPiggyBank } from '@mdi/js';
 
 import { ReactComponent as FilenLogo } from '../../media/Filen_Logo.svg';
 import { ReactComponent as FilenLogoName } from '../../media/Filen_Logo_Name.svg';
+import { ReactComponent as FilenLogoBlack } from '../../media/Filen_Logo_Black.svg';
+import { ReactComponent as FilenLogoNameBlack } from '../../media/Filen_Logo_Name_Black.svg';
 import { ReactComponent as DropboxLogo } from '../../media/Dropbox_Logo.svg';
 import { ReactComponent as DropboxLogoName } from '../../media/Dropbox_Logo_Name.svg';
 
@@ -29,21 +31,45 @@ const sources = {
         component: <Dropbox />,
     },
     filen: {
-        background: 'black',
-        prevIcon: <FilenLogoName style={{ height: '30px', width: 'auto' }} />,
-        icon: <FilenLogo style={{ height: '30px', width: 'auto' }} />,
+        light: {
+            background: 'black',
+            prevIcon: (
+                <FilenLogoName style={{ height: '30px', width: 'auto' }} />
+            ),
+            icon: <FilenLogo style={{ height: '30px', width: 'auto' }} />,
+        },
+        dark: {
+            background: 'white',
+            prevIcon: (
+                <FilenLogoNameBlack style={{ height: '30px', width: 'auto' }} />
+            ),
+            icon: <FilenLogoBlack style={{ height: '30px', width: 'auto' }} />,
+        },
         component: <Filen />,
     },
     lokal: {
-        background: '#FFEBCD',
-        color: '#800000',
-        prevIcon: (
-            <>
-                <Icon path={mdiFolderOpen} size={1.413} color="#F4A460" />
-                <span style={{ marginLeft: '5px' }}>Lokal</span>
-            </>
-        ),
-        icon: <Icon path={mdiFolderOpen} size={1.413} color="#F4A460" />,
+        light: {
+            background: '#FFEBCD',
+            color: '#800000',
+            prevIcon: (
+                <>
+                    <Icon path={mdiFolderOpen} size={1.413} color="#F4A460" />
+                    <span style={{ marginLeft: '5px' }}>Lokal</span>
+                </>
+            ),
+            icon: <Icon path={mdiFolderOpen} size={1.413} color="#F4A460" />,
+        },
+        dark: {
+            background: '#F4A460',
+            color: '#800000',
+            prevIcon: (
+                <>
+                    <Icon path={mdiFolderOpen} size={1.413} color="#FFEBCD" />
+                    <span style={{ marginLeft: '5px' }}>Lokal</span>
+                </>
+            ),
+            icon: <Icon path={mdiFolderOpen} size={1.413} color="#FFEBCD" />,
+        },
         component: <Lokal />,
     },
 };
@@ -81,6 +107,15 @@ const Sources = ({ preview }) => {
     const source = useSelector((state) => state.auth.type);
     const token = useSelector((state) => state.auth.token);
     const sourceKeys = Object.keys(sources);
+
+    const themeMode = useSelector((state) => state.settings.theme.mode);
+    const systemModeIsDark = useMediaQuery('(prefers-color-scheme: dark)');
+    const mode =
+        themeMode === 'system'
+            ? systemModeIsDark
+                ? 'dark'
+                : 'light'
+            : themeMode;
 
     useEffect(() => {
         dispatch(setAuthType(params.source));
@@ -175,9 +210,17 @@ const Sources = ({ preview }) => {
                             if (!!token) dispatch(logout());
                             dispatch(setAuthType(s));
                         }}
-                        background={sources[s].background}
-                        color={sources[s].color}
-                        icon={preview ? sources[s].prevIcon : sources[s].icon}
+                        background={
+                            sources[s][mode]?.background ||
+                            sources[s].background
+                        }
+                        color={sources[s][mode]?.color || sources[s].color}
+                        icon={
+                            preview
+                                ? sources[s][mode]?.prevIcon ||
+                                  sources[s].prevIcon
+                                : sources[s][mode]?.icon || sources[s].icon
+                        }
                     />
                 ))}
                 {!preview && (
