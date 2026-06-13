@@ -110,6 +110,7 @@ export const reset = () => (dispatch, getState) => {
             gesamt: true,
             ausgabenTyp: true,
             ausgabenKategorie: true,
+            nichtGelistet: true,
         },
     });
     dispatch(

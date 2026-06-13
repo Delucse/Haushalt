@@ -5,13 +5,16 @@ import { Box, Stack } from '@mui/material';
 import Icon from '@mdi/react';
 import { mdiCartVariant, mdiCashMultiple, mdiPiggyBank } from '@mdi/js';
 
-const Stat = ({ betrag, percent, icon, print }) => {
+export const Stat = ({ betrag, percent, icon, print, quantity = 3 }) => {
     return (
         <Stack
             direction="row"
             sx={{
                 display: 'flex',
-                height: 'calc((100% / 3) - 12px)',
+                height:
+                    quantity > 1
+                        ? `calc((100% / ${quantity}) - 12px)`
+                        : 'calc(100% - 2 * 12px)',
                 padding: '12px 0',
                 color: !print ? (theme) => theme.palette.text.primary : '#000',
             }}
@@ -39,9 +42,15 @@ const Stat = ({ betrag, percent, icon, print }) => {
                             width: !print
                                 ? {
                                       xxs: '100%',
-                                      xs: 'calc(60% - 8px)',
+                                      xs:
+                                          typeof betrag !== 'string'
+                                              ? 'calc(60% - 8px)'
+                                              : '100%',
                                       md: '100%',
-                                      lg: 'calc(60% - 8px)',
+                                      lg:
+                                          typeof betrag !== 'string'
+                                              ? 'calc(60% - 8px)'
+                                              : '100%',
                                   }
                                 : 'calc(60% - 8px)',
                             justifyContent: 'end',
@@ -50,9 +59,15 @@ const Stat = ({ betrag, percent, icon, print }) => {
                             marginRight: !print
                                 ? {
                                       xxs: '0px',
-                                      xs: '8px',
+                                      xs:
+                                          typeof betrag !== 'string'
+                                              ? '8px'
+                                              : '0px',
                                       md: '0px',
-                                      lg: '8px',
+                                      lg:
+                                          typeof betrag !== 'string'
+                                              ? '8px'
+                                              : '0px',
                                   }
                                 : '8px',
                             fontWeight: 'bold',

@@ -30,6 +30,7 @@ import AusgabenPieChart from './AusgabenPieChart';
 import AusgabenTreeMap from './AusgabenTreeMap';
 import Stats from './Stats';
 import Qr from './QR';
+import NichtGelistet from './NichtGelistet';
 
 const charts = {
     Gesamt: <UmsatzBarChart />,
@@ -310,12 +311,12 @@ const Dashboard = ({ print }) => {
                         </Item>
                         <Item
                             col={0.125}
-                            row={1 / 2}
+                            row={downMedium ? (!print ? 1 / 3 : 1 / 2) : 1 / 2}
                             order={!print ? 8 : 9}
-                            display={settings.ausgabenTyp}
+                            display={settings.nichtGelistet}
                             print={print}
                         >
-                            nicht gelistet
+                            <NichtGelistet print={print} />
                         </Item>
                     </Box>
                     {!print && (

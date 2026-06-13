@@ -64,8 +64,9 @@ const initialState = {
         ausgabenTyp: getCookieDefaultBoolean('dashboard.ausgabenTyp', true),
         ausgabenKategorie: getCookieDefaultBoolean(
             'dashboard.ausgabenKategorie',
-            true
+            true,
         ),
+        nichtGelistet: getCookieDefaultBoolean('dashboard.nichtGelistet', true),
     },
     simple: getCookieDefaultBoolean('simple', false),
 };

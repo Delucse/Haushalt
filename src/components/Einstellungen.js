@@ -82,6 +82,13 @@ const Dashboard = () => {
                     )
                 }
             />
+            <Switch
+                label="nicht gelistet"
+                checked={settings.nichtGelistet}
+                onChange={(e) =>
+                    dispatch(setDashboard('nichtGelistet', e.target.checked))
+                }
+            />
         </Box>
     );
 };
