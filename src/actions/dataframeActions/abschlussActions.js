@@ -4,7 +4,11 @@ import DataFrame from 'dataframe-js';
 import { uploadFile } from '../fileActions';
 import { filterDataframe } from '../filterActions';
 import { snackbarMessage } from '../messageActions';
-import { updateNichtGelistet } from './umsatzActions';
+import {
+    updateNichtGelistet,
+    updateNichtGelistetMonate,
+    letzterAbschlussZeitstempel,
+} from './umsatzActions';
 
 import { DATAFRAME_ORIGINAL_ABSCHLUSS } from '../types';
 
@@ -42,6 +46,8 @@ export const addAbschluss =
     (timestamp, konto, bargeld) => (dispatch, getState) => {
         var { abschluss, umsatz } = getState().dataframe.original;
         var newDate = moment(timestamp);
+        // bisheriger letzter Abschluss: sein Monatsposten kann entfallen
+        const alterMax = letzterAbschlussZeitstempel(abschluss);
         abschluss = abschluss.push([
             abschluss.count() + 1,
             newDate.format('DD.MM.YYYY'),
@@ -58,7 +64,10 @@ export const addAbschluss =
         dispatch(uploadFile('Abschluss'));
         dispatch(updateNichtGelistet(timestamp, true));
         dispatch(
-            updateNichtGelistet(newDate.clone().add(1, 'month').valueOf()),
+            updateNichtGelistetMonate([
+                newDate.clone().add(1, 'month').valueOf(),
+                alterMax,
+            ]),
         );
         dispatch(filterDataframe());
         dispatch(
@@ -69,6 +78,8 @@ export const addAbschluss =
 export const changeAbschluss = (id, update, old) => (dispatch, getState) => {
     var { abschluss, umsatz } = getState().dataframe.original;
     var newDate = moment(update.timestamp);
+    // bisheriger letzter Abschluss (vor der Änderung)
+    const alterMax = letzterAbschlussZeitstempel(abschluss);
     abschluss = abschluss.setRow(id - 1, (row) => {
         row = row.set('Datum', newDate.format('DD.MM.YYYY'));
         row = row.set('Zeitstempel', update.timestamp);
@@ -85,15 +96,25 @@ export const changeAbschluss = (id, update, old) => (dispatch, getState) => {
         payload: abschluss,
     });
     dispatch(uploadFile('Abschluss'));
-    var timestamp = isNewTimestamp ? update.timestamp : old.timestamp;
-    dispatch(updateNichtGelistet(timestamp));
-    dispatch(updateNichtGelistet(newDate.clone().add(1, 'month').valueOf()));
+    // alter und neuer Monat (jeweils samt Folgemonat) sowie die Monate des
+    // alten und neuen letzten Abschlusses (Monatsposten)
+    dispatch(
+        updateNichtGelistetMonate([
+            old.timestamp,
+            moment(old.timestamp).add(1, 'month').valueOf(),
+            update.timestamp,
+            newDate.clone().add(1, 'month').valueOf(),
+            alterMax,
+            letzterAbschlussZeitstempel(abschluss),
+        ]),
+    );
     dispatch(filterDataframe());
     dispatch(snackbarMessage(`Der Abschluss wurde erfolgreich geändert.`));
 };
 
 export const deleteAbschluss = (id, timestamp) => (dispatch, getState) => {
     var { abschluss, umsatz } = getState().dataframe.original;
+    const alterMax = letzterAbschlussZeitstempel(abschluss);
     abschluss = abschluss.filter((row) => row.get('ID') !== id);
     abschluss = abschluss.withColumn('ID', (row, index) => index + 1);
     abschluss = calcMonatsposten(abschluss, umsatz);
@@ -102,8 +123,14 @@ export const deleteAbschluss = (id, timestamp) => (dispatch, getState) => {
         payload: abschluss,
     });
     dispatch(uploadFile('Abschluss'));
-    dispatch(updateNichtGelistet(timestamp));
-    dispatch(updateNichtGelistet(moment(timestamp).add(1, 'month').valueOf()));
+    dispatch(
+        updateNichtGelistetMonate([
+            timestamp,
+            moment(timestamp).add(1, 'month').valueOf(),
+            alterMax,
+            letzterAbschlussZeitstempel(abschluss),
+        ]),
+    );
     dispatch(filterDataframe());
     dispatch(snackbarMessage(`Der Abschluss wurde erfolgreich entfernt.`));
 };

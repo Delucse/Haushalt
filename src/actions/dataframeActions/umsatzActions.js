@@ -130,8 +130,9 @@ export const calcNichtGelistet = (umsatz, abschluss, umbuchung) => {
                 umbuchung,
                 umsatz,
             );
+            // ID muss wie überall sonst index + 1 sein (setRow nutzt ID - 1)
             umsatz = umsatz.push([
-                count++,
+                ++count,
                 datum.format('DD.MM.YYYY'),
                 datum.valueOf(),
                 datum.month() + 1,
@@ -207,6 +208,14 @@ export const addUmsatz =
             });
         }
         dispatch(updateNichtGelistet(zeitstempel, true));
+        if (wid) {
+            // Monatsposten des letzten Abschlusses hat sich geändert
+            dispatch(
+                updateNichtGelistetMonate([
+                    letzterAbschlussZeitstempel(abschluss),
+                ]),
+            );
+        }
         dispatch(filterDataframe());
         dispatch(snackbarMessage(`Die ${art} wurde erfolgreich hinzugefügt.`));
     };
@@ -214,8 +223,14 @@ export const addUmsatz =
 export const changeUmsatz = (id, update) => (dispatch, getState) => {
     var { umsatz, abschluss, kategorien } = getState().dataframe.original,
         newDate = moment(update.zeitstempel),
-        monatspostenChanged = false;
+        monatspostenChanged = false,
+        alterZeitstempel = null;
     umsatz = umsatz.setRow(id - 1, (row) => {
+        // alte Werte merken, bevor sie überschrieben werden
+        alterZeitstempel = row.get('Zeitstempel');
+        // Monatsposten ändern sich, sobald der Umsatz vorher oder nachher
+        // wiederkehrend (WID) ist
+        monatspostenChanged = Boolean(row.get('WID') || update.wid);
         row = row.set('Betrag', update.betrag);
         row = row.set('Art', update.art);
         row = row.set(
@@ -243,12 +258,6 @@ export const changeUmsatz = (id, update) => (dispatch, getState) => {
             row = row.set('Monat', newDate.month() + 1);
             row = row.set('Quartal', newDate.quarter());
             row = row.set('Jahr', newDate.year());
-            if (update.wid) {
-                monatspostenChanged = true;
-            }
-        }
-        if (!monatspostenChanged && update.wid !== row.get('WID')) {
-            monatspostenChanged = true;
         }
         return row;
     });
@@ -265,8 +274,14 @@ export const changeUmsatz = (id, update) => (dispatch, getState) => {
             payload: abschluss,
         });
     }
-    dispatch(updateNichtGelistet(update.zeitstempel));
-    dispatch(updateNichtGelistet(newDate.clone().add(1, 'month').valueOf()));
+    dispatch(
+        updateNichtGelistetMonate([
+            alterZeitstempel,
+            update.zeitstempel,
+            newDate.clone().add(1, 'month').valueOf(),
+            monatspostenChanged ? letzterAbschlussZeitstempel(abschluss) : null,
+        ]),
+    );
     dispatch(filterDataframe());
     dispatch(snackbarMessage(`Die ${update.art} wurde erfolgreich geändert.`));
 };
@@ -287,7 +302,12 @@ export const deleteUmsatz = (id, wid, zeitstempel) => (dispatch, getState) => {
             payload: abschluss,
         });
     }
-    dispatch(updateNichtGelistet(zeitstempel));
+    dispatch(
+        updateNichtGelistetMonate([
+            zeitstempel,
+            wid ? letzterAbschlussZeitstempel(abschluss) : null,
+        ]),
+    );
     dispatch(filterDataframe());
     dispatch(snackbarMessage(`Der Umsatz-Eintrag wurde erfolgreich entfernt.`));
 };
@@ -436,3 +456,18 @@ export const updateNichtGelistet =
             );
         }
     };
+
+// Zeitstempel des letzten Abschlusses (nur dieser hat Monatsposten) oder null
+export const letzterAbschlussZeitstempel = (abschluss) =>
+    abschluss.count() > 0 ? abschluss.stat.max('Zeitstempel') : null;
+
+// Berechnet "nicht gelistet" für alle Monate der übergebenen Zeitstempel neu
+// (jeder Monat nur einmal; null/undefined werden ignoriert).
+export const updateNichtGelistetMonate = (zeitstempel) => (dispatch) => {
+    const monate = new Set(
+        zeitstempel
+            .filter((z) => z !== null && z !== undefined && !Number.isNaN(z))
+            .map((z) => moment(z).startOf('month').valueOf()),
+    );
+    monate.forEach((monat) => dispatch(updateNichtGelistet(monat)));
+};
