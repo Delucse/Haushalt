@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginDropbox } from '../../actions/authActions';
 import { alertErrorMessage } from '../../actions/messageActions';
 import { setFilesDropbox } from '../../actions/fileActions';
+import { findeDropboxKandidaten, hatAlleDateien } from '../../utils/ordner';
 
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -26,20 +27,77 @@ import Button from '../Button';
 import Loader from '../Loader';
 import Alert from '../Alert';
 
-const FolderTree = ({ auth }) => {
+// Namen aller Dateien direkt in einem Ordner
+const listFileNames = async (dropbox, path) => {
+    let response = await dropbox.filesListFolder({ path });
+    let entries = response.result.entries;
+    while (response.result.has_more) {
+        response = await dropbox.filesListFolderContinue({
+            cursor: response.result.cursor,
+        });
+        entries = entries.concat(response.result.entries);
+    }
+    return entries.filter((e) => e['.tag'] === 'file').map((e) => e.name);
+};
+
+// Pfad des Haushalt-Ordners, wenn genau einer passt (Name, keine Unterordner,
+// alle Dateien vorhanden), sonst null. Bei Fehlern wird der Baum angezeigt.
+const findeHaushaltOrdner = async (dropbox, folders) => {
+    try {
+        const vollstaendig = [];
+        for (const kandidat of findeDropboxKandidaten(folders)) {
+            const dateien = await listFileNames(dropbox, kandidat.path_lower);
+            if (hatAlleDateien(dateien)) {
+                vollstaendig.push(kandidat);
+            }
+        }
+        return vollstaendig.length === 1 ? vollstaendig[0].path_lower : null;
+    } catch (error) {
+        console.log(error.message);
+        return null;
+    }
+};
+
+// autoSelect: passenden Haushalt-Ordner automatisch wählen (statt den Baum zu
+// zeigen). Nach einem Fehler ist es false, damit es keine Endlosschleife gibt.
+// onBereit: wird aufgerufen, sobald die Prüfung beendet ist und der Baum (oder
+// der Platzhalter) angezeigt werden kann; bis dahin zeigt Dropbox den Loader.
+const FolderTree = ({ auth, autoSelect, onBereit }) => {
     const [tree, setTree] = useState(null);
+    const [prueft, setPrueft] = useState(autoSelect);
 
     const dispatch = useDispatch();
 
     useEffect(() => {
+        let aktiv = true;
         const directories = async () => {
-            var dropbox = new DropboxApi({
-                auth: auth,
-            });
-            const items = await getDirectories(dropbox);
-            setTree(dropboxFolders(items));
+            try {
+                var dropbox = new DropboxApi({
+                    auth: auth,
+                });
+                const items = await getDirectories(dropbox);
+                if (!aktiv) return;
+                if (autoSelect) {
+                    const path = await findeHaushaltOrdner(dropbox, items);
+                    if (!aktiv) return;
+                    if (path) {
+                        // der Loader bleibt bestehen, bis die Daten geladen sind
+                        dispatch(setFilesDropbox(path));
+                        return;
+                    }
+                }
+                setTree(dropboxFolders(items));
+            } catch (error) {
+                console.log(error.message);
+            }
+            if (!aktiv) return;
+            setPrueft(false);
+            onBereit();
         };
         directories();
+        return () => {
+            aktiv = false;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -156,7 +214,7 @@ const FolderTree = ({ auth }) => {
             <Alert type={'tree'} style={{ marginBottom: '20px' }} />
             <List disablePadding>{renderTree(tree)}</List>
         </>
-    ) : (
+    ) : prueft ? null : (
         <List disablePadding>{renderTree([{ name: 'lädt ...' }])}</List>
     );
 };
@@ -170,6 +228,12 @@ const Dropbox = () => {
     const authProgress = useSelector((state) => state.auth.progress);
     const dataframeProgress = useSelector((state) => state.dataframe.progress);
     const error = useSelector((state) => state.message.error);
+
+    // Token, für den der Baum bereits angezeigt werden kann
+    const [bereitFuer, setBereitFuer] = useState(null);
+    // Loader schon während der Prüfung auf den Haushalt-Ordner zeigen
+    const prueft =
+        !!token && dataframeProgress === null && !error && bereitFuer !== token;
 
     useEffect(() => {
         const code = searchParams.get('code');
@@ -228,31 +292,39 @@ const Dropbox = () => {
             .catch((error) => console.error(error));
     };
 
-    return dataframeProgress === null ? (
-        !token ? (
-            <>
-                <Alert
-                    type={['dropbox-login']}
-                    style={{ marginBottom: '20px' }}
-                />
-                <Button
-                    onClick={doAuth}
-                    variant="contained"
-                    fullWidth
-                    disabled={authProgress}
-                >
-                    {!authProgress ? (
-                        'mit Dropbox verknüpfen'
-                    ) : (
-                        <CircularProgress size={24.5} />
-                    )}
-                </Button>
-            </>
-        ) : (
-            <FolderTree auth={token} />
-        )
-    ) : (
-        <Loader />
+    // Der Loader steht immer an derselben Stelle, damit er beim Wechsel von
+    // der Prüfung zum Laden der Daten nicht neu eingeblendet wird.
+    return (
+        <>
+            {dataframeProgress === null &&
+                (!token ? (
+                    <>
+                        <Alert
+                            type={['dropbox-login']}
+                            style={{ marginBottom: '20px' }}
+                        />
+                        <Button
+                            onClick={doAuth}
+                            variant="contained"
+                            fullWidth
+                            disabled={authProgress}
+                        >
+                            {!authProgress ? (
+                                'mit Dropbox verknüpfen'
+                            ) : (
+                                <CircularProgress size={24.5} />
+                            )}
+                        </Button>
+                    </>
+                ) : (
+                    <FolderTree
+                        auth={token}
+                        autoSelect={!error}
+                        onBereit={() => setBereitFuer(token)}
+                    />
+                ))}
+            {(dataframeProgress !== null || prueft) && <Loader />}
+        </>
     );
 };
 

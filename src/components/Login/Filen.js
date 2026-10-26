@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginFilen } from '../../actions/authActions';
 import { setFilesFilen } from '../../actions/fileActions';
 import { resetMessage } from '../../actions/messageActions';
+import { findeFilenHaushaltOrdner } from '../../utils/ordner';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -128,28 +129,53 @@ const Login = () => {
     );
 };
 
-const FolderTree = ({ token }) => {
+// autoSelect: passenden Haushalt-Ordner automatisch wählen (statt den Baum zu
+// zeigen). Nach einem Fehler ist es false, damit es keine Endlosschleife gibt.
+// onBereit: wird aufgerufen, sobald die Prüfung beendet ist und der Baum (oder
+// der Platzhalter) angezeigt werden kann; bis dahin zeigt Filen den Loader.
+const FolderTree = ({ token, autoSelect, onBereit }) => {
     const [tree, setTree] = useState(null);
+    const [prueft, setPrueft] = useState(autoSelect);
 
     const dispatch = useDispatch();
 
     useEffect(() => {
+        let aktiv = true;
         const directories = async () => {
-            const filen = new FilenSDK({
-                metadataCache: true, // Cache decrypted metadata in memory. Recommended.
-                connectToSocket: false, // Recommended if you are using the virtual FS class. Keeps the internal item tree up to date with remote changes.
-                ...token,
-            });
-            // https://github.com/FilenCloudDienste/filen-sdk-ts/blob/00247846f311ac6916c7bcc9a9498ed17119493b/src/cloud/index.ts#L3222C15-L3222C31
-            const items = await filen.cloud().getDirectoryTree({
-                uuid: token.baseFolderUUID,
-            });
-            var folders = Object.values(items).filter(
-                (item) => item.type === 'directory',
-            );
-            setTree(filenDirectories(folders[0], folders)[0]);
+            try {
+                const filen = new FilenSDK({
+                    metadataCache: true, // Cache decrypted metadata in memory. Recommended.
+                    connectToSocket: false, // Recommended if you are using the virtual FS class. Keeps the internal item tree up to date with remote changes.
+                    ...token,
+                });
+                // https://github.com/FilenCloudDienste/filen-sdk-ts/blob/00247846f311ac6916c7bcc9a9498ed17119493b/src/cloud/index.ts#L3222C15-L3222C31
+                const items = await filen.cloud().getDirectoryTree({
+                    uuid: token.baseFolderUUID,
+                });
+                if (!aktiv) return;
+                if (autoSelect) {
+                    const uuid = findeFilenHaushaltOrdner(items);
+                    if (uuid) {
+                        // der Loader bleibt bestehen, bis die Daten geladen sind
+                        dispatch(setFilesFilen(uuid));
+                        return;
+                    }
+                }
+                var folders = Object.values(items).filter(
+                    (item) => item.type === 'directory',
+                );
+                setTree(filenDirectories(folders[0], folders)[0]);
+            } catch (error) {
+                console.log(error.message);
+            }
+            if (!aktiv) return;
+            setPrueft(false);
+            onBereit();
         };
         directories();
+        return () => {
+            aktiv = false;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -214,7 +240,7 @@ const FolderTree = ({ token }) => {
             <Alert type={'tree'} style={{ marginBottom: '20px' }} />
             <List disablePadding>{renderTree(tree)}</List>
         </>
-    ) : (
+    ) : prueft ? null : (
         <List disablePadding>{renderTree([{ name: 'lädt ...' }])}</List>
     );
 };
@@ -226,6 +252,12 @@ const Filen = () => {
     const progress = useSelector((state) => state.dataframe.progress);
     const error = useSelector((state) => state.message.error);
 
+    // Token, für den der Baum bereits angezeigt werden kann
+    const [bereitFuer, setBereitFuer] = useState(null);
+    // Loader schon während der Prüfung auf den Haushalt-Ordner zeigen
+    const prueft =
+        !!token && progress === null && !error && bereitFuer !== token;
+
     useEffect(() => {
         if (progress === false && !error) {
             navigate('/dashboard', {
@@ -236,14 +268,22 @@ const Filen = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [progress, error]);
 
-    return progress === null ? (
-        !token ? (
-            <Login />
-        ) : (
-            <FolderTree token={token} />
-        )
-    ) : (
-        <Loader />
+    // Der Loader steht immer an derselben Stelle, damit er beim Wechsel von
+    // der Prüfung zum Laden der Daten nicht neu eingeblendet wird.
+    return (
+        <>
+            {progress === null &&
+                (!token ? (
+                    <Login />
+                ) : (
+                    <FolderTree
+                        token={token}
+                        autoSelect={!error}
+                        onBereit={() => setBereitFuer(token)}
+                    />
+                ))}
+            {(progress !== null || prueft) && <Loader />}
+        </>
     );
 };
 
