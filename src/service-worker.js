@@ -26,47 +26,110 @@ precacheAndRoute(self.__WB_MANIFEST);
 // https://developers.google.com/web/fundamentals/architecture/app-shell
 const fileExtensionRegexp = new RegExp('/[^/?]+\\.[^/]+$');
 registerRoute(
-  // Return false to exempt requests from being fulfilled by index.html.
-  ({ request, url }) => {
-    // If this isn't a navigation, skip.
-    if (request.mode !== 'navigate') {
-      return false;
-    } // If this is a URL that starts with /_, skip.
+    // Return false to exempt requests from being fulfilled by index.html.
+    ({ request, url }) => {
+        // If this isn't a navigation, skip.
+        if (request.mode !== 'navigate') {
+            return false;
+        } // If this is a URL that starts with /_, skip.
 
-    if (url.pathname.startsWith('/_')) {
-      return false;
-    } // If this looks like a URL for a resource, because it contains // a file extension, skip.
+        if (url.pathname.startsWith('/_')) {
+            return false;
+        } // If this looks like a URL for a resource, because it contains // a file extension, skip.
 
-    if (url.pathname.match(fileExtensionRegexp)) {
-      return false;
-    } // Return true to signal that we want to use the handler.
+        if (url.pathname.match(fileExtensionRegexp)) {
+            return false;
+        } // Return true to signal that we want to use the handler.
 
-    return true;
-  },
-  createHandlerBoundToURL(process.env.PUBLIC_URL + '/index.html')
+        return true;
+    },
+    createHandlerBoundToURL(process.env.PUBLIC_URL + '/index.html'),
 );
 
 // An example runtime caching route for requests that aren't handled by the
 // precache, in this case same-origin .png requests like those from in public/
 registerRoute(
-  // Add in any other file extensions or routing criteria as needed.
-  ({ url }) => url.origin === self.location.origin && url.pathname.endsWith('.png'), // Customize this strategy as needed, e.g., by changing to CacheFirst.
-  new StaleWhileRevalidate({
-    cacheName: 'images',
-    plugins: [
-      // Ensure that once this runtime cache reaches a maximum size the
-      // least-recently used images are removed.
-      new ExpirationPlugin({ maxEntries: 50 }),
-    ],
-  })
+    // Add in any other file extensions or routing criteria as needed.
+    ({ url }) =>
+        url.origin === self.location.origin && url.pathname.endsWith('.png'), // Customize this strategy as needed, e.g., by changing to CacheFirst.
+    new StaleWhileRevalidate({
+        cacheName: 'images',
+        plugins: [
+            // Ensure that once this runtime cache reaches a maximum size the
+            // least-recently used images are removed.
+            new ExpirationPlugin({ maxEntries: 50 }),
+        ],
+    }),
 );
 
 // This allows the web app to trigger skipWaiting via
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });
 
 // Any other custom service worker logic can go here.
+
+// 1. Auf das Push-Event vom Node.js Server lauschen
+self.addEventListener('push', (event) => {
+    // Standard-Daten falls der Server keine mitsendet
+    let data = {
+        title: 'Erinnerung',
+        body: 'Zeit für dein abendliches Update!',
+    };
+
+    // Wenn Daten vom Server mitgeschickt wurden, diese parsen
+    if (event.data) {
+        try {
+            data = event.data.json();
+        } catch (e) {
+            // Falls der Server reinen Text statt JSON sendet
+            data = { title: 'Erinnerung', body: event.data.text() };
+        }
+    }
+
+    // Optionen für das Aussehen der Benachrichtigung
+    const options = {
+        body: data.body,
+        icon: '/logo192.png', // Pfad zu Ihrem App-Icon (liegt im public-Ordner)
+        badge: '/badge128.png', // Kleines Icon für die Statusleiste (Android)
+        image: '/logo1200.png',
+        vibrate: [200, 100, 200, 100, 200, 100, 200], // Vibrationsmuster (sofern vom Gerät unterstützt)
+        renotify: true,
+        tag: 'Erinnerung',
+        data: {
+            url: '/', // Ziel-URL beim Anklicken der Nachricht
+        },
+    };
+
+    // Benachrichtigung anzeigen (wichtig: event.waitUntil hält den SW so lange wach)
+    event.waitUntil(self.registration.showNotification(data.title, options));
+});
+
+// 2. Aktion ausführen, wenn der Nutzer auf die Benachrichtigung klickt
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close(); // Benachrichtigung im Info-Center schließen
+
+    // Die App im Browser oder als installierte PWA öffnen/fokussieren
+    event.waitUntil(
+        self.clients
+            .matchAll({ type: 'window', includeUncontrolled: true })
+            .then((clientList) => {
+                // Wenn die App schon offen ist, diese fokussieren
+                for (const client of clientList) {
+                    if (
+                        client.url === event.notification.data.url &&
+                        'focus' in client
+                    ) {
+                        return client.focus();
+                    }
+                }
+                // Wenn sie geschlossen war, neu öffnen
+                if (self.clients.openWindow) {
+                    return self.clients.openWindow(event.notification.data.url);
+                }
+            }),
+    );
+});

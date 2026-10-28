@@ -19,6 +19,7 @@ import generateColor from '../utils/color';
 import IconButton from './IconButton';
 import Icon from '@mdi/react';
 import { mdiRestore } from '@mdi/js';
+import Erinnerung from './Erinnerung';
 
 const Dashboard = () => {
     const dispatch = useDispatch();
@@ -406,6 +407,7 @@ const Einstellungen = () => {
                 />
                 {isAuthenticated && (
                     <>
+                        <Erinnerung />
                         <Dashboard />
                         <Box>
                             <Typography
