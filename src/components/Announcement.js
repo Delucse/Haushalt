@@ -77,7 +77,7 @@ const Loader = () => {
             open
             sx={{
                 zIndex: 99999,
-                background: '#076428',
+                background: '#006400',
                 display: 'grid',
             }}
         >

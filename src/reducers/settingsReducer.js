@@ -48,8 +48,8 @@ export const getCookieDefaultBoolean = (cookie, defaultValue) => {
 const initialState = {
     theme: {
         color: {
-            main: getCookie('theme.color.main') || '#076428', //'#006400',
-            light: getCookie('theme.color.light') || '#70b87c', // '#7fb17f',
+            main: getCookie('theme.color.main') || '#006400', //'#076428',
+            light: getCookie('theme.color.light') || '#7fb17f', // '#70b87c',
             start: getCookie('theme.color.start') || '#ff5722',
             end: getCookie('theme.color.end') || '#ffcc80',
         },
